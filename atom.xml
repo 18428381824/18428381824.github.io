@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://18428381824.github.io/"/>
-  <updated>2017-11-05T03:12:06.012Z</updated>
+  <updated>2017-11-05T03:15:30.548Z</updated>
   <id>http://18428381824.github.io/</id>
   
   <author>
@@ -21,21 +21,22 @@
     <link href="http://18428381824.github.io/2017/11/05/hexo%E5%8D%9A%E5%AE%A2%E6%81%A2%E5%A4%8D/"/>
     <id>http://18428381824.github.io/2017/11/05/hexo博客恢复/</id>
     <published>2017-11-05T03:04:43.770Z</published>
-    <updated>2017-11-05T03:12:06.012Z</updated>
+    <updated>2017-11-05T03:15:30.548Z</updated>
     
-    <content type="html"><![CDATA[<hr><p>title: hexo 博客恢复<br>date: 2017-10-16<br>time: 15-38-39<br>tags:</p><ul><li>逆向<br>categories: 逆向</li></ul><hr><h2 id="1-安装node-js和git"><a href="#1-安装node-js和git" class="headerlink" title="1.安装node.js和git"></a>1.安装node.js和git</h2><p> 这个不用多说，直接下载安装就行了。</p><h2 id="2-配置-git-个人信息，生成新的-ssh-密钥："><a href="#2-配置-git-个人信息，生成新的-ssh-密钥：" class="headerlink" title="2.配置 git 个人信息，生成新的 ssh 密钥："></a>2.配置 git 个人信息，生成新的 ssh 密钥：</h2><p>git config –global user.name “xxxxxx”<br>git config –global user.email “xxxxxx”<br>ssh-keygen -t rsa -C “xxxxxxxx(邮箱)”</p><h2 id="3-添加公钥"><a href="#3-添加公钥" class="headerlink" title="3.添加公钥"></a>3.添加公钥</h2><p>在用户文件夹.ssh 文件里面把公钥复制出来粘贴到github个人设置的ssh位置。</p><h2 id="4-安装hexo"><a href="#4-安装hexo" class="headerlink" title="4.安装hexo"></a>4.安装hexo</h2><p>建议先<br>npm install cnpm -g –registry=<a href="https://registry.npm.taobao.org" target="_blank" rel="external">https://registry.npm.taobao.org</a><br>安装的时候 用cpm 代替npm<br>这样的话npm 安装比较快而且不容易失败<br>cnpm install hexo-cli -g</p><h2 id="5-删除博客文件夹文件，保留部分"><a href="#5-删除博客文件夹文件，保留部分" class="headerlink" title="5.删除博客文件夹文件，保留部分"></a>5.删除博客文件夹文件，保留部分</h2><p>打开原来的博客文件夹,只需保留_config.yml，theme/，source/，scaffolds/，package.json，.gitignore 这些项目，删除其他的文件。</p><h2 id="6-git-bush"><a href="#6-git-bush" class="headerlink" title="6.git bush"></a>6.git bush</h2><p>在本文件夹下git bush,运行cnpm install</p><h2 id="7-安装部署插件"><a href="#7-安装部署插件" class="headerlink" title="7.安装部署插件"></a>7.安装部署插件</h2><p>npm install hexo-deployer-git –save</p><h2 id="8-测试"><a href="#8-测试" class="headerlink" title="8.测试"></a>8.测试</h2><p>此时就可以hexo g &amp;&amp; hexo d 测试是否成功了。</p>]]></content>
+    <content type="html"><![CDATA[<hr><p>title: hexo 博客恢复</p><p>date: 2017-10-16 </p><p>time: 15-38-39</p><p>tags: 逆向</p><p>categories: 逆向</p><hr><h2 id="1-安装node-js和git"><a href="#1-安装node-js和git" class="headerlink" title="1.安装node.js和git"></a>1.安装node.js和git</h2><p> 这个不用多说，直接下载安装就行了。</p><h2 id="2-配置-git-个人信息，生成新的-ssh-密钥："><a href="#2-配置-git-个人信息，生成新的-ssh-密钥：" class="headerlink" title="2.配置 git 个人信息，生成新的 ssh 密钥："></a>2.配置 git 个人信息，生成新的 ssh 密钥：</h2><p>git config –global user.name “xxxxxx”<br>git config –global user.email “xxxxxx”<br>ssh-keygen -t rsa -C “xxxxxxxx(邮箱)”</p><h2 id="3-添加公钥"><a href="#3-添加公钥" class="headerlink" title="3.添加公钥"></a>3.添加公钥</h2><p>在用户文件夹.ssh 文件里面把公钥复制出来粘贴到github个人设置的ssh位置。</p><h2 id="4-安装hexo"><a href="#4-安装hexo" class="headerlink" title="4.安装hexo"></a>4.安装hexo</h2><p>建议先<br>npm install cnpm -g –registry=<a href="https://registry.npm.taobao.org" target="_blank" rel="external">https://registry.npm.taobao.org</a><br>安装的时候 用cpm 代替npm<br>这样的话npm 安装比较快而且不容易失败<br>cnpm install hexo-cli -g</p><h2 id="5-删除博客文件夹文件，保留部分"><a href="#5-删除博客文件夹文件，保留部分" class="headerlink" title="5.删除博客文件夹文件，保留部分"></a>5.删除博客文件夹文件，保留部分</h2><p>打开原来的博客文件夹,只需保留_config.yml，theme/，source/，scaffolds/，package.json，.gitignore 这些项目，删除其他的文件。</p><h2 id="6-git-bush"><a href="#6-git-bush" class="headerlink" title="6.git bush"></a>6.git bush</h2><p>在本文件夹下git bush,运行cnpm install</p><h2 id="7-安装部署插件"><a href="#7-安装部署插件" class="headerlink" title="7.安装部署插件"></a>7.安装部署插件</h2><p>npm install hexo-deployer-git –save</p><h2 id="8-测试"><a href="#8-测试" class="headerlink" title="8.测试"></a>8.测试</h2><p>此时就可以hexo g &amp;&amp; hexo d 测试是否成功了。</p>]]></content>
     
     <summary type="html">
     
       
       
         &lt;hr&gt;
-&lt;p&gt;title: hexo 博客恢复&lt;br&gt;date: 2017-10-16&lt;br&gt;time: 15-38-39&lt;br&gt;tags:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;逆向&lt;br&gt;categories: 逆向&lt;/li&gt;
-&lt;/ul&gt;
+&lt;p&gt;title: hexo 博客恢复&lt;/p&gt;
+&lt;p&gt;date: 2017-10-16 &lt;/p&gt;
+&lt;p&gt;time: 15-38-39&lt;/p&gt;
+&lt;p&gt;tags: 逆向&lt;/p&gt;
+&lt;p&gt;categories: 逆向&lt;/p&gt;
 &lt;hr&gt;
-&lt;h2 id=&quot;1-安装node-j
+&lt;h2 id=&quot;1-安装node-js和g
       
     
     </summary>
@@ -91,6 +92,34 @@
     
     
       <category term="网络" scheme="http://18428381824.github.io/tags/%E7%BD%91%E7%BB%9C/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>对抗反汇编</title>
+    <link href="http://18428381824.github.io/2017/10/16/%E5%AF%B9%E6%8A%97%E5%8F%8D%E6%B1%87%E7%BC%96/"/>
+    <id>http://18428381824.github.io/2017/10/16/对抗反汇编/</id>
+    <published>2017-10-15T16:00:00.000Z</published>
+    <updated>2017-10-25T07:18:53.412Z</updated>
+    
+    <content type="html"><![CDATA[<p>1.插入流氓字节，阻止真正的指令被反汇编</p><blockquote><p>线性反汇编和面向代码流的反汇编：</p><p>线性反汇编是遍历一个代码段，一次一条指令的线性反汇编，不考虑代码流的控制指令。而面向代码流的反汇编是会检查每一条指令。然后建立反汇编的地址列表，然后这样的反汇编算法会更加先进，而不易出错。比如：</p></blockquote><pre><code>.text:00401035                 jz      short near ptr loc_401037+1.text:00401037.text:00401037 loc_401037:                             ; CODE XREF: .text:00401035j.text:00401037                 call    near ptr 8B4C55C7h</code></pre><blockquote><p>观察以上的汇编代码，你会发现jz跳转到了call 指令中间，这显然是不可能的，所以call指令一定是一个数据而不是代码，在此处按d键，然后再观察</p><pre><code>                 xor     eax, eax.text:00401035                 jz      short loc_401038.text:00401035 ; ---------------------------------------------------------------------------.text:00401037                 db 0E8h.text:00401038 ; ---------------------------------------------------------------------------.text:00401038.text:00401038 loc_401038:                             ; CODE XREF: .text:00401035j.text:00401038                 mov     eax, [ebp+0Ch]</code></pre><p>这样显然很正确了，对于call 指令而言，如果后面四个字节跟的是地址，它对应的机器码是0xe8，此处显然是把数据0xe8当成了call指令，才会出现这样的问题。</p></blockquote><p>2.固定条件的跳转指令</p><pre><code>   xor     eax, eax.text:00401035                 jz      short loc_401038</code></pre><p>3.函数指针问题 </p><pre><code> mov [ebp+var_4],offset sub_4011c0; call [ebp+var_4]可用IDA脚本语言IDC进行修正函数为AddCodeXref();</code></pre><p>3.函数未识别的问题 </p><blockquote><p>可以按p键来强制把一段代码变成函数<br>但是要把流氓字节nop,不然函数可能会出问题。用IDA自带的patch program来做。<br>也可用脚本idapython  代码如下：</p></blockquote><pre><code>import idaapiidaapi.CompileLine(&apos;static n_key(){ RunPythonStatement(&quot;nopIt()&quot;);}&apos;)AddHotkey(&quot;Alt-N&quot;,&quot;n_key&quot;)def nopIt():    start=ScreenEA()    end=NextHead(start)    for ea in range(start,end):        PatchByte(ea,0x90)    Jump(end)</code></pre><p>4，异常触发</p><pre><code>push offset sub_4014c0push large dword ptr fs:0mov large fs:0,espxor ecx,ecxdiv ecx</code></pre><blockquote><p>属于滥用结构化异常（SEH）来对抗反汇编，通过人为构造一些比如访问一个无效的内存区域，除0等来触发异常，</p><p>SHE链是一个函数列表，处理线程的异常，列表中的函数要么处理异常，要么向下传递，如果传递到最后一个异常处理函数，就会被认为是一个不能处理的异常，弹出“an unhandled exception has occurred ”。</p><p>查找SEH链，操作系统会检查FS寄存器，这个寄存器中包含一个段选择子，从概念上来讲，链表以栈的方式工作，第一个调用的是最后一个加入链表的记录。前面的例子就是把自己的异常处理加入到链表的头部，然后用除0来触发异常，进而执行自己的代码。</p></blockquote>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;1.插入流氓字节，阻止真正的指令被反汇编&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;线性反汇编和面向代码流的反汇编：&lt;/p&gt;
+&lt;p&gt;线性反汇编是遍历一个代码段，一次一条指令的线性反汇编，不考虑代码流的控制指令。而面向代码流的反汇编是会检查每一条指令。然后建立反汇编的地址列表，
+      
+    
+    </summary>
+    
+      <category term="逆向" scheme="http://18428381824.github.io/categories/%E9%80%86%E5%90%91/"/>
+    
+    
+      <category term="逆向" scheme="http://18428381824.github.io/tags/%E9%80%86%E5%90%91/"/>
     
   </entry>
   
@@ -175,34 +204,6 @@ ubuntu系统
     
     
       <category term="杂学" scheme="http://18428381824.github.io/tags/%E6%9D%82%E5%AD%A6/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>对抗反汇编</title>
-    <link href="http://18428381824.github.io/2017/10/16/%E5%AF%B9%E6%8A%97%E5%8F%8D%E6%B1%87%E7%BC%96/"/>
-    <id>http://18428381824.github.io/2017/10/16/对抗反汇编/</id>
-    <published>2017-10-15T16:00:00.000Z</published>
-    <updated>2017-10-25T07:18:53.412Z</updated>
-    
-    <content type="html"><![CDATA[<p>1.插入流氓字节，阻止真正的指令被反汇编</p><blockquote><p>线性反汇编和面向代码流的反汇编：</p><p>线性反汇编是遍历一个代码段，一次一条指令的线性反汇编，不考虑代码流的控制指令。而面向代码流的反汇编是会检查每一条指令。然后建立反汇编的地址列表，然后这样的反汇编算法会更加先进，而不易出错。比如：</p></blockquote><pre><code>.text:00401035                 jz      short near ptr loc_401037+1.text:00401037.text:00401037 loc_401037:                             ; CODE XREF: .text:00401035j.text:00401037                 call    near ptr 8B4C55C7h</code></pre><blockquote><p>观察以上的汇编代码，你会发现jz跳转到了call 指令中间，这显然是不可能的，所以call指令一定是一个数据而不是代码，在此处按d键，然后再观察</p><pre><code>                 xor     eax, eax.text:00401035                 jz      short loc_401038.text:00401035 ; ---------------------------------------------------------------------------.text:00401037                 db 0E8h.text:00401038 ; ---------------------------------------------------------------------------.text:00401038.text:00401038 loc_401038:                             ; CODE XREF: .text:00401035j.text:00401038                 mov     eax, [ebp+0Ch]</code></pre><p>这样显然很正确了，对于call 指令而言，如果后面四个字节跟的是地址，它对应的机器码是0xe8，此处显然是把数据0xe8当成了call指令，才会出现这样的问题。</p></blockquote><p>2.固定条件的跳转指令</p><pre><code>   xor     eax, eax.text:00401035                 jz      short loc_401038</code></pre><p>3.函数指针问题 </p><pre><code> mov [ebp+var_4],offset sub_4011c0; call [ebp+var_4]可用IDA脚本语言IDC进行修正函数为AddCodeXref();</code></pre><p>3.函数未识别的问题 </p><blockquote><p>可以按p键来强制把一段代码变成函数<br>但是要把流氓字节nop,不然函数可能会出问题。用IDA自带的patch program来做。<br>也可用脚本idapython  代码如下：</p></blockquote><pre><code>import idaapiidaapi.CompileLine(&apos;static n_key(){ RunPythonStatement(&quot;nopIt()&quot;);}&apos;)AddHotkey(&quot;Alt-N&quot;,&quot;n_key&quot;)def nopIt():    start=ScreenEA()    end=NextHead(start)    for ea in range(start,end):        PatchByte(ea,0x90)    Jump(end)</code></pre><p>4，异常触发</p><pre><code>push offset sub_4014c0push large dword ptr fs:0mov large fs:0,espxor ecx,ecxdiv ecx</code></pre><blockquote><p>属于滥用结构化异常（SEH）来对抗反汇编，通过人为构造一些比如访问一个无效的内存区域，除0等来触发异常，</p><p>SHE链是一个函数列表，处理线程的异常，列表中的函数要么处理异常，要么向下传递，如果传递到最后一个异常处理函数，就会被认为是一个不能处理的异常，弹出“an unhandled exception has occurred ”。</p><p>查找SEH链，操作系统会检查FS寄存器，这个寄存器中包含一个段选择子，从概念上来讲，链表以栈的方式工作，第一个调用的是最后一个加入链表的记录。前面的例子就是把自己的异常处理加入到链表的头部，然后用除0来触发异常，进而执行自己的代码。</p></blockquote>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;1.插入流氓字节，阻止真正的指令被反汇编&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;线性反汇编和面向代码流的反汇编：&lt;/p&gt;
-&lt;p&gt;线性反汇编是遍历一个代码段，一次一条指令的线性反汇编，不考虑代码流的控制指令。而面向代码流的反汇编是会检查每一条指令。然后建立反汇编的地址列表，
-      
-    
-    </summary>
-    
-      <category term="逆向" scheme="http://18428381824.github.io/categories/%E9%80%86%E5%90%91/"/>
-    
-    
-      <category term="逆向" scheme="http://18428381824.github.io/tags/%E9%80%86%E5%90%91/"/>
     
   </entry>
   
@@ -371,33 +372,6 @@ ubuntu系统
   </entry>
   
   <entry>
-    <title>进程替换的一种方式</title>
-    <link href="http://18428381824.github.io/2017/08/06/%E8%BF%9B%E7%A8%8B%E6%9B%BF%E6%8D%A2%E7%9A%84%E4%B8%80%E7%A7%8D%E6%A3%80%E6%B5%8B%E6%96%B9%E5%BC%8F/"/>
-    <id>http://18428381824.github.io/2017/08/06/进程替换的一种检测方式/</id>
-    <published>2017-08-05T16:00:00.000Z</published>
-    <updated>2017-08-06T09:19:12.130Z</updated>
-    
-    <content type="html"><![CDATA[<p>进程替换问题</p><p>svchost.exe 经常被替换，鉴定的一种方式是通过process explorer 查看磁盘和内存中的字符串是否一致来判断。</p><p><img src="http://i.imgur.com/3u192lY.png" alt=""></p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;进程替换问题&lt;/p&gt;
-&lt;p&gt;svchost.exe 经常被替换，鉴定的一种方式是通过process explorer 查看磁盘和内存中的字符串是否一致来判断。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/3u192lY.png&quot; alt=&quot;&quot;&gt;&lt;
-      
-    
-    </summary>
-    
-      <category term="恶意代码分析" scheme="http://18428381824.github.io/categories/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"/>
-    
-    
-      <category term="恶意代码分析" scheme="http://18428381824.github.io/tags/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"/>
-    
-  </entry>
-  
-  <entry>
     <title>汇编知识学习</title>
     <link href="http://18428381824.github.io/2017/08/06/%E6%B1%87%E7%BC%96%E7%9F%A5%E8%AF%86%E5%AD%A6%E4%B9%A0/"/>
     <id>http://18428381824.github.io/2017/08/06/汇编知识学习/</id>
@@ -428,28 +402,29 @@ AX=0FF80H
   </entry>
   
   <entry>
-    <title>字符串</title>
-    <link href="http://18428381824.github.io/2017/08/06/strings/"/>
-    <id>http://18428381824.github.io/2017/08/06/strings/</id>
+    <title>进程替换的一种方式</title>
+    <link href="http://18428381824.github.io/2017/08/06/%E8%BF%9B%E7%A8%8B%E6%9B%BF%E6%8D%A2%E7%9A%84%E4%B8%80%E7%A7%8D%E6%A3%80%E6%B5%8B%E6%96%B9%E5%BC%8F/"/>
+    <id>http://18428381824.github.io/2017/08/06/进程替换的一种检测方式/</id>
     <published>2017-08-05T16:00:00.000Z</published>
-    <updated>2017-08-06T08:59:08.244Z</updated>
+    <updated>2017-08-06T09:19:12.130Z</updated>
     
-    <content type="html"><![CDATA[<p>1 字符串添加</p><p>qq=’1265616844’<br>driver.get(‘<a href="http://user.qzone.qq.com/{}/311&#39;.format(qq" target="_blank" rel="external">http://user.qzone.qq.com/{}/311&#39;.format(qq</a>))<br>如上，在一堆字符串中添加某个字符串，可以用如上的方式</p><p>2.中文字符串</p><pre><code># _*_ coding: utf-8 _*_</code></pre><p>python 文件首行增加这一行，才可以输出中文，python默认以ASCII码来解析<br>对于windows的python文件保存为带bom 的utf-8也可以实现这个功能<br>文件的声明编码要和实际文件保存的编码一致，不然可能保存为gbk<br>要想命令行输出中文还要添加</p><pre><code>de_str1=str1.decode(&apos;utf-8&apos;)</code></pre><p>才可以在命令行正常输出中文</p>]]></content>
+    <content type="html"><![CDATA[<p>进程替换问题</p><p>svchost.exe 经常被替换，鉴定的一种方式是通过process explorer 查看磁盘和内存中的字符串是否一致来判断。</p><p><img src="http://i.imgur.com/3u192lY.png" alt=""></p>]]></content>
     
     <summary type="html">
     
       
       
-        &lt;p&gt;1 字符串添加&lt;/p&gt;
-&lt;p&gt;qq=’1265616844’&lt;br&gt;driver.get(‘&lt;a href=&quot;http://user.qzone.qq.com/{}/311&amp;#39;.format(qq&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;htt
+        &lt;p&gt;进程替换问题&lt;/p&gt;
+&lt;p&gt;svchost.exe 经常被替换，鉴定的一种方式是通过process explorer 查看磁盘和内存中的字符串是否一致来判断。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/3u192lY.png&quot; alt=&quot;&quot;&gt;&lt;
       
     
     </summary>
     
-      <category term="编程" scheme="http://18428381824.github.io/categories/%E7%BC%96%E7%A8%8B/"/>
+      <category term="恶意代码分析" scheme="http://18428381824.github.io/categories/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"/>
     
     
-      <category term="编程" scheme="http://18428381824.github.io/tags/%E7%BC%96%E7%A8%8B/"/>
+      <category term="恶意代码分析" scheme="http://18428381824.github.io/tags/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"/>
     
   </entry>
   
@@ -476,6 +451,32 @@ AX=0FF80H
     
     
       <category term="恶意代码分析" scheme="http://18428381824.github.io/tags/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>字符串</title>
+    <link href="http://18428381824.github.io/2017/08/06/strings/"/>
+    <id>http://18428381824.github.io/2017/08/06/strings/</id>
+    <published>2017-08-05T16:00:00.000Z</published>
+    <updated>2017-08-06T08:59:08.244Z</updated>
+    
+    <content type="html"><![CDATA[<p>1 字符串添加</p><p>qq=’1265616844’<br>driver.get(‘<a href="http://user.qzone.qq.com/{}/311&#39;.format(qq" target="_blank" rel="external">http://user.qzone.qq.com/{}/311&#39;.format(qq</a>))<br>如上，在一堆字符串中添加某个字符串，可以用如上的方式</p><p>2.中文字符串</p><pre><code># _*_ coding: utf-8 _*_</code></pre><p>python 文件首行增加这一行，才可以输出中文，python默认以ASCII码来解析<br>对于windows的python文件保存为带bom 的utf-8也可以实现这个功能<br>文件的声明编码要和实际文件保存的编码一致，不然可能保存为gbk<br>要想命令行输出中文还要添加</p><pre><code>de_str1=str1.decode(&apos;utf-8&apos;)</code></pre><p>才可以在命令行正常输出中文</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;1 字符串添加&lt;/p&gt;
+&lt;p&gt;qq=’1265616844’&lt;br&gt;driver.get(‘&lt;a href=&quot;http://user.qzone.qq.com/{}/311&amp;#39;.format(qq&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;htt
+      
+    
+    </summary>
+    
+      <category term="编程" scheme="http://18428381824.github.io/categories/%E7%BC%96%E7%A8%8B/"/>
+    
+    
+      <category term="编程" scheme="http://18428381824.github.io/tags/%E7%BC%96%E7%A8%8B/"/>
     
   </entry>
   
@@ -509,20 +510,20 @@ AX=0FF80H
   </entry>
   
   <entry>
-    <title>迷路</title>
-    <link href="http://18428381824.github.io/2017/08/01/%E8%BF%B7%E8%B7%AF/"/>
-    <id>http://18428381824.github.io/2017/08/01/迷路/</id>
+    <title>一个简单的crackme</title>
+    <link href="http://18428381824.github.io/2017/08/01/%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84crackme/"/>
+    <id>http://18428381824.github.io/2017/08/01/一个简单的crackme/</id>
     <published>2017-07-31T16:00:00.000Z</published>
-    <updated>2017-08-01T02:06:52.003Z</updated>
+    <updated>2017-08-02T13:57:37.472Z</updated>
     
-    <content type="html"><![CDATA[<p>###步骤如下</p><p>1.这个题目是迄今遇到的最坑题目。话不多说，上题目。链接：<a href="http://pan.baidu.com/s/1hr5CtpU" target="_blank" rel="external">http://pan.baidu.com/s/1hr5CtpU</a> 密码：r9wi</p><p>2.首先运行题目，如下图所示，跟平常的题目没什么两样。随便输入字符串，发现弹出报错信息。咋一看，有关键字符串，好咧，这题不难，肯定可以找到关键挑战，然后问题就简单了。（太天真。。。）</p><p><img src="http://i.imgur.com/60iDg8y.png" alt=""></p><p>3  打开OD载入程序，搜索字符串，发现关键字符串，很高兴。</p><p><img src="http://i.imgur.com/J9OcWmh.png" alt=""></p><p>在字符串上方发现两个跳转都跳到失败处，猜想应该是二次验证，一个一个分析，分析第一个call crackme.00402e40 ，发现是对输入的字符串进行一系列处理，然后得到一个数值，在下面语句中发现是和0x92381221 进行比较。不等则跳转向失败，打开IDA，分析关键call ,发现0x92381221代表的十进制数2453148193刚好符合条件，心中顿感，我实在是太聪明了。</p><p><img src="http://i.imgur.com/gT8tpJM.png" alt=""></p><p>继续往下看下一个跳转，call crackme.00401DF0,发现是两个字符串比较，猜想是我们前面的字符串进行再次的运算得到一堆字符串然后比较，然后分析可得处理函数为call crackme.00401990,分析关键call 发现是把输入进行MD5运算得到的一堆字符串。沃日。。。这控制不了啊。。。然后感觉不太对，于是我尝试暴力把跳转改一下，看会出现什么情况。发现既弹出了成功，又弹出来失败，感觉不对。</p><p>4.想着对消息框下个断点，F9运行，点击工具栏的W发现，竟然出现了两个输入Input,觉得肯定玄机在此，觉得其中一个按钮一定是被隐藏了，在command 位置下断点，输入 bp ShowWindow,寻找ShowWindow函数，重新运行程序，发现运行到了用户层，alt+f9运行出来，发现前面就是ShowWindow 窗口在此下断点，删除刚刚下的user32里的断点，发现参数信息为0时，为隐藏，为1时为显现，于是更改参数值如下图所示：</p><p><img src="http://i.imgur.com/k7dqhuI.png" alt=""></p><p>复制到可执行文件，保存文件。再次运行发现果然出现了两个输入按钮。</p><p>5.修改后的程序重新加载进OD，此时发现感觉没什么思路，对获取输入字符串的函数进行下断点，在IDA中发现有GetWindowText函数，双加该函数，ctrl+x 获取其引用的位置，记下地址，在OD中ctrl+g 查找，找到该函数位置下断点，重新运行程序，输入字符串，点击左边的Input,程序运行到断点处，F8单步运行，发现下面有一个call ,F7进去看看，发现是获取字符串的长度，感觉好多Crackme都会对字符串的长度进行检查，于是对存字符串的位置下一个内存访问断点，看看是否有什么意外的惊喜，F9运行程序，发现程序到了这，IDA查看此位置的反编译结果，发现果然是对字符串的长度进行了检查，0x27u说明字符串长度为39,79，79,67,84,70,123,125刚好是题目所说的格式00CTF{},继续运行寻找返回的地方。最后回到401f96的位置，此处果然为一个调用，检查长度和格式。如果不符合返回值为0，跳到失败的位置。符合的话返回值为1，继续往下进行。</p><p><img src="http://i.imgur.com/EoKNATC.png" alt=""></p><p><img src="http://i.imgur.com/HQGVXkP.png" alt=""></p><p>6 继续往下分析，分析各个call 的作用，发现call 1.00401860 位置的call 有很大的嫌疑，里面有各种循环，猜测为算法处理过程，IDA定位此处位置分析基本确定此位置，继续向下运行，查找字符串比较的过程，发现地址为401fca的调用，是弹出错错误的位置，此处下断点，重新运行程序到这个位置，F7进去分析，同时打开IDA，定位此函数，辅助分析，果然发现了两个MessageBOXA函数。分析不同的弹框结果发现前面是一个字符串比较函数，IDA按table键定位此函数的位置。</p><p><img src="http://i.imgur.com/O2ZMscC.png" alt="">    </p><p>进去发现是一个一个进行字符的比较，比较字符串b5h760h64R867618bBwB48BrW92H4w5r  错误的话最后函数返回值为1，弹出错误对话框。</p><p>7.现在的问题就只剩下解决算法出路的问题了。IDA反编译出的代码如下</p><p><img src="http://i.imgur.com/bvyHkdm.png" alt=""></p><p>分析可知其对数字不做变换，大写字母减去65然后再进行关键操作，<br>V9=(V6+V5<em>V7)%26+((V6+V5</em>V7)%26&lt;0?0X1a:0)<br>v6在调试的时候会出现32-2-2=28，v5情况有点复杂，可能是3或者5，待会再说为什么，小写字母减去97然后进行关键操作，这样就进行了字符串的变换。<br>关于v6的问题：该数值最早是函数0041458e 的返回值，返回值为-1的时候就赋值为3，否则为原数。我用3进行测试的时候发现是错误的，那这个函数0041458e 就很有问题。<br>在此处下断点，F7进去发现是再次调用了函数41459c,继续跟进去同时观察IDA的结果，</p><p><img src="http://i.imgur.com/B0LOlTZ.png" alt=""></p><p>发现其实就是判断_mbschr((const unsigned __int8 <em>)(a3 + </em>(_DWORD *)this),a2))的结果，点击该函数进去，OD定位该位置，单步运行会发现，其实是检查输入字符串的第六位是否为0，如果为0则返回 值为0的地址，后面是字符串的地址减去该地址为5，即为v6,否则的话返回值为-1，在后面的判断中赋值为3.此为v6的具体赋值过程。</p><p><img src="http://i.imgur.com/IbfwZCz.png" alt=""></p>]]></content>
+    <content type="html"><![CDATA[<p>###步骤如下</p><p>1  .程序链接    <a href="http://pan.baidu.com/s/1bSPUdK" target="_blank" rel="external">http://pan.baidu.com/s/1bSPUdK</a></p><p>2.这是一个vb程序，ida不能看出什么，只能靠OD了。首先打开程序查看界面以及填入name和serial后的弹出的关键字符串。</p><p>3.打开OD，定位关键字符串的位置，然后寻找关键跳转，发现是在0040258b的位置，往前看是test esi，esi 。</p><p><img src="http://i.imgur.com/zNx08T2.png" alt=""></p><p>寻找一下esi的来源，发现时00402533位置的比较字符串函数的返回值，在此处下断点，在堆栈中发现了两个字符串AKA-585235和111111，一个是我们输入的serial,另一个应该我输入的name处理后的结果，继续向上寻找这个字符串的来源。在00402523位置的函数时一个字符串连接函数，把AKA和585235连接在一起，</p><p><img src="http://i.imgur.com/L7OC3u0.png" alt=""></p><p>继续往前找585235的位置，发现在4024f4d处的函数调用以后，在堆栈中出现了585235，记下它的地址0014e3dc，</p><p><img src="http://i.imgur.com/XvyRwWc.png" alt=""></p><p>重新运行程序到004024f4的位置，在内存区设置0014e3dc位置设置内存访问断点，然后运行程序，</p><p><img src="http://i.imgur.com/6LollUw.png" alt=""></p><p>程序停在了7c84c3A1的位置，查看堆栈，发现出现了585235字符，记下它的地址008fbc80,</p><p><img src="http://i.imgur.com/xWA8wmF.png" alt=""></p><p>然后重新运行程序，停在004024f4的位置，查看内存008fbc80的内容，发现还不是585235，然后f9运行直到找到对其赋值的位置，记下此时的地址，0014db00,</p><p><img src="http://i.imgur.com/KF1WoYi.png" alt=""></p><p>然后重新运行程序到004024f4的位置，在内存区寻找这个位置发现是585235，</p><p><img src="http://i.imgur.com/SM4q3Fu.png" alt=""></p><p>继续往前找寻找它的来源，在004024c1的位置下断点，看一下此时它的数据是否有所变化，下面我的灵感来源于我对程序测试的结果，在程序中name输入123456和111111，serial都是585235，刚开始我以为这是一个固定的字符串，后来我输入1234567的时候，发现不一样了，于是我想着去找一下获取字符串长度的函数。在IDA中找到函数<strong>vbaLenBstr，记下它的地址，在OD中找到这个位置00402415，返回值eax是5，然后后面就是eax乘以0x17cfb赋给edi，然后调用rtcansivaluebstr函数，网上查资料该函数是获取第一个字符的ascii值，得到eax=0x31即ax=31,最后得到edi的值为6*0x17cfb+0x31=0x8ee13,然后程序调用</strong>vbastri4函数，即把十进制数转变为字符串即0x8ee13的十进制数位585235，转变为字符串“585235”，然后就得到这个585235，到此整个流程就很清楚了。</p><p><img src="http://i.imgur.com/s7GXTIj.png" alt=""></p><p>   4.转化为c代码为：</p><pre><code>#include&lt;stdio.h&gt;#include&lt;stdlib.h&gt;#include&lt;string.h&gt;int main(){    char name[10];    int len=0,key=0;    scanf(&quot;%s&quot;,&amp;name);    len=strlen(name);    key=len*0x17cfb+name[0];    printf(&quot;AKA-&quot;);    printf(&quot;%d\n&quot;,key);    system(&quot;pause&quot;);    return 0;}</code></pre>]]></content>
     
     <summary type="html">
     
       
       
         &lt;p&gt;###步骤如下&lt;/p&gt;
-&lt;p&gt;1.这个题目是迄今遇到的最坑题目。话不多说，上题目。链接：&lt;a href=&quot;http://pan.baidu.com/s/1hr5CtpU&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;http://pan.baidu.com
+&lt;p&gt;1  .程序链接    &lt;a href=&quot;http://pan.baidu.com/s/1bSPUdK&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;http://pan.baidu.com/s/1bSPUdK&lt;/a&gt;&lt;/p&gt;
       
     
     </summary>
