@@ -1,0 +1,77 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>第一次注册机 | learn_malware</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/6.0.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.2/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.2/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">第一次注册机</h1><a id="logo" href="/.">learn_malware</a><p class="description">学习使我快乐，学习使我沉迷</p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a></div></div><div id="layout" class="pure-g"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">第一次注册机</h1><div class="post-meta">Jul 12, 2017<span> | </span><span class="category"><a href="/categories/逆向/">逆向</a></span><script src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js" async></script><span id="busuanzi_container_page_pv"> | <span id="busuanzi_value_page_pv"></span><span> 阅读</span></span></div><a data-disqus-identifier="2017/07/12/第一次编写注册机/" href="/2017/07/12/第一次编写注册机/#disqus_thread" class="disqus-comment-count"></a><div class="post-content"><p>###步骤如下</p>
+<p>1.破解样本 链接为 <a href="http://pan.baidu.com/s/1miA38A8" target="_blank" rel="external">http://pan.baidu.com/s/1miA38A8</a></p>
+<p>2.首先打开样本程序，得到关键字符串“Incorrect!!,Try Again”，如下<br><img src="http://i.imgur.com/kQ9YJPI.png" alt=""></p>
+<p>3.打开IDA加载该样本程序。打开View-&gt;Open Subviws-&gt;Strings 字符串窗口，搜索关键字符串,得到关键字符串”Correct way to go,You Got It”.点击找到数据段的定义位置，按下Ctrl+x 找到它的引用位置，然后按下tab键，找到反编译的结果。</p>
+<p><img src="http://i.imgur.com/H0wjDEh.png" alt=""><br><img src="http://i.imgur.com/eLlL0cI.png" alt=""></p>
+<p>分析反编译的c程序，发现其首先进行字符串长度的比较，然后把字符串和一个常数进行了一系列的操作。</p>
+<p>4.打开od,载入程序定位到关键字符串的位置（在IDA中有具体地址），直接ctrl+G输入地址可以直接定位字符串位置，然后向上查找关键跳转，找到一个JNZ。。。。，直接断点，<br><img src="http://i.imgur.com/SGROWMU.png" alt=""><br>看下结果。然后发现跳转实现的话，直接后面单步执行，会弹出“Incorrect!!,Try Again”。尝试把跳转给改了，然后保存到文件，此时再随意输入，发现弹出“correct way to go”、<br><img src="http://i.imgur.com/COHLpMa.png" alt=""></p>
+<p>5.下面分析其算法逻辑。<br>JNZ 前面的call下断点，单步进入发现是一个字符串你的比较，一个字符串是我们输入的第二个字，另一个是一个长字符串，猜测应该是第一个字符串经过一系列运算所得。向上分析，查找算法：找到GetDlgItemTextA_3097，为获取输入的字符串，然后后面是字符串长度的比较。<img src="http://i.imgur.com/ougupiX.png" alt=""> </p>
+<p>再后面就是其具体的算法了：</p>
+<p><img src="http://i.imgur.com/37qWSuL.png" alt=""></p>
+<p>用c代码来表示就是：</p>
+<pre><code>#include&lt;stdio.h&gt;
+#include&lt;string.h&gt;
+int main()
+{
+    char name[200];
+    char key[100] = { 0 };  
+    int nlen,i;   // int 4个字节 
+    int start;
+    //int len=5;
+    start=0x81276345;
+    scanf(&quot;%s&quot;, name);
+    nlen = strlen(name);
+    if(nlen&gt;=5)
+    {
+        //printf(&quot;%s&quot;, name);
+        //printf(&quot;%c&quot;, name[0]);
+        for(i=0;i&lt;nlen;i++)
+        {
+            start=start+name[i];
+            //i=i&lt;&lt;8;
+            //printf(&quot;%x\n&quot;,i);
+            start=start^(i&lt;&lt;8);
+            //j=i+1;
+            //tmp=len*i;
+            //tmp=~tmp;
+            //j=j*tmp;
+            start=start*(i+1)*(~(nlen*i));
+            //printf(&quot;%x\n&quot;,start);
+        }
+        printf(&quot;%1u\n&quot;,start);  //u 代表无符号整数
+        system(&quot;pause&quot;);
+    }
+    else
+    {
+        printf(&quot;序列号不能少于5位\n&quot;);
+        system(&quot;pause&quot;);
+    }
+    return 0;
+}
+</code></pre><p>输入任意大于等于5位的字符串，得到的结果就是其序列号。如<br><img src="http://i.imgur.com/fGIngFo.png" alt=""><br><img src="http://i.imgur.com/jaGjvKJ.png" alt=""></p>
+</div><script type="text/javascript" src="/js/share.js?v=0.0.0" async></script><a data-url="http://18428381824.github.io/2017/07/12/第一次编写注册机/" data-id="cj9m4s8v2002nzwulbjut7o2t" class="article-share-link">分享</a><div class="tags"><a href="/tags/逆向/">逆向</a></div><div class="post-nav"><a href="/2017/07/15/esp脱壳+文件大小自校验/" class="pre">esp脱壳+文件大小自校验</a><a href="/2017/07/10/栈基础知识/" class="next">栈基础知识</a></div><div id="disqus_thread"><div class="btn_click_load"><button class="disqus_click_btn">阅读评论 「请确保 disqus.com 可以正常加载」</button></div><script>var disqus_shortname = '18428381824-github-io';
+var disqus_identifier = '2017/07/12/第一次编写注册机/';
+var disqus_title = '第一次注册机';
+var disqus_url = 'http://18428381824.github.io/2017/07/12/第一次编写注册机/';
+$('.btn_click_load').click(function() {
+  (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+  $('.btn_click_load').css('display','none');
+});
+$.ajax({
+  url: 'https://disqus.com/favicon.ico',
+  timeout: 3000,
+  type: 'GET',
+  success: (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    $('.btn_click_load').css('display','none');
+  })(),
+  error: function() {
+    $('.btn_click_load').css('display','block');
+  }
+});</script><script id="dsq-count-scr" src="//18428381824-github-io.disqus.com/count.js" async></script></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form action="//www.baidu.com/baidu" method="get" accept-charset="utf-8" target="_blank" class="search-form"><input type="search" name="word" maxlength="20" placeholder="Search"/><input type="hidden" name="si" value="http://18428381824.github.io"/><input name="tn" type="hidden" value="bds"/><input name="cl" type="hidden" value="3"/><input name="ct" type="hidden" value="2097152"/><input name="s" type="hidden" value="on"/></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/python/">python</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/恶意代码/">恶意代码</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/恶意代码分析/">恶意代码分析</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂学/">杂学</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程/">编程</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/网络/">网络</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/逆向/">逆向</a><span class="category-list-count">14</span></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/恶意代码/" style="font-size: 15px;">恶意代码</a> <a href="/tags/逆向/" style="font-size: 15px;">逆向</a> <a href="/tags/杂学/" style="font-size: 15px;">杂学</a> <a href="/tags/网络/" style="font-size: 15px;">网络</a> <a href="/tags/恶意代码分析/" style="font-size: 15px;">恶意代码分析</a> <a href="/tags/编程/" style="font-size: 15px;">编程</a> <a href="/tags/python/" style="font-size: 15px;">python</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/10/22/对抗反汇编分析/">对抗反汇编分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/20/iptables/">iptables</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/16/对抗反汇编/">对抗反汇编</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/16/恶意代码重定向/">恶意代码重定向</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/16/树莓派透明代理/">树莓派透明代理</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/16/双系统安装/">双系统安装（win10+ubuntu）</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/16/dll之APC注入/">dll注入之APC注入</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/14/vs错误集/">VS错误集</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/13/sublime乱码处理/">sublime中文乱码处理</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/11/shellcode 实现键盘记录样本分析/">shellcode 实现键盘记录样本分析</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-comment-o"> 最近评论</i></div><script type="text/javascript" src="//18428381824-github-io.disqus.com/recent_comments_widget.js?num_items=5&amp;hide_avatars=1&amp;avatar_size=32&amp;excerpt_length=20&amp;hide_mods=1"></script></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div><ul></ul><a href="http://www.github.com/" title="github" target="_blank">github</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2017 <a href="/." rel="nofollow">learn_malware.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a id="rocket" href="#top" class="show"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/3.0.47/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/3.0.47/jquery.fancybox.min.css"><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>

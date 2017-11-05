@@ -1,0 +1,92 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>iptables | learn_malware</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/6.0.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.2/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.2/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">iptables</h1><a id="logo" href="/.">learn_malware</a><p class="description">学习使我快乐，学习使我沉迷</p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a></div></div><div id="layout" class="pure-g"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">iptables</h1><div class="post-meta">Oct 20, 2017<span> | </span><span class="category"><a href="/categories/网络/">网络</a></span><script src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js" async></script><span id="busuanzi_container_page_pv"> | <span id="busuanzi_value_page_pv"></span><span> 阅读</span></span></div><a data-disqus-identifier="2017/10/20/iptables/" href="/2017/10/20/iptables/#disqus_thread" class="disqus-comment-count"></a><div class="post-content"><h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>&emsp;&emsp;当主机收到一个数据包后，数据包先在内核空间中处理，若发现目的地址是自身，则传到用户空间中交给对应的应用程序处理，若发现目的不是自身，则会将包丢弃或进行转发。</p>
+<p>&emsp;&emsp;iptables实现防火墙功能的原理是：在数据包经过内核的过程中有五处关键地方，分别是PREROUTING、INPUT、OUTPUT、FORWARD、POSTROUTING，称为钩子函数，iptables这款用户空间的软件可以在这5处地方写规则，对经过的数据包进行处理，规则一般的定义为“如果数据包头符合这样的条件，就这样处理数据包”。</p>
+<p>&emsp;&emsp;iptables中定义有表，分别表示提供的功能，有filter表（实现包过滤）、nat表（实现网络地址转换）、mangle表（实现包修改）、raw表（实现数据跟踪），这些表具有一定的优先级：raw–&gt;mangle–&gt;nat–&gt;filter</p>
+<p><img src="https://i.imgur.com/Fl0nfg8.png" alt=""></p>
+<p><img src="https://i.imgur.com/OHQyUMC.png" alt=""></p>
+<h2 id="常用操作"><a href="#常用操作" class="headerlink" title="常用操作"></a>常用操作</h2><p>&amp;emsp常用操作命令    说明</p>
+<p>-A    在指定链尾部添加规则</p>
+<p>-D    删除匹配的规则</p>
+<p>-R    替换匹配的规则</p>
+<p>-I    在指定位置插入规则</p>
+<pre><code>例：iptables -I INPUT 1 --dport 80 -j ACCEPT
+（将规则插入到filter表INPUT链中的第一位上）
+</code></pre><p>-L/S    列出指定链或所有链的规则</p>
+<p>-F    删除指定链或所有链的规则</p>
+<p>-N    创建用户自定义链</p>
+<pre><code>例：iptables -N allowed
+</code></pre><p>-X    删除指定的用户自定义链</p>
+<p>-P    为指定链设置默认规则策略，对自定义链不起作用</p>
+<pre><code>例：iptables -P OUTPUT DROP
+</code></pre><p>-Z    将指定链或所有链的计数器清零</p>
+<p>-E    更改自定义链的名称</p>
+<pre><code>例：iptables -E allowed disallowed
+</code></pre><p>-n    ip地址和端口号以数字方式显示</p>
+<pre><code>例：iptables -Ln
+</code></pre><p>常见规则匹配器    说明</p>
+<p>-p tcp|udp|icmp|all    匹配协议，all会匹配所有协议</p>
+<p>-s addr[/mask]    匹配源地址</p>
+<p>-d addr[/mask]    匹配目标地址</p>
+<p>–sport port1[:port2]    匹配源端口(可指定连续的端口）</p>
+<p>–dport port1[:port2]    匹配目的端口(可指定连续的端口）</p>
+<p>-o interface    匹配出口网卡，只适用FORWARD、POSTROUTING、OUTPUT。</p>
+<pre><code>例：iptables -A FORWARD -o eth0
+</code></pre><p>-i interface    匹配入口网卡，只使用PREROUTING、INPUT、FORWARD。</p>
+<p>–icmp-type     匹配icmp类型（使用iptables -p icmp -h可查看可用的ICMP类型<br>）</p>
+<p>–tcp-flags mask comp    匹配TCP标记，mask表示检查范围，comp表示匹配mask中的哪些标记。</p>
+<pre><code>例：iptables -A FORWARD -p tcp --tcp-flags ALL SYN，ACK -j ACCEPT
+（表示匹配SYN和ACK标记的数据包）
+</code></pre><p>目标动作    说明</p>
+<p>ACCEPT    允许数据包通过</p>
+<p>DROP    丢弃数据包</p>
+<p>REJECT    丢弃数据包，并且将拒绝信息发送给发送方</p>
+<p>SNAT    源地址转换（在nat表上）</p>
+<pre><code>例：iptables -t nat -A POSTROUTING -d 192.168.0.102 -j SNAT --to 192.168.0.1 
+</code></pre><p>DNAT    目标地址转换（在nat表上）</p>
+<pre><code>例：iptables -t nat -A PREROUTING -d 202.202.202.2 -j DNAT --to-destination 192.168.0.102
+</code></pre><p>REDIRECT    目标端口转换（在nat表上）</p>
+<pre><code>例：iptables -t nat -D PREROUTING -p tcp --dport 8080 -i eth2.2 -j REDIRECT --to 80
+</code></pre><p>MARK    将数据包打上标记</p>
+<pre><code>例：iptables -t mangle -A PREROUTING -s 192.168.1.3 -j MARK --set-mark 60
+</code></pre><h3 id="注意要点："><a href="#注意要点：" class="headerlink" title="注意要点："></a>注意要点：</h3><pre><code>1、目标地址转换一般在PREROUTING链上操作
+
+2、源地址转换一般在POSTROUTING链上操作
+</code></pre><p>state：匹配指定的状态数据包</p>
+<p>参数    说明</p>
+<p>–state value    value可以为NEW、RELATED（有关联的）、ESTABLISHED、INVALID（未知连接）</p>
+<p>例子：<br>    iptables -A INPUT -m state –state NEW，ESTABLISHED -j ACCEPT</p>
+<h2 id="常见iptables"><a href="#常见iptables" class="headerlink" title="常见iptables"></a>常见iptables</h2><p>&emsp;&emsp;MASQUERADE：是动态分配ip时用的IP伪装：在nat表的POSTROUTING链加入一条规则:所有从ppp0口送出的包会被伪装（MASQUERADE）</p>
+<p> iptables -t nat -A POSTROUTING -o ppp0 -j MASQUERADE</p>
+<p>&emsp;&emsp;REDIRECT：重定向，这个在squid透明代理时肯定要用到它</p>
+<p> 所有从eth1进入的请求80和82端口的数据，被转发到80端口，由squid处理。</p>
+<p> iptables -t nat -A PREROUTING - -i eth1 -p tcp -m multiport –dports 80,82 -j REDIRECT –to-ports 80</p>
+<p>保存和恢复iptables规则</p>
+<p>使用iptables-save可以保存到特定文件中</p>
+<p>&emsp;&emsp;iptables-save &gt;/etc/sysconfig/iptables_save</p>
+<p>使用iptables-restore可以恢复规则</p>
+<p>&emsp;&emsp;iptables-restore&lt;/etc/sysconfig/iptables_save</p>
+</div><script type="text/javascript" src="/js/share.js?v=0.0.0" async></script><a data-url="http://18428381824.github.io/2017/10/20/iptables/" data-id="cj9m4s8su000azwulf4zn2ysr" class="article-share-link">分享</a><div class="tags"><a href="/tags/网络/">网络</a></div><div class="post-nav"><a href="/2017/10/22/对抗反汇编分析/" class="pre">对抗反汇编分析</a><a href="/2017/10/16/对抗反汇编/" class="next">对抗反汇编</a></div><div id="disqus_thread"><div class="btn_click_load"><button class="disqus_click_btn">阅读评论 「请确保 disqus.com 可以正常加载」</button></div><script>var disqus_shortname = '18428381824-github-io';
+var disqus_identifier = '2017/10/20/iptables/';
+var disqus_title = 'iptables';
+var disqus_url = 'http://18428381824.github.io/2017/10/20/iptables/';
+$('.btn_click_load').click(function() {
+  (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+  $('.btn_click_load').css('display','none');
+});
+$.ajax({
+  url: 'https://disqus.com/favicon.ico',
+  timeout: 3000,
+  type: 'GET',
+  success: (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    $('.btn_click_load').css('display','none');
+  })(),
+  error: function() {
+    $('.btn_click_load').css('display','block');
+  }
+});</script><script id="dsq-count-scr" src="//18428381824-github-io.disqus.com/count.js" async></script></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form action="//www.baidu.com/baidu" method="get" accept-charset="utf-8" target="_blank" class="search-form"><input type="search" name="word" maxlength="20" placeholder="Search"/><input type="hidden" name="si" value="http://18428381824.github.io"/><input name="tn" type="hidden" value="bds"/><input name="cl" type="hidden" value="3"/><input name="ct" type="hidden" value="2097152"/><input name="s" type="hidden" value="on"/></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/python/">python</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/恶意代码/">恶意代码</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/恶意代码分析/">恶意代码分析</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂学/">杂学</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程/">编程</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/网络/">网络</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/逆向/">逆向</a><span class="category-list-count">14</span></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/恶意代码/" style="font-size: 15px;">恶意代码</a> <a href="/tags/逆向/" style="font-size: 15px;">逆向</a> <a href="/tags/杂学/" style="font-size: 15px;">杂学</a> <a href="/tags/网络/" style="font-size: 15px;">网络</a> <a href="/tags/恶意代码分析/" style="font-size: 15px;">恶意代码分析</a> <a href="/tags/编程/" style="font-size: 15px;">编程</a> <a href="/tags/python/" style="font-size: 15px;">python</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/10/22/对抗反汇编分析/">对抗反汇编分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/20/iptables/">iptables</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/16/对抗反汇编/">对抗反汇编</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/16/恶意代码重定向/">恶意代码重定向</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/16/树莓派透明代理/">树莓派透明代理</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/16/双系统安装/">双系统安装（win10+ubuntu）</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/16/dll之APC注入/">dll注入之APC注入</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/14/vs错误集/">VS错误集</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/13/sublime乱码处理/">sublime中文乱码处理</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/11/shellcode 实现键盘记录样本分析/">shellcode 实现键盘记录样本分析</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-comment-o"> 最近评论</i></div><script type="text/javascript" src="//18428381824-github-io.disqus.com/recent_comments_widget.js?num_items=5&amp;hide_avatars=1&amp;avatar_size=32&amp;excerpt_length=20&amp;hide_mods=1"></script></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div><ul></ul><a href="http://www.github.com/" title="github" target="_blank">github</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2017 <a href="/." rel="nofollow">learn_malware.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a id="rocket" href="#top" class="show"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/3.0.47/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/3.0.47/jquery.fancybox.min.css"><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>

@@ -1,0 +1,330 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>简单爬虫 | learn_malware</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/6.0.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.2/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.2/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">简单爬虫</h1><a id="logo" href="/.">learn_malware</a><p class="description">学习使我快乐，学习使我沉迷</p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a></div></div><div id="layout" class="pure-g"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">简单爬虫</h1><div class="post-meta">Jul 6, 2017<span> | </span><span class="category"><a href="/categories/python/">python</a></span><script src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js" async></script><span id="busuanzi_container_page_pv"> | <span id="busuanzi_value_page_pv"></span><span> 阅读</span></span></div><a data-disqus-identifier="2017/07/06/spider/" href="/2017/07/06/spider/#disqus_thread" class="disqus-comment-count"></a><div class="post-content"><h3 id="coding-utf-8-可解决诸多编码问题，建议程序加上"><a href="#coding-utf-8-可解决诸多编码问题，建议程序加上" class="headerlink" title="-- coding: utf-8 --    #可解决诸多编码问题，建议程序加上"></a>-<em>- coding: utf-8 -</em>-    #可解决诸多编码问题，建议程序加上</h3><pre><code># import urllib2
+# import urllib
+</code></pre><p>###1 .直接传输数据。利用urllib2</p>
+<pre><code># response =urllib2.urlopen(&apos;http://www.baidu.com&apos;)
+# print response.read()
+#首先建立一个request实例，可以在构建请求的时候加入其他内容，比如data和header
+#request=urllib2.request(url)
+#response=urllib2.urlopen(request)
+#print response.read()
+</code></pre><p>###2.post方式传递数据和get方式</p>
+<pre><code># post方式传送数据
+# values={&apos;username&apos;:&apos;1265616844@qq.com&apos;,&apos;password&apos;:&apos;scu123456&apos;}
+# data=urllib.urlencode(values)
+# request=urllib2.request(&apos;http://www.baidu.com&apos;,data)
+# response=urllib2.urlopen(request)
+# print response.read()
+#get方式出传送数据
+# values={&apos;username&apos;:&apos;1265616844@qq.com&apos;,&apos;password&apos;:&apos;scu123456&apos;}
+# data=urllib.urlencode(values)
+# url=&quot;http://www.baidu.com&quot;+&quot;?&quot;+data
+# request=urllib2.request(url)
+# response=urllib2.urlopen(request)
+# print response.read()
+</code></pre><p>###3 .模拟登陆</p>
+<pre><code># 构建request实例的时候，加入header模拟登陆
+# values={&apos;username&apos;:&apos;1265616844@qq.com&apos;,&apos;password&apos;:&apos;scu123456&apos;}
+# data=urllib.urlencode(values)
+# headers={&apos;User-Agent&apos;:&apos;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36&apos;,&apos;Referer&apos;:&apos;https://www.baidu.com/link?url=E3phPx1eObXAfu4bCGSc2YVs58W76-YCXkEtiAN51lC&amp;wd=&amp;eqid=8815b85d0006fca2000000035915d702&apos;}
+# request=urllib2.request(&apos;http://www.baidu.com&apos;,data,headers)
+# response=urllib2.urlopen(request)
+# print response.read()
+</code></pre><p>###4.设置代理服务器</p>
+<pre><code># 设置代理服务器解决ip频繁访问被封问题
+# import urllib2
+# enable_proxy=True
+# proxy_handler=urllib2.ProxyHander({&quot;http&quot;:&apos;http://some-proxy.com:8080&apos;})
+# null_proxy_handler=urllib2.build_opener(proxy_handler)
+# if enable_proxy:
+#   opener=urllib2.build_opener(proxy_handler)
+# else:
+#   opener=urllib2.build_opener(null_proxy_handler)
+#urllib2.install_opener(opener)
+#
+</code></pre><p>###5.捕获url异常的写法</p>
+<pre><code>#
+# import urllib2
+# request = urllib2.Request(&apos;http://www.baidu&apos;)
+# try:
+#     print urllib2.urlopen(request).read()
+# except urllib2.URLError, e:
+#     print e.reason
+#
+</code></pre><p>###6.捕获httperror 的写法</p>
+<pre><code># import urllib2
+# req=urllib2.Request(&quot;http://blog.csdn.net/cqcre&quot;)
+# try:
+#     print urllib2.urlopen(req)
+# except urllib2.HTTPError,e:
+#     print e.code
+#     print e.reason
+# except urllib2.URLError,e:
+#     print e.reason
+#requires 库的使用
+# import requests
+# s = requests.session()
+# s.headers.update({&apos;x-test&apos;: &apos;true&apos;})
+# r = s.get(&apos;http://httpbin.org/headers&apos;, headers={&apos;x-test2&apos;: &apos;true&apos;})
+# print r.text
+</code></pre><p> ###7.正则匹配</p>
+<pre><code>Example 1
+# import re
+# a=&apos;ba91c&apos;
+# pattern=re.compile(r&quot;a\d{1,2}c&quot;)
+# if  re.match(pattern,a):  #开头必须匹配
+#     print &apos;success&apos;
+# if re.search(pattern,a):  #开头不要求匹配
+#     print &apos;research success &apos;
+# pattern=re.compile(r&quot;\d+&quot;)
+# print re.split(pattern,a)
+# print re.findall(pattern,a)
+Example 2
+# import urllib
+# import json
+# import urllib2
+# import re
+# from bs4 import BeautifulSoup
+# page=1
+# url = &apos;http://www.qiushibaike.com/hot/page/&apos; + str(page)
+# headers={&apos;User-Agent&apos;:&apos;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36&apos;}
+# try:
+#     req=urllib2.Request(url,headers=headers)
+#     response=urllib2.urlopen(req)
+#     print response.code
+#     content=response.read().decode(&apos;utf-8&apos;)
+#     pattern = re.compile(r&apos;&lt;a href=.*? target=.*? title=.*?&gt;.*?&lt;h2&gt;(.*?)&lt;/h2&gt;.*?&lt;span&gt;(.*?)&lt;/span&gt;.*?&lt;i class=&quot;number&quot;&gt;(.*?)&lt;/i&gt;&apos;, re.S)
+#     items=re.findall(pattern,content)
+#     for item in items:
+#         print json.dumps(item[0], encoding=&quot;UTF-8&quot;, ensure_ascii=False),json.dumps(item[1], encoding=&quot;UTF-8&quot;, ensure_ascii=False),json.dumps(item[2], encoding=&quot;UTF-8&quot;, ensure_ascii=False)
+# except urllib2.URLError,e:
+#     if hasattr(e,&quot;code&quot;):
+#         print e.code
+#     if hasattr(e,&quot;reason&quot;):
+#         print e.reason
+</code></pre><p>###8.时间戳</p>
+<pre><code># from datetime import datetime
+# import time
+# a =datetime.now()
+# #sleep(10)
+# time.sleep(10)
+# b=datetime.now()
+# print (b-a).seconds
+</code></pre><p>###9.beautifulsoup 的学习</p>
+<pre><code># from bs4 import BeautifulSoup
+# html = &quot;&quot;&quot;
+# &lt;html&gt;&lt;head&gt;&lt;title&gt;The Dormouse&apos;s story&lt;/title&gt;&lt;/head&gt;
+# &lt;body&gt;
+# &lt;p class=&quot;title&quot; name=&quot;dromouse&quot;&gt;&lt;b&gt;The Dormouse&apos;s story&lt;/b&gt;&lt;/p&gt;
+# &lt;p class=&quot;story&quot;&gt;Once upon a time there were three little sisters; and their names were
+# &lt;a href=&quot;http://example.com/elsie&quot; class=&quot;sister&quot; id=&quot;link1&quot;&gt;&lt;!-- Elsie --&gt;&lt;/a&gt;,
+# &lt;a href=&quot;http://example.com/lacie&quot; class=&quot;sister&quot; id=&quot;link2&quot;&gt;Lacie&lt;/a&gt; and
+# &lt;a href=&quot;http://example.com/tillie&quot; class=&quot;sister&quot; id=&quot;link3&quot;&gt;Tillie&lt;/a&gt;;
+# and they lived at the bottom of a well.&lt;/p&gt;
+# &lt;p class=&quot;story&quot;&gt;...&lt;/p&gt;
+# &quot;&quot;&quot;
+# soup=BeautifulSoup(html,&apos;lxml&apos;)
+# for p in soup.p.next_siblings :  #同级兄弟节点
+#     print p
+
+# print soup.prettify()
+# print soup.title
+# print soup.title.string
+# for string in  soup.body.stripped_strings:
+#     print string
+# print soup.a
+# print soup.a.string
+# print soup.head.contents
+# for children in  soup.head.children:
+#     print children
+
+#soup.findall()
+#还可以传入关键词如果一个指定名字的参数不是搜索内置的参数名,
+#搜索时会把该参数当作指定名字tag的属性来搜索,例如如果包含一
+#个名字为 id 的参数,Beautiful Soup会搜索每个tag的”id”属性
+#for examle  soup.findall(id=&quot;link2&quot;) or soup.findall(href=re.compile(&apos;elsie&apos;)
+#print soup.find_all(attrs={&quot;name&quot;: &quot;dromouse&quot;})
+#soup.select()
+# print soup.select(&apos;title&apos;)  #通过标签名
+# print soup.select(&apos;.story&apos;) #通过类名
+# print soup.select(&quot;#link1&quot;) #通过id
+# print soup.select(&quot;p #link1&quot;) #标签名和id 的组合
+# print soup.select(&apos;a[class=&quot;sister&quot;]&apos;)#标签和类
+</code></pre><p>###10.selenium测试  </p>
+<pre><code># -*- coding: utf-8 -*-  
+# from selenium import webdriver
+# browser=webdriver.Chrome()
+# browser.get(&apos;http://www.baidu.com/&apos;)
+# import sys
+# reload(sys)
+# sys.setdefaultencoding(&apos;utf-8&apos;)
+# from selenium import webdriver
+# from selenium.webdriver.common.keys import Keys
+#
+# driver = webdriver.Chrome()
+# driver.get(&quot;http://www.python.org&quot;)
+# assert &quot;Python&quot; in driver.title
+# elem = driver.find_element_by_name(&quot;q&quot;)
+# elem.send_keys(&quot;pycon&quot;)
+# elem.send_keys(Keys.RETURN)
+# print driver.page_source
+</code></pre><p>###11.  selenium 优化</p>
+<p>以登陆腾讯哈勃分析系统为例</p>
+<p>主要的优化在于把time.sleep()这种强制等待多少秒换成隐式等待和显式等待。<br>所谓隐式等待就是<br>driver.implicitly_wait(30) 设置最大超时时间为30秒，当页面加载完毕以后，要查找的元素找到即进行下一步，而不必强行等待多少秒，所谓的显式等待就是等你所要查找的元素出现后进行下一步，WebDriverWait(driver, 60).until(EC.presence_of_element_located(locator))  。</p>
+<pre><code># -*- coding: utf-8 -*-
+# 登陆腾讯哈勃分析系统
+import time
+import json
+from selenium import webdriver
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+driver = webdriver.Chrome()
+time.sleep(3)
+driver.get(&apos;https://habo.qq.com/&apos;)
+#time.sleep(3)
+driver.implicitly_wait(30)
+#driver.implicitly_wait(30)
+driver.find_element_by_id(&quot;nologin&quot;).click()
+# time.sleep(5)
+#driver.implicitly_wait(30)
+driver.switch_to_frame(&apos;login_ifr&apos;)
+# print driver.page_source.encode(&apos;utf-8&apos;)
+driver.find_element_by_css_selector(&quot;#img_out_1031652154&quot;).click()
+# time.sleep(3)
+#driver.implicitly_wait(30)
+for i in range(1200,1300):
+    filename=&apos;F:\\sample_malware\\1\\pdf\\&apos;+str(i)+&apos;.pdf&apos;
+    driver.find_element_by_css_selector(&quot;#file_upload2&quot;).send_keys(filename)
+    #time.sleep(15)
+    #driver.implicitly_wait(30)
+    time.sleep(3)
+    print &apos;pdf&apos;+str(i)
+    # try:
+    #     driver.find_element_by_id(&apos;file_upload_fail&apos;)
+    #     a = True
+    # except:
+    #     a = False
+    # if a == False:
+        #time.sleep(6)
+    locator=(By.ID,&quot;detail_frame&quot;)
+    # driver.implicitly_wait(30)
+    #driver.find_element_by_xpath(&quot;.//*[@id=&apos;detail_frame&apos;]/div[1]/div/div[1]/div[1]&quot;)
+    try:
+        WebDriverWait(driver, 60).until(EC.presence_of_element_located(locator))
+        driver.back()
+    except:
+        driver.refresh()
+
+    # else:
+    #     pass
+    #     #driver.refresh()
+</code></pre><p>遇到的问题：</p>
+<p>注意:<br>Frame/Iframe原因定位不到元素：</p>
+<p>1.这个是最常见的原因，首先要理解下frame的实质，frame中实际上是嵌入了另一个页面，而webdriver每次只能在一个页面识别，因此需要先定位到相应的frame，对那个页面里的元素进行定位。 例如：如果iframe有name或id的话，直接使用switch_to_frame(“name值”)或switch_to_frame(“id值”)。如下：</p>
+<pre><code>driver=webdriver.Firefox()
+driver.get(r&apos;http://www.126.com/&apos;)
+driver.switch_to_frame(&apos;x-URS-iframe&apos;)  #需先跳转到iframe框架
+username=driver.find_element_by_name(&apos;email&apos;)
+username.clear()
+</code></pre><p>如果iframe没有name或id的话，则可以通过下面的方式定位：</p>
+<pre><code>#先定位到iframe
+elementi= driver.find_element_by_class_name(&apos;APP-editor-iframe&apos;)
+#再将定位对象传给switch_to_frame()方法
+driver.switch_to_frame(elementi) 
+</code></pre><p>如果完成操作后，可以通过switch_to.parent_content()方法跳出当前iframe，或者还可以通过switch_to.default_content()方法跳回最外层的页面</p>
+<p>2.关于窗口的切换用到switch_to_window(handle)  方法</p>
+<p>例如：</p>
+<pre><code>all_handles = driver.window_handles #获取所有窗口句柄
+for handle in all_handles:
+    if handle != now_handle:
+        print handle    #输出待选择的窗口句柄
+        driver.switch_to_window(handle)
+        time.sleep(5)
+        try:
+            filename=driver.find_element_by_xpath(&quot;.//*[@id=&apos;baseinfo&apos;]/div/table/tbody/tr[1]/td[2]/p&quot;).text+&quot;.html&quot;
+            with open(filename, &apos;w&apos;) as fp:
+                fp.write(driver.page_source.encode(&apos;utf-8&apos;))
+        except:
+            print str(j)+str(i)
+        time.sleep(5)
+        driver.close() #关闭当前窗口
+time.sleep(3)
+print now_handle   #输出主窗口句柄
+driver.switch_to_window(now_handle) #返回主窗口
+time.sleep(5)
+</code></pre><p>###12.requires库的使用</p>
+<p>两种模拟登陆的方式：</p>
+<ol>
+<li><p>构建请求的表单数据来登录</p>
+<pre><code># -*- coding: utf-8 -*-
+# import requests
+# import ConfigParser
+# import json
+# cf = ConfigParser.ConfigParser()
+# cf.read(&apos;config.ini&apos;)
+# username = cf.get(&apos;info&apos;, &apos;username&apos;)
+# password = cf.get(&apos;info&apos;, &apos;password&apos;)
+# csrfmiddlewaretoken=cf.get(&apos;info&apos;,&apos;csrfmiddlewaretoken&apos;)
+# ##g-recaptcha-response=cf.get(&apos;info&apos;,&apos;g-recaptcha-response&apos;)
+# session = requests.session()
+# login_data = {&apos;username&apos;: username, &apos;password&apos;: password,&apos;csrfmiddlewaretoken&apos;:csrfmiddlewaretoken,&apos;g-recaptcha-response&apos;:cf.get(&apos;info&apos;,&apos;g-recaptcha-response&apos;)}
+# header = {
+#     &apos;User-Agent&apos;:&apos;Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.98 Safari/537.36&apos;,
+#     &apos;Host&apos;: &apos;malwr.com&apos;,
+#     &apos;Referer&apos;: &apos;https://malwr.com/account/login/&apos;
+# }
+# # r = session.get(&apos;http://malwr.com/&apos;)  # 实现验证码登陆
+# r = session.post(&apos;https://malwr.com/account/login/&apos;, data=login_data, headers=header)
+
+# with open(&apos;123.html&apos;, &apos;w&apos;) as fp:
+#     fp.write(r.content)
+</code></pre></li>
+</ol>
+<ol>
+<li>构建cookies来模拟登陆</li>
+<li><pre><code># -*- coding: utf-8 -*-
+import requests
+import ConfigParser
+import json
+cf = ConfigParser.ConfigParser()
+cf.read(&apos;config.ini&apos;)
+cookies = cf.items(&apos;cookies&apos;)
+cookies = dict(cookies)
+header = {
+    &apos;User-Agent&apos;:&apos;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36&apos;,
+    &apos;Host&apos;: &apos;malwr.com&apos;,
+    &apos;Referer&apos;: &apos;https://malwr.com/account/login/&apos;
+}
+session = requests.session()
+r = session.get(&apos;http://malwr.com/analysis/&apos;, cookies=cookies,headers=header)  # 实现验证码登陆
+
+with open(&apos;login.html&apos;, &apos;w&apos;) as fp:
+    fp.write(r.content)
+</code></pre></li>
+</ol>
+</div><script type="text/javascript" src="/js/share.js?v=0.0.0" async></script><a data-url="http://18428381824.github.io/2017/07/06/spider/" data-id="cj9m4s8tb000lzwulawh30yzv" class="article-share-link">分享</a><div class="tags"><a href="/tags/python/">python</a></div><div class="post-nav"><a href="/2017/07/06/破解实例1/" class="pre">破解实例1</a><a href="/2017/07/06/右键菜单/" class="next">win10添加右键菜单</a></div><div id="disqus_thread"><div class="btn_click_load"><button class="disqus_click_btn">阅读评论 「请确保 disqus.com 可以正常加载」</button></div><script>var disqus_shortname = '18428381824-github-io';
+var disqus_identifier = '2017/07/06/spider/';
+var disqus_title = '简单爬虫';
+var disqus_url = 'http://18428381824.github.io/2017/07/06/spider/';
+$('.btn_click_load').click(function() {
+  (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+  $('.btn_click_load').css('display','none');
+});
+$.ajax({
+  url: 'https://disqus.com/favicon.ico',
+  timeout: 3000,
+  type: 'GET',
+  success: (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    $('.btn_click_load').css('display','none');
+  })(),
+  error: function() {
+    $('.btn_click_load').css('display','block');
+  }
+});</script><script id="dsq-count-scr" src="//18428381824-github-io.disqus.com/count.js" async></script></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form action="//www.baidu.com/baidu" method="get" accept-charset="utf-8" target="_blank" class="search-form"><input type="search" name="word" maxlength="20" placeholder="Search"/><input type="hidden" name="si" value="http://18428381824.github.io"/><input name="tn" type="hidden" value="bds"/><input name="cl" type="hidden" value="3"/><input name="ct" type="hidden" value="2097152"/><input name="s" type="hidden" value="on"/></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/python/">python</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/恶意代码/">恶意代码</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/恶意代码分析/">恶意代码分析</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂学/">杂学</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程/">编程</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/网络/">网络</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/逆向/">逆向</a><span class="category-list-count">14</span></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/恶意代码/" style="font-size: 15px;">恶意代码</a> <a href="/tags/逆向/" style="font-size: 15px;">逆向</a> <a href="/tags/杂学/" style="font-size: 15px;">杂学</a> <a href="/tags/网络/" style="font-size: 15px;">网络</a> <a href="/tags/恶意代码分析/" style="font-size: 15px;">恶意代码分析</a> <a href="/tags/编程/" style="font-size: 15px;">编程</a> <a href="/tags/python/" style="font-size: 15px;">python</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/10/22/对抗反汇编分析/">对抗反汇编分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/20/iptables/">iptables</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/16/对抗反汇编/">对抗反汇编</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/16/恶意代码重定向/">恶意代码重定向</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/16/树莓派透明代理/">树莓派透明代理</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/16/双系统安装/">双系统安装（win10+ubuntu）</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/16/dll之APC注入/">dll注入之APC注入</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/14/vs错误集/">VS错误集</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/13/sublime乱码处理/">sublime中文乱码处理</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/11/shellcode 实现键盘记录样本分析/">shellcode 实现键盘记录样本分析</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-comment-o"> 最近评论</i></div><script type="text/javascript" src="//18428381824-github-io.disqus.com/recent_comments_widget.js?num_items=5&amp;hide_avatars=1&amp;avatar_size=32&amp;excerpt_length=20&amp;hide_mods=1"></script></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div><ul></ul><a href="http://www.github.com/" title="github" target="_blank">github</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2017 <a href="/." rel="nofollow">learn_malware.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a id="rocket" href="#top" class="show"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/3.0.47/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/3.0.47/jquery.fancybox.min.css"><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>

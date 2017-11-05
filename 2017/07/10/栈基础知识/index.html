@@ -1,0 +1,129 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>栈基础知识 | learn_malware</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/6.0.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.2/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.2/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">栈基础知识</h1><a id="logo" href="/.">learn_malware</a><p class="description">学习使我快乐，学习使我沉迷</p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a></div></div><div id="layout" class="pure-g"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">栈基础知识</h1><div class="post-meta">Jul 10, 2017<span> | </span><span class="category"><a href="/categories/逆向/">逆向</a></span><script src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js" async></script><span id="busuanzi_container_page_pv"> | <span id="busuanzi_value_page_pv"></span><span> 阅读</span></span></div><a data-disqus-identifier="2017/07/10/栈基础知识/" href="/2017/07/10/栈基础知识/#disqus_thread" class="disqus-comment-count"></a><div class="post-content"><h3 id="1-C语言变量的分布-："><a href="#1-C语言变量的分布-：" class="headerlink" title="1.C语言变量的分布 ："></a>1.C语言变量的分布 ：</h3><p>C 语言有全局变量(Global)、本地变量(Local)，静态变量(Static)、寄存器变量(Regeister)。每种变量都有不同的分配方式。先来看下面这段代码： </p>
+<pre><code>#include &lt;stdio.h&gt; 
+int g1=0, g2=0, g3=0; 
+int main() 
+{ 
+static int s1=0, s2=0, s3=0; 
+int v1=0, v2=0, v3=0; 
+
+//打印出各个变量的内存地址 
+
+printf(&quot;0x%08x\n&quot;,&amp;v1); //打印各本地变量的内存地址 
+printf(&quot;0x%08x\n&quot;,&amp;v2); 
+printf(&quot;0x%08x\n\n&quot;,&amp;v3); 
+printf(&quot;0x%08x\n&quot;,&amp;g1); //打印各全局变量的内存地址 
+printf(&quot;0x%08x\n&quot;,&amp;g2); 
+printf(&quot;0x%08x\n\n&quot;,&amp;g3); 
+printf(&quot;0x%08x\n&quot;,&amp;s1); //打印各静态变量的内存地址 
+printf(&quot;0x%08x\n&quot;,&amp;s2); 
+printf(&quot;0x%08x\n\n&quot;,&amp;s3); 
+system(&quot;pause&quot;);
+return 0; 
+} 
+</code></pre><p>可以看出本地变量和全局/静态变量的分布完全不同，相差甚远，这是因为他们分布在不同类型的区域。<br>进程的内存空间分为：代码区，静态数据区和动态数据区。全局和静态变量分配在静态数据区，本地变量分配在动态数据区，即”堆栈“，<br><img src="http://i.imgur.com/Pbbtyit.png" alt=""></p>
+<h3 id="2-栈的存储"><a href="#2-栈的存储" class="headerlink" title="2. 栈的存储"></a>2. 栈的存储</h3><pre><code>#include &lt;stdio.h&gt; 
+void __stdcall func(int param1,int param2,int param3) 
+{ 
+int var1=param1; 
+int var2=param2; 
+int var3=param3; 
+printf(&quot;0x%08x\n&quot;,&amp;parameter1); //打印出各个变量的内存地址 
+printf(&quot;0x%08x\n&quot;,&amp;parameter2); 
+printf(&quot;0x%08x\n\n&quot;,&amp;parameter3); 
+printf(&quot;0x%08x\n&quot;,&amp;var1); 
+printf(&quot;0x%08x\n&quot;,&amp;var2); 
+printf(&quot;0x%08x\n\n&quot;,&amp;var3); 
+return; 
+} 
+int main() 
+{ 
+func(1,2,3); 
+return 0; 
+} 
+</code></pre><p><img src="http://i.imgur.com/kFjeO8n.png" alt=""></p>
+<p>函数的参数是从右向左传递，即先压栈parameter 3，然后parameter 2，最后才是parameter 1，然后是函数的返回地址，然后就是本地变量var1，var2,var3</p>
+<h3 id="3-程序进入main-函数-，栈帧的保存和关闭"><a href="#3-程序进入main-函数-，栈帧的保存和关闭" class="headerlink" title="3.程序进入main()函数 ，栈帧的保存和关闭"></a>3.程序进入main()函数 ，栈帧的保存和关闭</h3><p>例如：</p>
+<pre><code>int main（）
+{
+return0；
+}
+汇编代码为：
+push ebp;   保存进入main()函数时其他初始化函数的栈底
+move ebp,esp; 把当前esp的值作为栈底
+sub esp ,40h 开辟栈空间，作为局部变量的存储空间
+push ebx
+push  esi
+push  edi  保存寄存器的值
+LEA edi ,[ebp-40h]  取出此函数可用栈空间首地址  
+mov ecx,10h            设置ecx寄存器的值
+mov eax ,occcccccch  把局部变量初始化为0xcccccccch
+rep stos  dword ptr [edi]   根据ecx的值，把eax的内容，以四字节为单位写到edi指向的内存
+xor eax,eax    设置返回值为0
+pop  edi  
+pop esi
+pop ebx   弹出压入寄存器的值
+add esp,40h  降低esp,局部空间释放
+cmp ebp,esp 检查栈平衡
+call _chkesp()  进入栈错误检查函数
+mov esp.ebp  还原esp
+pop ebp         还原ebp
+ret
+</code></pre><h3 id="4-简单的分配栈帧及溢出修改相邻变量"><a href="#4-简单的分配栈帧及溢出修改相邻变量" class="headerlink" title="4.  简单的分配栈帧及溢出修改相邻变量"></a>4.  简单的分配栈帧及溢出修改相邻变量</h3><p>例如：</p>
+<pre><code>#include &lt;windows.h&gt;
+
+#define PASSWORD &quot;1234567&quot;
+
+int verify_password(char *password){
+    int authenticated;
+    char buffer[8];
+    authenticated = strcmp(password,PASSWORD);
+    strcpy(buffer,password);
+    return authenticated;
+}
+
+int main(int argc, char* argv[])
+{
+    int valid_flag = 0;
+    char password[1024];
+    FILE *fp;
+    if (!(fp=fopen(&quot;password.txt&quot;,&quot;rw+&quot;))){
+        return 0;
+    }
+    fscanf(fp,&quot;%s&quot;,password);
+    valid_flag = verify_password(password);
+    if(valid_flag){
+        printf(&quot;incorrect password!\n&quot;);
+    }else{
+        printf(&quot;Congratulation! You have passed the verification !\n&quot;);
+    }
+    Sleep(-1);
+    return 1;
+}
+</code></pre><p>用OD调试：<br>进入main()主函数，找到验证密码的函数调用位置，进入到函数具体代码处：<br><img src="http://i.imgur.com/jNcKasB.png" alt=""><br><img src="http://i.imgur.com/pQm0oAL.png" alt=""><br><img src="http://i.imgur.com/qBPQTjK.png" alt=""></p>
+<p>前面部分就是栈分配局部变量空间和初始化的过程，然后就是字符串的计较，最后是字符串的复制，分析可得栈溢出在这一部分，在指令008D1409处把函数的返回值（EAX储存的是返回值）存在了EBP-0XC处，下面就是strocpy的操作，char buffer[8]分配了八个字节的存储空间，但是password.txt的密码如图为24个字节，知错执行strcpy的时候，把buffer 附近的变量空间也给覆盖了，比如返回值的。以上过程如图所示<br><img src="http://i.imgur.com/9CBEnex.png" alt=""><br><img src="http://i.imgur.com/S0M3SMC.png" alt=""><br><img src="http://i.imgur.com/S0ptRZH.png" alt=""></p>
+</div><script type="text/javascript" src="/js/share.js?v=0.0.0" async></script><a data-url="http://18428381824.github.io/2017/07/10/栈基础知识/" data-id="cj9m4s9h60035zwulhcw6kk6i" class="article-share-link">分享</a><div class="tags"><a href="/tags/逆向/">逆向</a></div><div class="post-nav"><a href="/2017/07/12/第一次编写注册机/" class="pre">第一次注册机</a><a href="/2017/07/06/破解实例1/" class="next">破解实例1</a></div><div id="disqus_thread"><div class="btn_click_load"><button class="disqus_click_btn">阅读评论 「请确保 disqus.com 可以正常加载」</button></div><script>var disqus_shortname = '18428381824-github-io';
+var disqus_identifier = '2017/07/10/栈基础知识/';
+var disqus_title = '栈基础知识';
+var disqus_url = 'http://18428381824.github.io/2017/07/10/栈基础知识/';
+$('.btn_click_load').click(function() {
+  (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+  $('.btn_click_load').css('display','none');
+});
+$.ajax({
+  url: 'https://disqus.com/favicon.ico',
+  timeout: 3000,
+  type: 'GET',
+  success: (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    $('.btn_click_load').css('display','none');
+  })(),
+  error: function() {
+    $('.btn_click_load').css('display','block');
+  }
+});</script><script id="dsq-count-scr" src="//18428381824-github-io.disqus.com/count.js" async></script></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form action="//www.baidu.com/baidu" method="get" accept-charset="utf-8" target="_blank" class="search-form"><input type="search" name="word" maxlength="20" placeholder="Search"/><input type="hidden" name="si" value="http://18428381824.github.io"/><input name="tn" type="hidden" value="bds"/><input name="cl" type="hidden" value="3"/><input name="ct" type="hidden" value="2097152"/><input name="s" type="hidden" value="on"/></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/python/">python</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/恶意代码/">恶意代码</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/恶意代码分析/">恶意代码分析</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂学/">杂学</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程/">编程</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/网络/">网络</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/逆向/">逆向</a><span class="category-list-count">14</span></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/恶意代码/" style="font-size: 15px;">恶意代码</a> <a href="/tags/逆向/" style="font-size: 15px;">逆向</a> <a href="/tags/杂学/" style="font-size: 15px;">杂学</a> <a href="/tags/网络/" style="font-size: 15px;">网络</a> <a href="/tags/恶意代码分析/" style="font-size: 15px;">恶意代码分析</a> <a href="/tags/编程/" style="font-size: 15px;">编程</a> <a href="/tags/python/" style="font-size: 15px;">python</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/10/22/对抗反汇编分析/">对抗反汇编分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/20/iptables/">iptables</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/16/对抗反汇编/">对抗反汇编</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/16/恶意代码重定向/">恶意代码重定向</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/16/树莓派透明代理/">树莓派透明代理</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/16/双系统安装/">双系统安装（win10+ubuntu）</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/16/dll之APC注入/">dll注入之APC注入</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/14/vs错误集/">VS错误集</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/13/sublime乱码处理/">sublime中文乱码处理</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/11/shellcode 实现键盘记录样本分析/">shellcode 实现键盘记录样本分析</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-comment-o"> 最近评论</i></div><script type="text/javascript" src="//18428381824-github-io.disqus.com/recent_comments_widget.js?num_items=5&amp;hide_avatars=1&amp;avatar_size=32&amp;excerpt_length=20&amp;hide_mods=1"></script></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div><ul></ul><a href="http://www.github.com/" title="github" target="_blank">github</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2017 <a href="/." rel="nofollow">learn_malware.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a id="rocket" href="#top" class="show"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/3.0.47/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/3.0.47/jquery.fancybox.min.css"><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>

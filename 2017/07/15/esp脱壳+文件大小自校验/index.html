@@ -1,0 +1,94 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>esp脱壳+文件大小自校验 | learn_malware</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/6.0.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.2/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.2/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">esp脱壳+文件大小自校验</h1><a id="logo" href="/.">learn_malware</a><p class="description">学习使我快乐，学习使我沉迷</p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a></div></div><div id="layout" class="pure-g"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">esp脱壳+文件大小自校验</h1><div class="post-meta">Jul 15, 2017<span> | </span><span class="category"><a href="/categories/逆向/">逆向</a></span><script src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js" async></script><span id="busuanzi_container_page_pv"> | <span id="busuanzi_value_page_pv"></span><span> 阅读</span></span></div><a data-disqus-identifier="2017/07/15/esp脱壳+文件大小自校验/" href="/2017/07/15/esp脱壳+文件大小自校验/#disqus_thread" class="disqus-comment-count"></a><div class="post-content"><p>###步骤如下</p>
+<p>1.查壳<br>由图可见，显然有壳</p>
+<p><img src="http://i.imgur.com/56OEUZ6.png" alt=""></p>
+<p>2.找oep(ESP定律)</p>
+<p>程序加载进OD，F8单步运行，右边寄存器窗口发现只有esp的值在变，符合ESP定律。<br>在寄存器位置右键，点击HW-break下硬件断点。然后F9运行到断点处，到达跳转到oep 的前一步，单步运行，遇到如下图：右键分析点击在模块中删除分析，即得到OEP.在oep处右键用ollydump脱壳当前进程。复制当前oep.</p>
+<p><img src="http://i.imgur.com/7VfQh3T.png" alt=""><br><img src="http://i.imgur.com/CaYz7wj.png" alt=""></p>
+<p>3.脱壳(LordPE)</p>
+<p>在lordPE中打开样本程序，选中右键纠正镜像大小，再右键完全脱壳。<br><img src="http://i.imgur.com/o84YxcW.png" alt=""></p>
+<p>4.修复导入表(ImportREC)</p>
+<p> 在ImportREC中打开目标进程即样本进程，然后右边选项中输入之前在OD中选中的OEP，点击IAT自动搜索，然后点击获取导入表。</p>
+<p><img src="http://i.imgur.com/Ah6wEjD.png" alt=""></p>
+<p>5.文件大小自检</p>
+<p>脱壳以后双击没得反应，可能是有文件大小自检校验，脱壳后的程序载入OD，在GetFileSize函数下断点，在插件中选API断点设置工具-&gt;常用API断点。选中文件类的GetFileSize.然后F9运行程序，到断点处停下，在堆栈中右键反汇编跟随，找到调用这个函数的位置，然后下断点，把刚刚的那个断点删除。在断点后发现是几个cmp ,很明显是比较文件大小，故而把这两个ｃｍｐ右键二进制－＞用ｎｏｐ填充。然后复制到可执行文件，保存文件。再次点击程序，发现正常运行。<br><img src="http://i.imgur.com/3X4dGg6.png" alt=""></p>
+<p><img src="http://i.imgur.com/nIXhd5Y.png" alt=""></p>
+<p><img src="http://i.imgur.com/UEFRdvd.png" alt=""></p>
+<p><strong><br>注：esp 定律</strong></p>
+<p>ESP定律算是我们在脱壳当中最常使用的方法之一，也特别适合像我一样的新手！而今天文章说的是ESP脱壳的原理和分析！只有知道原理了，我们的技术才能走得列远！</p>
+<p>一.准备知识<br>在我们开始讨论ESP定律之前，我先给你讲解一下一些简单的汇编知识。</p>
+<p>1.call</p>
+<p>这个命令是访问子程序的一个汇编基本指令。也许你说，这个我早就知道了！别急请继续看完。call真正的意义是什么呢？我们可以这样来理解：</p>
+<p>1.向堆栈中压入下一行程序的地址；<br>2.JMP到call的子程序地址处。</p>
+<p>例如：</p>
+<p>代码:</p>
+<p>00401029.E8 DA240A00 call 004A3508<br>0040102E.5A pop edx</p>
+<p>在执行了00401029以后，程序会将0040102E压入堆栈，然后JMP到004A3508地址处！</p>
+<p>2.RETN</p>
+<p>与call对应的就是RETN了。对于RETN我们可以这样来理解：</p>
+<p>1.将当前的ESP中指向的地址出栈；</p>
+<p>2.JMP到这个地址。</p>
+<p>这个就完成了一次调用子程序的过程。在这里关键的地方是：如果我们要返回父程序，则当我们在堆栈中进行堆栈的操作的时候，一定要保证在RETN这条指令之前，ESP指向的是我们压入栈中的地址。这也就是著名的“堆栈平衡”原理！</p>
+<p>3.狭义ESP定律</p>
+<p>ESP定律的原理就是“堆栈平衡”原理。</p>
+<p>让我们来到程序的入口处看看吧！</p>
+<p>1.这个是加了ASPACK壳的入口时各个寄存器的值！</p>
+<p>代码:</p>
+<p>EAX 00000000</p>
+<p>ECX 0012FFB0</p>
+<p>EDX 7FFE0304 //堆栈值</p>
+<p>EBX 7FFDF000 //堆栈值</p>
+<p>ESP 0012FFC4</p>
+<p>EBP 0012FFF0</p>
+<p>ESI 77F57D70 ntdll.77F57D70</p>
+<p>EDI 77F944A8 ntdll.77F944A8</p>
+<p>EIP 0040D000 ASPACK.<moduleentrypoint></moduleentrypoint></p>
+<p>2.这个是ASPACK壳JMP到OEP后的寄存器的值！</p>
+<p>代码:</p>
+<p>EAX 004010CC ASPACK.004010CC</p>
+<p>ECX 0012FFB0</p>
+<p>EDX 7FFE0304 //堆栈值</p>
+<p>EBX 7FFDF000 //堆栈值</p>
+<p>ESP 0012FFC4</p>
+<p>EBP 0012FFF0</p>
+<p>ESI 77F57D70 ntdll.77F57D70</p>
+<p>EDI 77F944A8 ntdll.77F944A8</p>
+<p>EIP 004010CC ASPACK.004010CC</p>
+<p>呵呵~是不是除了EIP不同以外，eax保存当前OEP值，其他都一模一样啊！</p>
+<p>为什么会这样呢？我们来看看</p>
+<p>0040D000 A&gt; 60 pushad //注意这里ESP=0012FFC4</p>
+<p>0040D001 E8 00000000 call ASPACK.0040D006 //ESP=0012FFA4</p>
+<p>PUSHAD就是把所有寄存器压栈！我们在到壳的最后看看：</p>
+<p>代码:</p>
+<p>0040D558 61 popad //ESP=0012FFA4</p>
+<p>0040D559 75 08 jnz short ASPACK.0040D563 //注意这里ESP=0012FFC4</p>
+<p>也就是说当我们对ESP的0012FFA4下硬件访问断点之后。当程序要通过堆栈访问这些值，从而恢复原来寄存器的值，准备跳向苦苦寻觅的OEP的时候，OD帮助我们中断下来。</p>
+<p>小结：我们可以把壳假设为一个子程序，当壳把代码解压前和解压后，他必须要做的是遵循堆栈平衡的原理。</p>
+<p>因为大家对ESP理解各有异同，但是，大同小异！一般理解可以为：</p>
+<p>1、在命令行下断hr esp-4（此时的ESP就是OD载入后当前显示的值）</p>
+<p>2、hr ESP(关键标志下一行代码所指示的ESP值(单步通过)) </p>
+</div><script type="text/javascript" src="/js/share.js?v=0.0.0" async></script><a data-url="http://18428381824.github.io/2017/07/15/esp脱壳+文件大小自校验/" data-id="cj9m4s8sd0001zwul7iubsjjg" class="article-share-link">分享</a><div class="tags"><a href="/tags/逆向/">逆向</a></div><div class="post-nav"><a href="/2017/08/01/恶意代码分析2/" class="pre">恶意代码分析第二记</a><a href="/2017/07/12/第一次编写注册机/" class="next">第一次注册机</a></div><div id="disqus_thread"><div class="btn_click_load"><button class="disqus_click_btn">阅读评论 「请确保 disqus.com 可以正常加载」</button></div><script>var disqus_shortname = '18428381824-github-io';
+var disqus_identifier = '2017/07/15/esp脱壳+文件大小自校验/';
+var disqus_title = 'esp脱壳+文件大小自校验';
+var disqus_url = 'http://18428381824.github.io/2017/07/15/esp脱壳+文件大小自校验/';
+$('.btn_click_load').click(function() {
+  (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+  $('.btn_click_load').css('display','none');
+});
+$.ajax({
+  url: 'https://disqus.com/favicon.ico',
+  timeout: 3000,
+  type: 'GET',
+  success: (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    $('.btn_click_load').css('display','none');
+  })(),
+  error: function() {
+    $('.btn_click_load').css('display','block');
+  }
+});</script><script id="dsq-count-scr" src="//18428381824-github-io.disqus.com/count.js" async></script></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form action="//www.baidu.com/baidu" method="get" accept-charset="utf-8" target="_blank" class="search-form"><input type="search" name="word" maxlength="20" placeholder="Search"/><input type="hidden" name="si" value="http://18428381824.github.io"/><input name="tn" type="hidden" value="bds"/><input name="cl" type="hidden" value="3"/><input name="ct" type="hidden" value="2097152"/><input name="s" type="hidden" value="on"/></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/python/">python</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/恶意代码/">恶意代码</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/恶意代码分析/">恶意代码分析</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂学/">杂学</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程/">编程</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/网络/">网络</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/逆向/">逆向</a><span class="category-list-count">14</span></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/恶意代码/" style="font-size: 15px;">恶意代码</a> <a href="/tags/逆向/" style="font-size: 15px;">逆向</a> <a href="/tags/杂学/" style="font-size: 15px;">杂学</a> <a href="/tags/网络/" style="font-size: 15px;">网络</a> <a href="/tags/恶意代码分析/" style="font-size: 15px;">恶意代码分析</a> <a href="/tags/编程/" style="font-size: 15px;">编程</a> <a href="/tags/python/" style="font-size: 15px;">python</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/10/22/对抗反汇编分析/">对抗反汇编分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/20/iptables/">iptables</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/16/对抗反汇编/">对抗反汇编</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/16/恶意代码重定向/">恶意代码重定向</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/16/树莓派透明代理/">树莓派透明代理</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/16/双系统安装/">双系统安装（win10+ubuntu）</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/16/dll之APC注入/">dll注入之APC注入</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/14/vs错误集/">VS错误集</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/13/sublime乱码处理/">sublime中文乱码处理</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/11/shellcode 实现键盘记录样本分析/">shellcode 实现键盘记录样本分析</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-comment-o"> 最近评论</i></div><script type="text/javascript" src="//18428381824-github-io.disqus.com/recent_comments_widget.js?num_items=5&amp;hide_avatars=1&amp;avatar_size=32&amp;excerpt_length=20&amp;hide_mods=1"></script></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div><ul></ul><a href="http://www.github.com/" title="github" target="_blank">github</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2017 <a href="/." rel="nofollow">learn_malware.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a id="rocket" href="#top" class="show"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/3.0.47/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/3.0.47/jquery.fancybox.min.css"><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>

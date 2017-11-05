@@ -1,0 +1,78 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>对抗反汇编 | learn_malware</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/6.0.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.2/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.2/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">对抗反汇编</h1><a id="logo" href="/.">learn_malware</a><p class="description">学习使我快乐，学习使我沉迷</p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a></div></div><div id="layout" class="pure-g"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">对抗反汇编</h1><div class="post-meta">Oct 16, 2017<span> | </span><span class="category"><a href="/categories/逆向/">逆向</a></span><script src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js" async></script><span id="busuanzi_container_page_pv"> | <span id="busuanzi_value_page_pv"></span><span> 阅读</span></span></div><a data-disqus-identifier="2017/10/16/对抗反汇编/" href="/2017/10/16/对抗反汇编/#disqus_thread" class="disqus-comment-count"></a><div class="post-content"><p>1.插入流氓字节，阻止真正的指令被反汇编</p>
+<blockquote>
+<p>线性反汇编和面向代码流的反汇编：</p>
+<p>线性反汇编是遍历一个代码段，一次一条指令的线性反汇编，不考虑代码流的控制指令。而面向代码流的反汇编是会检查每一条指令。然后建立反汇编的地址列表，然后这样的反汇编算法会更加先进，而不易出错。比如：</p>
+</blockquote>
+<pre><code>.text:00401035                 jz      short near ptr loc_401037+1
+.text:00401037
+.text:00401037 loc_401037:                             ; CODE XREF: .text:00401035j
+.text:00401037                 call    near ptr 8B4C55C7h
+</code></pre><blockquote>
+<p>观察以上的汇编代码，你会发现jz跳转到了call 指令中间，这显然是不可能的，所以call指令一定是一个数据而不是代码，在此处按d键，然后再观察</p>
+<pre><code>                 xor     eax, eax
+.text:00401035                 jz      short loc_401038
+.text:00401035 ; ---------------------------------------------------------------------------
+.text:00401037                 db 0E8h
+.text:00401038 ; ---------------------------------------------------------------------------
+.text:00401038
+.text:00401038 loc_401038:                             ; CODE XREF: .text:00401035j
+.text:00401038                 mov     eax, [ebp+0Ch]
+</code></pre><p>这样显然很正确了，对于call 指令而言，如果后面四个字节跟的是地址，它对应的机器码是0xe8，此处显然是把数据0xe8当成了call指令，才会出现这样的问题。</p>
+</blockquote>
+<p>2.固定条件的跳转指令</p>
+<pre><code>   xor     eax, eax
+.text:00401035                 jz      short loc_401038
+</code></pre><p>3.函数指针问题 </p>
+<pre><code> mov [ebp+var_4],offset sub_4011c0;
+ call [ebp+var_4]
+可用IDA脚本语言IDC进行修正函数为AddCodeXref();
+</code></pre><p>3.函数未识别的问题 </p>
+<blockquote>
+<p>可以按p键来强制把一段代码变成函数<br>但是要把流氓字节nop,不然函数可能会出问题。用IDA自带的patch program来做。<br>也可用脚本idapython  代码如下：</p>
+</blockquote>
+<pre><code>import idaapi
+idaapi.CompileLine(&apos;static n_key(){ RunPythonStatement(&quot;nopIt()&quot;);}&apos;)
+AddHotkey(&quot;Alt-N&quot;,&quot;n_key&quot;)
+def nopIt():
+    start=ScreenEA()
+    end=NextHead(start)
+    for ea in range(start,end):
+        PatchByte(ea,0x90)
+    Jump(end)
+</code></pre><p>4，异常触发</p>
+<pre><code>push offset sub_4014c0
+push large dword ptr fs:0
+mov large fs:0,esp
+xor ecx,ecx
+div ecx
+</code></pre><blockquote>
+<p>属于滥用结构化异常（SEH）来对抗反汇编，通过人为构造一些比如访问一个无效的内存区域，除0等来触发异常，</p>
+<p>SHE链是一个函数列表，处理线程的异常，列表中的函数要么处理异常，要么向下传递，如果传递到最后一个异常处理函数，就会被认为是一个不能处理的异常，弹出“an unhandled exception has occurred ”。</p>
+<p>查找SEH链，操作系统会检查FS寄存器，这个寄存器中包含一个段选择子，从概念上来讲，链表以栈的方式工作，第一个调用的是最后一个加入链表的记录。前面的例子就是把自己的异常处理加入到链表的头部，然后用除0来触发异常，进而执行自己的代码。</p>
+</blockquote>
+</div><script type="text/javascript" src="/js/share.js?v=0.0.0" async></script><a data-url="http://18428381824.github.io/2017/10/16/对抗反汇编/" data-id="cj9m4s8uc001hzwulxavcr6j9" class="article-share-link">分享</a><div class="tags"><a href="/tags/逆向/">逆向</a></div><div class="post-nav"><a href="/2017/10/20/iptables/" class="pre">iptables</a><a href="/2017/10/16/恶意代码重定向/" class="next">恶意代码重定向</a></div><div id="disqus_thread"><div class="btn_click_load"><button class="disqus_click_btn">阅读评论 「请确保 disqus.com 可以正常加载」</button></div><script>var disqus_shortname = '18428381824-github-io';
+var disqus_identifier = '2017/10/16/对抗反汇编/';
+var disqus_title = '对抗反汇编';
+var disqus_url = 'http://18428381824.github.io/2017/10/16/对抗反汇编/';
+$('.btn_click_load').click(function() {
+  (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+  $('.btn_click_load').css('display','none');
+});
+$.ajax({
+  url: 'https://disqus.com/favicon.ico',
+  timeout: 3000,
+  type: 'GET',
+  success: (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    $('.btn_click_load').css('display','none');
+  })(),
+  error: function() {
+    $('.btn_click_load').css('display','block');
+  }
+});</script><script id="dsq-count-scr" src="//18428381824-github-io.disqus.com/count.js" async></script></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form action="//www.baidu.com/baidu" method="get" accept-charset="utf-8" target="_blank" class="search-form"><input type="search" name="word" maxlength="20" placeholder="Search"/><input type="hidden" name="si" value="http://18428381824.github.io"/><input name="tn" type="hidden" value="bds"/><input name="cl" type="hidden" value="3"/><input name="ct" type="hidden" value="2097152"/><input name="s" type="hidden" value="on"/></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/python/">python</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/恶意代码/">恶意代码</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/恶意代码分析/">恶意代码分析</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂学/">杂学</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程/">编程</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/网络/">网络</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/逆向/">逆向</a><span class="category-list-count">14</span></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/恶意代码/" style="font-size: 15px;">恶意代码</a> <a href="/tags/逆向/" style="font-size: 15px;">逆向</a> <a href="/tags/杂学/" style="font-size: 15px;">杂学</a> <a href="/tags/网络/" style="font-size: 15px;">网络</a> <a href="/tags/恶意代码分析/" style="font-size: 15px;">恶意代码分析</a> <a href="/tags/编程/" style="font-size: 15px;">编程</a> <a href="/tags/python/" style="font-size: 15px;">python</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/10/22/对抗反汇编分析/">对抗反汇编分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/20/iptables/">iptables</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/16/对抗反汇编/">对抗反汇编</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/16/恶意代码重定向/">恶意代码重定向</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/16/树莓派透明代理/">树莓派透明代理</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/16/双系统安装/">双系统安装（win10+ubuntu）</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/16/dll之APC注入/">dll注入之APC注入</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/14/vs错误集/">VS错误集</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/13/sublime乱码处理/">sublime中文乱码处理</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/11/shellcode 实现键盘记录样本分析/">shellcode 实现键盘记录样本分析</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-comment-o"> 最近评论</i></div><script type="text/javascript" src="//18428381824-github-io.disqus.com/recent_comments_widget.js?num_items=5&amp;hide_avatars=1&amp;avatar_size=32&amp;excerpt_length=20&amp;hide_mods=1"></script></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div><ul></ul><a href="http://www.github.com/" title="github" target="_blank">github</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2017 <a href="/." rel="nofollow">learn_malware.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a id="rocket" href="#top" class="show"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/3.0.47/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/3.0.47/jquery.fancybox.min.css"><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>

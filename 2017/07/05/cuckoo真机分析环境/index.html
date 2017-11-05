@@ -1,0 +1,80 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>cuckoo真机分析环境(clonezilla) | learn_malware</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/6.0.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.2/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.2/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">cuckoo真机分析环境(clonezilla)</h1><a id="logo" href="/.">learn_malware</a><p class="description">学习使我快乐，学习使我沉迷</p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a></div></div><div id="layout" class="pure-g"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">cuckoo真机分析环境(clonezilla)</h1><div class="post-meta">Jul 5, 2017<span> | </span><span class="category"><a href="/categories/恶意代码/">恶意代码</a></span><script src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js" async></script><span id="busuanzi_container_page_pv"> | <span id="busuanzi_value_page_pv"></span><span> 阅读</span></span></div><a data-disqus-identifier="2017/07/05/cuckoo真机分析环境/" href="/2017/07/05/cuckoo真机分析环境/#disqus_thread" class="disqus-comment-count"></a><div class="post-content"><p>序言介绍：为了应对层出不穷的反虚拟机技术，本文实现一种真机搭建cuckoo的方式，结合国家网路中心的clonezila来实现分析机器的还原。</p>
+<h1 id="1-硬件准备"><a href="#1-硬件准备" class="headerlink" title="1.硬件准备"></a>1.硬件准备</h1><pre><code>*ubuntu16.04服务器一台(可在虚拟机中实现）
+*win7或者winxp一台
+*交换机一台
+</code></pre><h1 id="2-服务器搭建"><a href="#2-服务器搭建" class="headerlink" title="2.服务器搭建"></a>2.服务器搭建</h1><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;我选择的目前最新的ubuntu16.04，内置python2.7比较方便,当然也可以选择其他版本的系统，或者centos应该也可以，不过最好用ubuntu,因为资料较多，cuckoo官方资料也是用cuckoo搭建的。</p>
+<p><strong>1.安装python2.7</strong></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;这是cuckoo所需要的，如果你的系统内置了python2.7那就不用安装了，安装步骤网上教程一大堆，不再赘述。查看python版本 python -V，一般内置pip安装工具，没有的话另外安装一下。</p>
+<p><strong>2.安装依赖库</strong></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.安装相关的依赖库</p>
+<pre><code>sudo apt-get install python python-pip python-dev libffi-dev libssl-dev libxml2-dev libxslt1-dev libjpeg-dev
+</code></pre><p>然后去<a href="https://cuckoosandbox.org/" target="_blank" rel="external">cuckoog官网</a>或者<a href="https://github.com/cuckoosandbox/cuckoo" target="_blank" rel="external">github</a>下载cuckoo最新版本,然后解压打开cuckoo文件夹，有个requiremens.txt的文件夹，这需要全部下载，可以用python的pip进行安装，其中其中的 pefile 需要从 Google Code 上下载，由于大陆网络限制，需要自备梯子，登上梯子后执行以下批量安装命令：</p>
+<pre><code>pip install -r requirements.txt
+</code></pre><p>或者先把pefile安装源码下载，手动安装，然后把它从requirements.txt里删除，然后用pip命令安装，个人建议用第二种方法。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.Host 机需要可以嗅探网络数据包，需要安装 tcpdump ，如果本机没有，则执行以下命令安装 tcpdump：</p>
+<pre><code>**apt-get install tcpdump**
+</code></pre><p>如果系统没启用 root 账户，由于 tcpdump 的执行需要 root 权限，则需要以下配置：</p>
+<pre><code>**$ sudo setcap cap_net_raw,cap_net_admin=eip /usr/sbin/tcpdump**
+</code></pre><p>如果系统里没有setcap命令，则需要安装 libpcap包：</p>
+<pre><code>**$ sudo apt-get install libcap2-bin**
+</code></pre><p>如果需要启用内存镜像分析，需要安装 volatility：</p>
+<pre><code>**apt-get install volatility**
+</code></pre><p><strong>3.cuckoo配置文件的修改</strong></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;主要修改的文件有：cuckoo.conf,physical.conf,auliary.conf.重点修改前两个。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.修改cuckoo.conf</p>
+<pre><code>version_check = on 这个其实可以关掉，不然一直检查，如果你版本稍微低了一下就报错。
+machinery = physical 这个地方改成physical
+ip = 192.168.56.1 根据你的实际情况填写
+vm_state = 60  根据你的电脑实际还原时间填写
+</code></pre><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.修改physical.conf<br>    user = username<br>    password = password 根据你的分析机填写<br>    interface = eth0根据你的网卡填写<br>    ip = 192.168.56.101根据你的分析机填写</p>
+<p><strong>4.安装drbl</strong></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1. 设置静态ip地址，直接在桌面设置及可以了。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.安装drbl金钥</p>
+<pre><code>wget -q http://drbl.nchc.org.tw/GPG-KEY-DRBL -O- | sudo apt-key add -
+</code></pre><p> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.添加drbl源(根据自己的系统版本修改一下）</p>
+<pre><code>vi /etc/apt/sources.list
+deb http://free.nchc.org.tw/ubuntu xenial main restricted universe multiverse
+deb http://free.nchc.org.tw/drbl-core drbl stable
+</code></pre><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.安装drbl</p>
+<pre><code>sudo apt-get update
+sudo apt-get install drbl 
+</code></pre><p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.设置drblserver</p>
+<pre><code>sudo drblsrv -i
+</code></pre><p>提示!当有yes/no选项的时候，预设的值是大写的字母。例如 (y/N), 预设值是 “N”, 当你按 “Enter”的时候，程式使用的值就是 “N”。如果你不确认选用那个好的时候，直接按”Enter”键是一个保险的方式.感觉不保险的话，去搜一下，很多介绍的，在这不赘述。</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.设置环境</p>
+<pre><code>sudo drblpush -i
+</code></pre><p>提示!当有yes/no选项的时候，预设的值是大写的字母。例如 (y/N), 预设值是 “N”, 当你按 “Enter”的时候，程式使用的值就是 “N”。如果你不确认选用那个好的时候，直接按”Enter”键是一个保险的方式.感觉不保险的话，去搜一下，很多介绍的，一般都差不多。<strong>注意有一点，搜集网卡的时候尽量选择实时收集，然后收集完，注意查看是否有文件在相应目录，还有注意系统读取网卡文件的名字的命名方式，比如我的网卡为ens33,所以网卡文件为macadr-ens33.txt,但是系统读取文件的时候可能会去查找以macadr-eth开头的文件，所以遇到这种情况的话，去手动创建一个这样的文件就可以了。还有就是配置的时候尽量切到/etc/drbl目录下进行操作。</strong></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6.现在基本上drbl就设置好了。</p>
+<p><strong>5。网路设置</strong></p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;由于我在虚拟机上搭建的服务器，所以我选择桥接模式，桥接到物理机有线网卡上，然后外接到交换机，然后分析机器也接到交换机，构成一个物理的局域网环境。</p>
+<h1 id="3-分析机设置"><a href="#3-分析机设置" class="headerlink" title="3.分析机设置"></a>3.分析机设置</h1><p>1.首先安装python2.7，去python官网下载就好了。</p>
+<p>2.关闭防火墙，自动更新，uac。</p>
+<p>3.设置python运行权限为管理员。</p>
+<p>4.设置固定ip.(注意此时的ip不要和clonezila给他分配的ip一致，否则在还原的时候，网络捕捉模块会抓取太多还原时候的无用包，从而导致分析报告异常庞大。）</p>
+<p>**到此整个环境搭建就已经差不多了。注意需要熟悉drbl的使用方法才能使用此环境。此外还需要把drbl还原分析机的指令加入到cuckoo的源代码里去。文件具体为：scheduler库文件，添加到让分析机关机指令的前面位置。</p>
+</div><script type="text/javascript" src="/js/share.js?v=0.0.0" async></script><a data-url="http://18428381824.github.io/2017/07/05/cuckoo真机分析环境/" data-id="cj9m4s8s80000zwulugooafd5" class="article-share-link">分享</a><div class="tags"><a href="/tags/恶意代码/">恶意代码</a></div><div class="post-nav"><a href="/2017/07/05/inetsim/" class="pre">搭建虚拟网络环境inetsim</a><a href="/2017/07/05/拯救我的虚拟机/" class="next">拯救我的虚拟机</a></div><div id="disqus_thread"><div class="btn_click_load"><button class="disqus_click_btn">阅读评论 「请确保 disqus.com 可以正常加载」</button></div><script>var disqus_shortname = '18428381824-github-io';
+var disqus_identifier = '2017/07/05/cuckoo真机分析环境/';
+var disqus_title = 'cuckoo真机分析环境(clonezilla)';
+var disqus_url = 'http://18428381824.github.io/2017/07/05/cuckoo真机分析环境/';
+$('.btn_click_load').click(function() {
+  (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+  $('.btn_click_load').css('display','none');
+});
+$.ajax({
+  url: 'https://disqus.com/favicon.ico',
+  timeout: 3000,
+  type: 'GET',
+  success: (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    $('.btn_click_load').css('display','none');
+  })(),
+  error: function() {
+    $('.btn_click_load').css('display','block');
+  }
+});</script><script id="dsq-count-scr" src="//18428381824-github-io.disqus.com/count.js" async></script></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form action="//www.baidu.com/baidu" method="get" accept-charset="utf-8" target="_blank" class="search-form"><input type="search" name="word" maxlength="20" placeholder="Search"/><input type="hidden" name="si" value="http://18428381824.github.io"/><input name="tn" type="hidden" value="bds"/><input name="cl" type="hidden" value="3"/><input name="ct" type="hidden" value="2097152"/><input name="s" type="hidden" value="on"/></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/python/">python</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/恶意代码/">恶意代码</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/恶意代码分析/">恶意代码分析</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂学/">杂学</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程/">编程</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/网络/">网络</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/逆向/">逆向</a><span class="category-list-count">14</span></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/恶意代码/" style="font-size: 15px;">恶意代码</a> <a href="/tags/逆向/" style="font-size: 15px;">逆向</a> <a href="/tags/杂学/" style="font-size: 15px;">杂学</a> <a href="/tags/网络/" style="font-size: 15px;">网络</a> <a href="/tags/恶意代码分析/" style="font-size: 15px;">恶意代码分析</a> <a href="/tags/编程/" style="font-size: 15px;">编程</a> <a href="/tags/python/" style="font-size: 15px;">python</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/10/22/对抗反汇编分析/">对抗反汇编分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/20/iptables/">iptables</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/16/对抗反汇编/">对抗反汇编</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/16/恶意代码重定向/">恶意代码重定向</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/16/树莓派透明代理/">树莓派透明代理</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/16/双系统安装/">双系统安装（win10+ubuntu）</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/16/dll之APC注入/">dll注入之APC注入</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/14/vs错误集/">VS错误集</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/13/sublime乱码处理/">sublime中文乱码处理</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/11/shellcode 实现键盘记录样本分析/">shellcode 实现键盘记录样本分析</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-comment-o"> 最近评论</i></div><script type="text/javascript" src="//18428381824-github-io.disqus.com/recent_comments_widget.js?num_items=5&amp;hide_avatars=1&amp;avatar_size=32&amp;excerpt_length=20&amp;hide_mods=1"></script></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div><ul></ul><a href="http://www.github.com/" title="github" target="_blank">github</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2017 <a href="/." rel="nofollow">learn_malware.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a id="rocket" href="#top" class="show"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/3.0.47/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/3.0.47/jquery.fancybox.min.css"><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>

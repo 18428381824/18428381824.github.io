@@ -1,0 +1,61 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>一个简单的crackme | learn_malware</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/6.0.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.2/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.2/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">一个简单的crackme</h1><a id="logo" href="/.">learn_malware</a><p class="description">学习使我快乐，学习使我沉迷</p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a></div></div><div id="layout" class="pure-g"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">一个简单的crackme</h1><div class="post-meta">Aug 1, 2017<span> | </span><span class="category"><a href="/categories/逆向/">逆向</a></span><script src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js" async></script><span id="busuanzi_container_page_pv"> | <span id="busuanzi_value_page_pv"></span><span> 阅读</span></span></div><a data-disqus-identifier="2017/08/01/一个简单的crackme/" href="/2017/08/01/一个简单的crackme/#disqus_thread" class="disqus-comment-count"></a><div class="post-content"><p>###步骤如下</p>
+<p>1  .程序链接    <a href="http://pan.baidu.com/s/1bSPUdK" target="_blank" rel="external">http://pan.baidu.com/s/1bSPUdK</a></p>
+<p>2.这是一个vb程序，ida不能看出什么，只能靠OD了。首先打开程序查看界面以及填入name和serial后的弹出的关键字符串。</p>
+<p>3.打开OD，定位关键字符串的位置，然后寻找关键跳转，发现是在0040258b的位置，往前看是test esi，esi 。</p>
+<p><img src="http://i.imgur.com/zNx08T2.png" alt=""></p>
+<p>寻找一下esi的来源，发现时00402533位置的比较字符串函数的返回值，在此处下断点，在堆栈中发现了两个字符串AKA-585235和111111，一个是我们输入的serial,另一个应该我输入的name处理后的结果，继续向上寻找这个字符串的来源。在00402523位置的函数时一个字符串连接函数，把AKA和585235连接在一起，</p>
+<p><img src="http://i.imgur.com/L7OC3u0.png" alt=""></p>
+<p>继续往前找585235的位置，发现在4024f4d处的函数调用以后，在堆栈中出现了585235，记下它的地址0014e3dc，</p>
+<p><img src="http://i.imgur.com/XvyRwWc.png" alt=""></p>
+<p>重新运行程序到004024f4的位置，在内存区设置0014e3dc位置设置内存访问断点，然后运行程序，</p>
+<p><img src="http://i.imgur.com/6LollUw.png" alt=""></p>
+<p>程序停在了7c84c3A1的位置，查看堆栈，发现出现了585235字符，记下它的地址008fbc80,</p>
+<p><img src="http://i.imgur.com/xWA8wmF.png" alt=""></p>
+<p>然后重新运行程序，停在004024f4的位置，查看内存008fbc80的内容，发现还不是585235，然后f9运行直到找到对其赋值的位置，记下此时的地址，0014db00,</p>
+<p><img src="http://i.imgur.com/KF1WoYi.png" alt=""></p>
+<p>然后重新运行程序到004024f4的位置，在内存区寻找这个位置发现是585235，</p>
+<p><img src="http://i.imgur.com/SM4q3Fu.png" alt=""></p>
+<p>继续往前找寻找它的来源，在004024c1的位置下断点，看一下此时它的数据是否有所变化，下面我的灵感来源于我对程序测试的结果，在程序中name输入123456和111111，serial都是585235，刚开始我以为这是一个固定的字符串，后来我输入1234567的时候，发现不一样了，于是我想着去找一下获取字符串长度的函数。在IDA中找到函数<strong>vbaLenBstr，记下它的地址，在OD中找到这个位置00402415，返回值eax是5，然后后面就是eax乘以0x17cfb赋给edi，然后调用rtcansivaluebstr函数，网上查资料该函数是获取第一个字符的ascii值，得到eax=0x31即ax=31,最后得到edi的值为6*0x17cfb+0x31=0x8ee13,然后程序调用</strong>vbastri4函数，即把十进制数转变为字符串即0x8ee13的十进制数位585235，转变为字符串“585235”，然后就得到这个585235，到此整个流程就很清楚了。</p>
+<p><img src="http://i.imgur.com/s7GXTIj.png" alt=""></p>
+<p>   4.转化为c代码为：</p>
+<pre><code>#include&lt;stdio.h&gt;
+#include&lt;stdlib.h&gt;
+#include&lt;string.h&gt;
+int main()
+{
+    char name[10];
+    int len=0,key=0;
+    scanf(&quot;%s&quot;,&amp;name);
+    len=strlen(name);
+    key=len*0x17cfb+name[0];
+    printf(&quot;AKA-&quot;);
+    printf(&quot;%d\n&quot;,key);
+    system(&quot;pause&quot;);
+    return 0;
+}
+</code></pre></div><script type="text/javascript" src="/js/share.js?v=0.0.0" async></script><a data-url="http://18428381824.github.io/2017/08/01/一个简单的crackme/" data-id="cj9m4s8tv000tzwul9dx32iyx" class="article-share-link">分享</a><div class="tags"><a href="/tags/逆向/">逆向</a></div><div class="post-nav"><a href="/2017/08/01/迷路/" class="pre">迷路</a><a href="/2017/08/01/恶意代码分析2/" class="next">恶意代码分析第二记</a></div><div id="disqus_thread"><div class="btn_click_load"><button class="disqus_click_btn">阅读评论 「请确保 disqus.com 可以正常加载」</button></div><script>var disqus_shortname = '18428381824-github-io';
+var disqus_identifier = '2017/08/01/一个简单的crackme/';
+var disqus_title = '一个简单的crackme';
+var disqus_url = 'http://18428381824.github.io/2017/08/01/一个简单的crackme/';
+$('.btn_click_load').click(function() {
+  (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+  $('.btn_click_load').css('display','none');
+});
+$.ajax({
+  url: 'https://disqus.com/favicon.ico',
+  timeout: 3000,
+  type: 'GET',
+  success: (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    $('.btn_click_load').css('display','none');
+  })(),
+  error: function() {
+    $('.btn_click_load').css('display','block');
+  }
+});</script><script id="dsq-count-scr" src="//18428381824-github-io.disqus.com/count.js" async></script></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form action="//www.baidu.com/baidu" method="get" accept-charset="utf-8" target="_blank" class="search-form"><input type="search" name="word" maxlength="20" placeholder="Search"/><input type="hidden" name="si" value="http://18428381824.github.io"/><input name="tn" type="hidden" value="bds"/><input name="cl" type="hidden" value="3"/><input name="ct" type="hidden" value="2097152"/><input name="s" type="hidden" value="on"/></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/python/">python</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/恶意代码/">恶意代码</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/恶意代码分析/">恶意代码分析</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂学/">杂学</a><span class="category-list-count">8</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程/">编程</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/网络/">网络</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/逆向/">逆向</a><span class="category-list-count">14</span></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/恶意代码/" style="font-size: 15px;">恶意代码</a> <a href="/tags/逆向/" style="font-size: 15px;">逆向</a> <a href="/tags/杂学/" style="font-size: 15px;">杂学</a> <a href="/tags/网络/" style="font-size: 15px;">网络</a> <a href="/tags/恶意代码分析/" style="font-size: 15px;">恶意代码分析</a> <a href="/tags/编程/" style="font-size: 15px;">编程</a> <a href="/tags/python/" style="font-size: 15px;">python</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/10/22/对抗反汇编分析/">对抗反汇编分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/20/iptables/">iptables</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/16/对抗反汇编/">对抗反汇编</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/16/恶意代码重定向/">恶意代码重定向</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/16/树莓派透明代理/">树莓派透明代理</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/16/双系统安装/">双系统安装（win10+ubuntu）</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/16/dll之APC注入/">dll注入之APC注入</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/14/vs错误集/">VS错误集</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/13/sublime乱码处理/">sublime中文乱码处理</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/11/shellcode 实现键盘记录样本分析/">shellcode 实现键盘记录样本分析</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-comment-o"> 最近评论</i></div><script type="text/javascript" src="//18428381824-github-io.disqus.com/recent_comments_widget.js?num_items=5&amp;hide_avatars=1&amp;avatar_size=32&amp;excerpt_length=20&amp;hide_mods=1"></script></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div><ul></ul><a href="http://www.github.com/" title="github" target="_blank">github</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2017 <a href="/." rel="nofollow">learn_malware.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a id="rocket" href="#top" class="show"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/3.0.47/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/3.0.47/jquery.fancybox.min.css"><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>
