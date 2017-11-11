@@ -1,0 +1,140 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>树莓派搭建vpn服务器 | learn_malware</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/6.0.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.2/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.2/grids-responsive-min.css"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">树莓派搭建vpn服务器</h1><a id="logo" href="/.">learn_malware</a><p class="description">学习使我快乐，学习使我沉迷</p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a></div></div><div id="layout" class="pure-g"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">树莓派搭建vpn服务器</h1><div class="post-meta">Nov 11, 2017<span> | </span><span class="category"><a href="/categories/杂学/">杂学</a></span><script src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js" async></script><span id="busuanzi_container_page_pv"> | <span id="busuanzi_value_page_pv"></span><span> 阅读</span></span></div><a data-disqus-identifier="2017/11/11/树莓派搭建vpn服务器/" href="/2017/11/11/树莓派搭建vpn服务器/#disqus_thread" class="disqus-comment-count"></a><div class="post-content"><p>1.此篇是在前篇搭建树莓派透明网管的基础上完成的，有兴趣的可以去看看<a href="http://scuzwj.xyz/2017/10/16/%E6%A0%91%E8%8E%93%E6%B4%BE%E9%80%8F%E6%98%8E%E4%BB%A3%E7%90%86/" target="_blank" rel="external">树莓派透明代理</a></p>
+<ol>
+<li><p>树莓派尽量设置成静态ip，具体如下</p>
+<p> sudo vim /etc/dhcpcd.conf</p>
+</li>
+</ol>
+<p>填写以下内容</p>
+<pre><code>interface eth0
+
+static ip_address=ip
+
+static routers=网关
+
+static domain_name_servers=223.5.5.5
+</code></pre><p>3.安装openvpn</p>
+<pre><code>sudo apt-get install openvpn
+</code></pre><p>4.下载easy-rsa</p>
+<pre><code>cd /etc/openvpn
+wget --no-check-certificate https://github.com/OpenVPN/easy-rsa/releases/download/2.2.2/EasyRSA-2.2.2.tgz
+tar -xzvf EasyRSA-2.2.2.tgz
+mv EasyRSA-2.2.2 easy-rsa
+</code></pre><p>5.配置easy-rsa</p>
+<pre><code>cd /etc/openvpn/easy-rsa
+vim vars    # 打开easy-rsa配置文件
+修改一下内容
+export EASY_RSA=&quot;/etc/openvpn/easy-rsa&quot;
+export KEY_SIZE=1024 #默认的2048太大，要运算很久
+加载配置
+source ./vars
+</code></pre><p>6.生成ca密钥</p>
+<pre><code>./clean-all      # 先清空所有密钥
+./build-ca       # 创建自己的证书
+所有内容直接回车就可以了。这时keys文件夹下会多了ca.crt,和ca.key文件
+</code></pre><p>7.生成服务器密钥</p>
+<pre><code>./build-key-server servername # servername为你自己设置的服务器名字
+会出现很多让填写的地方，注意下面三个其他的默认就好
+Common Name 常用名必须是你方才所设置的服务器名，默认设置如此。
+A challenge password? 网上说必须留空，我也照办了，不晓得为什么
+Sign the certificate? [y/n] 必须填y
+</code></pre><p>8.生成客户端密钥</p>
+<pre><code>./build-key-pass client1   # 命令中client1是客户端的名字
+Enter PEM pass phrase 这个要记住，这是客户端使用vpn时的密码，会让输入两次。
+这时keys下又会多出三个文件client1.csr client1.crt client.key
+</code></pre><p>9.生成dh</p>
+<pre><code>./build-dh
+到此密钥生成部分就完成了。
+</code></pre><p>10.openvpn 服务器配置    </p>
+<pre><code># 复制一个模板过来先
+cp /usr/share/doc/openvpn/examples/sample-config-files/server.conf /etc/openvpn/server.conf
+vim /etc/openvpn/server.conf
+下面是我的配置
+
+port 1194   #Openvpn服务使用的端口
+proto tcp   #使用udp协议传输
+dev tun     #使用隧道
+
+ca /etc/openvpn/easy-rsa/keys/ca.crt        #ca公钥路径
+cert /etc/openvpn/easy-rsa/keys/server.crt  #服务器公钥路径
+key /etc/openvpn/easy-rsa/keys/server.key   #服务器私钥路径
+dh /etc/openvpn/easy-rsa/keys/dh1024.pem    #dh
+
+server 10.10.20.0 255.255.255.0   #客户端连接后，所在的子网段
+
+ifconfig-pool-persist ipp.txt   #客户端使用固定的子网地址，这里可以不配置
+
+push &quot;redirect-gateway def1 bypass-dhcp&quot;    #网关重定向，客户端的流量都会经由OpenvpnServer
+push &quot;dhcp-option DNS 192.168.19.149&quot;          #配置DNS
+push &quot;dhcp-option DNS 202.141.162.123&quot;
+push &quot;dhcp-option DNS 202.38.93.153 
+
+client-to-client
+
+duplicate-cn    #允许客户端的CommonName重复，因为我们填的都是默认值
+
+keepalive 10 120
+
+comp-lzo    #启动数据压缩
+
+user nobody     #Openvpn进程运行时所属的用户，这里为了安全
+group nogroup   #Openvpn进程运行时所属的组，这里为了安全
+
+persist-key     #一直保存key，避免权限问题导致不能再次读取
+persist-tun     #一直保持隧道，原因同上
+
+status /etc/openvpn/easy-rsa/keys/openvpn-status.log   #Openvpn运行状态Log，就在Openvpn目录下，会自动生成
+
+log openvpn.log             #Openvpn运行Log，也在Openvpn目录下，会自动生成
+
+verb 3                      #log的等级
+</code></pre><p>11.此时可以测试一下了</p>
+<pre><code>openvpn server.conf
+service openvpn restart
+不报错就是成功了
+</code></pre><p>12.客户端配置</p>
+<pre><code>cp /usr/share/doc/openvpn/examples/sample-config-files/client.conf /etc/openvpn/clientconfig/client.conf
+vim /etc/openvpn/clientconfig/client.conf
+我的配置如下：
+# 里面注释也很详细，这里贴出我精简后的结果
+client      #标明是客户端配置
+dev tun     #使用隧道
+proto tcp   #使用UDP
+
+remote 192.168.19.149 1194   #树莓派外网IP（使用动态域名绑定） + 端口
+comp-lzo        
+
+ca ca.crt       #ca公钥
+cert wxlnb.crt  #客户端公钥
+key wxlnb.key   #客户端私钥
+
+verb 3  #log等级
+</code></pre><p>13.防火墙规则我就改了一点</p>
+<pre><code>iptables -t nat -A PREROUTING -i tun0 -p tcp -j REDSOCKS
+</code></pre><p>14.测试</p>
+<pre><code>在其他Windows机器上，下载openvpn 安装，然后把ca.crt,client.conf（就是刚刚那个client.conf）,client1.crt,client1.key复制到config 文件夹下。
+</code></pre></div><script type="text/javascript" src="/js/share.js?v=0.0.0" async></script><a data-url="http://18428381824.github.io/2017/11/11/树莓派搭建vpn服务器/" data-id="cj9v5b13i002fmkulbt5ek419" class="article-share-link">分享</a><div class="tags"><a href="/tags/杂学/">杂学</a></div><div class="post-nav"><a href="/2017/11/05/hexo 博客恢复/" class="next">重装系统后hexo 博客恢复</a></div><div id="disqus_thread"><div class="btn_click_load"><button class="disqus_click_btn">阅读评论 「请确保 disqus.com 可以正常加载」</button></div><script>var disqus_shortname = '18428381824-github-io';
+var disqus_identifier = '2017/11/11/树莓派搭建vpn服务器/';
+var disqus_title = '树莓派搭建vpn服务器';
+var disqus_url = 'http://18428381824.github.io/2017/11/11/树莓派搭建vpn服务器/';
+$('.btn_click_load').click(function() {
+  (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+  })();
+  $('.btn_click_load').css('display','none');
+});
+$.ajax({
+  url: 'https://disqus.com/favicon.ico',
+  timeout: 3000,
+  type: 'GET',
+  success: (function() {
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    $('.btn_click_load').css('display','none');
+  })(),
+  error: function() {
+    $('.btn_click_load').css('display','block');
+  }
+});</script><script id="dsq-count-scr" src="//18428381824-github-io.disqus.com/count.js" async></script></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form action="//www.baidu.com/baidu" method="get" accept-charset="utf-8" target="_blank" class="search-form"><input type="search" name="word" maxlength="20" placeholder="Search"/><input type="hidden" name="si" value="http://18428381824.github.io"/><input name="tn" type="hidden" value="bds"/><input name="cl" type="hidden" value="3"/><input name="ct" type="hidden" value="2097152"/><input name="s" type="hidden" value="on"/></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/python/">python</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/恶意代码/">恶意代码</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/恶意代码分析/">恶意代码分析</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/杂学/">杂学</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/编程/">编程</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/网络/">网络</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/逆向/">逆向</a><span class="category-list-count">14</span></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/杂学/" style="font-size: 15px;">杂学</a> <a href="/tags/逆向/" style="font-size: 15px;">逆向</a> <a href="/tags/恶意代码/" style="font-size: 15px;">恶意代码</a> <a href="/tags/网络/" style="font-size: 15px;">网络</a> <a href="/tags/编程/" style="font-size: 15px;">编程</a> <a href="/tags/恶意代码分析/" style="font-size: 15px;">恶意代码分析</a> <a href="/tags/python/" style="font-size: 15px;">python</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/11/11/树莓派搭建vpn服务器/">树莓派搭建vpn服务器</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/11/05/hexo 博客恢复/">重装系统后hexo 博客恢复</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/22/对抗反汇编分析/">对抗反汇编分析</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/20/iptables/">iptables</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/16/树莓派透明代理/">树莓派透明代理</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/16/对抗反汇编/">对抗反汇编</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/16/双系统安装/">双系统安装（win10+ubuntu）</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/10/16/恶意代码重定向/">恶意代码重定向</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/16/dll之APC注入/">dll注入之APC注入</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/09/14/vs错误集/">VS错误集</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-comment-o"> 最近评论</i></div><script type="text/javascript" src="//18428381824-github-io.disqus.com/recent_comments_widget.js?num_items=5&amp;hide_avatars=1&amp;avatar_size=32&amp;excerpt_length=20&amp;hide_mods=1"></script></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div><ul></ul><a href="http://www.github.com/" title="github" target="_blank">github</a></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2017 <a href="/." rel="nofollow">learn_malware.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a id="rocket" href="#top" class="show"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/3.0.47/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/fancybox/3.0.47/jquery.fancybox.min.css"><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>

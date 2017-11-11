@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://18428381824.github.io/"/>
-  <updated>2017-11-05T05:38:26.322Z</updated>
+  <updated>2017-11-11T09:44:57.772Z</updated>
   <id>http://18428381824.github.io/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>树莓派搭建vpn服务器</title>
+    <link href="http://18428381824.github.io/2017/11/11/%E6%A0%91%E8%8E%93%E6%B4%BE%E6%90%AD%E5%BB%BAvpn%E6%9C%8D%E5%8A%A1%E5%99%A8/"/>
+    <id>http://18428381824.github.io/2017/11/11/树莓派搭建vpn服务器/</id>
+    <published>2017-11-10T16:00:00.000Z</published>
+    <updated>2017-11-11T09:44:57.772Z</updated>
+    
+    <content type="html"><![CDATA[<p>1.此篇是在前篇搭建树莓派透明网管的基础上完成的，有兴趣的可以去看看<a href="http://scuzwj.xyz/2017/10/16/%E6%A0%91%E8%8E%93%E6%B4%BE%E9%80%8F%E6%98%8E%E4%BB%A3%E7%90%86/" target="_blank" rel="external">树莓派透明代理</a></p><ol><li><p>树莓派尽量设置成静态ip，具体如下</p><p> sudo vim /etc/dhcpcd.conf</p></li></ol><p>填写以下内容</p><pre><code>interface eth0static ip_address=ipstatic routers=网关static domain_name_servers=223.5.5.5</code></pre><p>3.安装openvpn</p><pre><code>sudo apt-get install openvpn</code></pre><p>4.下载easy-rsa</p><pre><code>cd /etc/openvpnwget --no-check-certificate https://github.com/OpenVPN/easy-rsa/releases/download/2.2.2/EasyRSA-2.2.2.tgztar -xzvf EasyRSA-2.2.2.tgzmv EasyRSA-2.2.2 easy-rsa</code></pre><p>5.配置easy-rsa</p><pre><code>cd /etc/openvpn/easy-rsavim vars    # 打开easy-rsa配置文件修改一下内容export EASY_RSA=&quot;/etc/openvpn/easy-rsa&quot;export KEY_SIZE=1024 #默认的2048太大，要运算很久加载配置source ./vars</code></pre><p>6.生成ca密钥</p><pre><code>./clean-all      # 先清空所有密钥./build-ca       # 创建自己的证书所有内容直接回车就可以了。这时keys文件夹下会多了ca.crt,和ca.key文件</code></pre><p>7.生成服务器密钥</p><pre><code>./build-key-server servername # servername为你自己设置的服务器名字会出现很多让填写的地方，注意下面三个其他的默认就好Common Name 常用名必须是你方才所设置的服务器名，默认设置如此。A challenge password? 网上说必须留空，我也照办了，不晓得为什么Sign the certificate? [y/n] 必须填y</code></pre><p>8.生成客户端密钥</p><pre><code>./build-key-pass client1   # 命令中client1是客户端的名字Enter PEM pass phrase 这个要记住，这是客户端使用vpn时的密码，会让输入两次。这时keys下又会多出三个文件client1.csr client1.crt client.key</code></pre><p>9.生成dh</p><pre><code>./build-dh到此密钥生成部分就完成了。</code></pre><p>10.openvpn 服务器配置    </p><pre><code># 复制一个模板过来先cp /usr/share/doc/openvpn/examples/sample-config-files/server.conf /etc/openvpn/server.confvim /etc/openvpn/server.conf下面是我的配置port 1194   #Openvpn服务使用的端口proto tcp   #使用udp协议传输dev tun     #使用隧道ca /etc/openvpn/easy-rsa/keys/ca.crt        #ca公钥路径cert /etc/openvpn/easy-rsa/keys/server.crt  #服务器公钥路径key /etc/openvpn/easy-rsa/keys/server.key   #服务器私钥路径dh /etc/openvpn/easy-rsa/keys/dh1024.pem    #dhserver 10.10.20.0 255.255.255.0   #客户端连接后，所在的子网段ifconfig-pool-persist ipp.txt   #客户端使用固定的子网地址，这里可以不配置push &quot;redirect-gateway def1 bypass-dhcp&quot;    #网关重定向，客户端的流量都会经由OpenvpnServerpush &quot;dhcp-option DNS 192.168.19.149&quot;          #配置DNSpush &quot;dhcp-option DNS 202.141.162.123&quot;push &quot;dhcp-option DNS 202.38.93.153 client-to-clientduplicate-cn    #允许客户端的CommonName重复，因为我们填的都是默认值keepalive 10 120comp-lzo    #启动数据压缩user nobody     #Openvpn进程运行时所属的用户，这里为了安全group nogroup   #Openvpn进程运行时所属的组，这里为了安全persist-key     #一直保存key，避免权限问题导致不能再次读取persist-tun     #一直保持隧道，原因同上status /etc/openvpn/easy-rsa/keys/openvpn-status.log   #Openvpn运行状态Log，就在Openvpn目录下，会自动生成log openvpn.log             #Openvpn运行Log，也在Openvpn目录下，会自动生成verb 3                      #log的等级</code></pre><p>11.此时可以测试一下了</p><pre><code>openvpn server.confservice openvpn restart不报错就是成功了</code></pre><p>12.客户端配置</p><pre><code>cp /usr/share/doc/openvpn/examples/sample-config-files/client.conf /etc/openvpn/clientconfig/client.confvim /etc/openvpn/clientconfig/client.conf我的配置如下：# 里面注释也很详细，这里贴出我精简后的结果client      #标明是客户端配置dev tun     #使用隧道proto tcp   #使用UDPremote 192.168.19.149 1194   #树莓派外网IP（使用动态域名绑定） + 端口comp-lzo        ca ca.crt       #ca公钥cert wxlnb.crt  #客户端公钥key wxlnb.key   #客户端私钥verb 3  #log等级</code></pre><p>13.防火墙规则我就改了一点</p><pre><code>iptables -t nat -A PREROUTING -i tun0 -p tcp -j REDSOCKS</code></pre><p>14.测试</p><pre><code>在其他Windows机器上，下载openvpn 安装，然后把ca.crt,client.conf（就是刚刚那个client.conf）,client1.crt,client1.key复制到config 文件夹下。</code></pre>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;1.此篇是在前篇搭建树莓派透明网管的基础上完成的，有兴趣的可以去看看&lt;a href=&quot;http://scuzwj.xyz/2017/10/16/%E6%A0%91%E8%8E%93%E6%B4%BE%E9%80%8F%E6%98%8E%E4%BB%A3%E7%90%86/&quot;
+      
+    
+    </summary>
+    
+      <category term="杂学" scheme="http://18428381824.github.io/categories/%E6%9D%82%E5%AD%A6/"/>
+    
+    
+      <category term="杂学" scheme="http://18428381824.github.io/tags/%E6%9D%82%E5%AD%A6/"/>
+    
+  </entry>
   
   <entry>
     <title>重装系统后hexo 博客恢复</title>
@@ -93,34 +118,6 @@
   </entry>
   
   <entry>
-    <title>对抗反汇编</title>
-    <link href="http://18428381824.github.io/2017/10/16/%E5%AF%B9%E6%8A%97%E5%8F%8D%E6%B1%87%E7%BC%96/"/>
-    <id>http://18428381824.github.io/2017/10/16/对抗反汇编/</id>
-    <published>2017-10-15T16:00:00.000Z</published>
-    <updated>2017-10-25T07:18:53.412Z</updated>
-    
-    <content type="html"><![CDATA[<p>1.插入流氓字节，阻止真正的指令被反汇编</p><blockquote><p>线性反汇编和面向代码流的反汇编：</p><p>线性反汇编是遍历一个代码段，一次一条指令的线性反汇编，不考虑代码流的控制指令。而面向代码流的反汇编是会检查每一条指令。然后建立反汇编的地址列表，然后这样的反汇编算法会更加先进，而不易出错。比如：</p></blockquote><pre><code>.text:00401035                 jz      short near ptr loc_401037+1.text:00401037.text:00401037 loc_401037:                             ; CODE XREF: .text:00401035j.text:00401037                 call    near ptr 8B4C55C7h</code></pre><blockquote><p>观察以上的汇编代码，你会发现jz跳转到了call 指令中间，这显然是不可能的，所以call指令一定是一个数据而不是代码，在此处按d键，然后再观察</p><pre><code>                 xor     eax, eax.text:00401035                 jz      short loc_401038.text:00401035 ; ---------------------------------------------------------------------------.text:00401037                 db 0E8h.text:00401038 ; ---------------------------------------------------------------------------.text:00401038.text:00401038 loc_401038:                             ; CODE XREF: .text:00401035j.text:00401038                 mov     eax, [ebp+0Ch]</code></pre><p>这样显然很正确了，对于call 指令而言，如果后面四个字节跟的是地址，它对应的机器码是0xe8，此处显然是把数据0xe8当成了call指令，才会出现这样的问题。</p></blockquote><p>2.固定条件的跳转指令</p><pre><code>   xor     eax, eax.text:00401035                 jz      short loc_401038</code></pre><p>3.函数指针问题 </p><pre><code> mov [ebp+var_4],offset sub_4011c0; call [ebp+var_4]可用IDA脚本语言IDC进行修正函数为AddCodeXref();</code></pre><p>3.函数未识别的问题 </p><blockquote><p>可以按p键来强制把一段代码变成函数<br>但是要把流氓字节nop,不然函数可能会出问题。用IDA自带的patch program来做。<br>也可用脚本idapython  代码如下：</p></blockquote><pre><code>import idaapiidaapi.CompileLine(&apos;static n_key(){ RunPythonStatement(&quot;nopIt()&quot;);}&apos;)AddHotkey(&quot;Alt-N&quot;,&quot;n_key&quot;)def nopIt():    start=ScreenEA()    end=NextHead(start)    for ea in range(start,end):        PatchByte(ea,0x90)    Jump(end)</code></pre><p>4，异常触发</p><pre><code>push offset sub_4014c0push large dword ptr fs:0mov large fs:0,espxor ecx,ecxdiv ecx</code></pre><blockquote><p>属于滥用结构化异常（SEH）来对抗反汇编，通过人为构造一些比如访问一个无效的内存区域，除0等来触发异常，</p><p>SHE链是一个函数列表，处理线程的异常，列表中的函数要么处理异常，要么向下传递，如果传递到最后一个异常处理函数，就会被认为是一个不能处理的异常，弹出“an unhandled exception has occurred ”。</p><p>查找SEH链，操作系统会检查FS寄存器，这个寄存器中包含一个段选择子，从概念上来讲，链表以栈的方式工作，第一个调用的是最后一个加入链表的记录。前面的例子就是把自己的异常处理加入到链表的头部，然后用除0来触发异常，进而执行自己的代码。</p></blockquote>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;1.插入流氓字节，阻止真正的指令被反汇编&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;线性反汇编和面向代码流的反汇编：&lt;/p&gt;
-&lt;p&gt;线性反汇编是遍历一个代码段，一次一条指令的线性反汇编，不考虑代码流的控制指令。而面向代码流的反汇编是会检查每一条指令。然后建立反汇编的地址列表，
-      
-    
-    </summary>
-    
-      <category term="逆向" scheme="http://18428381824.github.io/categories/%E9%80%86%E5%90%91/"/>
-    
-    
-      <category term="逆向" scheme="http://18428381824.github.io/tags/%E9%80%86%E5%90%91/"/>
-    
-  </entry>
-  
-  <entry>
     <title>树莓派透明代理</title>
     <link href="http://18428381824.github.io/2017/10/16/%E6%A0%91%E8%8E%93%E6%B4%BE%E9%80%8F%E6%98%8E%E4%BB%A3%E7%90%86/"/>
     <id>http://18428381824.github.io/2017/10/16/树莓派透明代理/</id>
@@ -146,6 +143,34 @@
     
     
       <category term="杂学" scheme="http://18428381824.github.io/tags/%E6%9D%82%E5%AD%A6/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>对抗反汇编</title>
+    <link href="http://18428381824.github.io/2017/10/16/%E5%AF%B9%E6%8A%97%E5%8F%8D%E6%B1%87%E7%BC%96/"/>
+    <id>http://18428381824.github.io/2017/10/16/对抗反汇编/</id>
+    <published>2017-10-15T16:00:00.000Z</published>
+    <updated>2017-10-25T07:18:53.412Z</updated>
+    
+    <content type="html"><![CDATA[<p>1.插入流氓字节，阻止真正的指令被反汇编</p><blockquote><p>线性反汇编和面向代码流的反汇编：</p><p>线性反汇编是遍历一个代码段，一次一条指令的线性反汇编，不考虑代码流的控制指令。而面向代码流的反汇编是会检查每一条指令。然后建立反汇编的地址列表，然后这样的反汇编算法会更加先进，而不易出错。比如：</p></blockquote><pre><code>.text:00401035                 jz      short near ptr loc_401037+1.text:00401037.text:00401037 loc_401037:                             ; CODE XREF: .text:00401035j.text:00401037                 call    near ptr 8B4C55C7h</code></pre><blockquote><p>观察以上的汇编代码，你会发现jz跳转到了call 指令中间，这显然是不可能的，所以call指令一定是一个数据而不是代码，在此处按d键，然后再观察</p><pre><code>                 xor     eax, eax.text:00401035                 jz      short loc_401038.text:00401035 ; ---------------------------------------------------------------------------.text:00401037                 db 0E8h.text:00401038 ; ---------------------------------------------------------------------------.text:00401038.text:00401038 loc_401038:                             ; CODE XREF: .text:00401035j.text:00401038                 mov     eax, [ebp+0Ch]</code></pre><p>这样显然很正确了，对于call 指令而言，如果后面四个字节跟的是地址，它对应的机器码是0xe8，此处显然是把数据0xe8当成了call指令，才会出现这样的问题。</p></blockquote><p>2.固定条件的跳转指令</p><pre><code>   xor     eax, eax.text:00401035                 jz      short loc_401038</code></pre><p>3.函数指针问题 </p><pre><code> mov [ebp+var_4],offset sub_4011c0; call [ebp+var_4]可用IDA脚本语言IDC进行修正函数为AddCodeXref();</code></pre><p>3.函数未识别的问题 </p><blockquote><p>可以按p键来强制把一段代码变成函数<br>但是要把流氓字节nop,不然函数可能会出问题。用IDA自带的patch program来做。<br>也可用脚本idapython  代码如下：</p></blockquote><pre><code>import idaapiidaapi.CompileLine(&apos;static n_key(){ RunPythonStatement(&quot;nopIt()&quot;);}&apos;)AddHotkey(&quot;Alt-N&quot;,&quot;n_key&quot;)def nopIt():    start=ScreenEA()    end=NextHead(start)    for ea in range(start,end):        PatchByte(ea,0x90)    Jump(end)</code></pre><p>4，异常触发</p><pre><code>push offset sub_4014c0push large dword ptr fs:0mov large fs:0,espxor ecx,ecxdiv ecx</code></pre><blockquote><p>属于滥用结构化异常（SEH）来对抗反汇编，通过人为构造一些比如访问一个无效的内存区域，除0等来触发异常，</p><p>SHE链是一个函数列表，处理线程的异常，列表中的函数要么处理异常，要么向下传递，如果传递到最后一个异常处理函数，就会被认为是一个不能处理的异常，弹出“an unhandled exception has occurred ”。</p><p>查找SEH链，操作系统会检查FS寄存器，这个寄存器中包含一个段选择子，从概念上来讲，链表以栈的方式工作，第一个调用的是最后一个加入链表的记录。前面的例子就是把自己的异常处理加入到链表的头部，然后用除0来触发异常，进而执行自己的代码。</p></blockquote>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;1.插入流氓字节，阻止真正的指令被反汇编&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;线性反汇编和面向代码流的反汇编：&lt;/p&gt;
+&lt;p&gt;线性反汇编是遍历一个代码段，一次一条指令的线性反汇编，不考虑代码流的控制指令。而面向代码流的反汇编是会检查每一条指令。然后建立反汇编的地址列表，
+      
+    
+    </summary>
+    
+      <category term="逆向" scheme="http://18428381824.github.io/categories/%E9%80%86%E5%90%91/"/>
+    
+    
+      <category term="逆向" scheme="http://18428381824.github.io/tags/%E9%80%86%E5%90%91/"/>
     
   </entry>
   
@@ -342,20 +367,24 @@ ubuntu系统
   </entry>
   
   <entry>
-    <title>字符串</title>
-    <link href="http://18428381824.github.io/2017/08/06/strings/"/>
-    <id>http://18428381824.github.io/2017/08/06/strings/</id>
+    <title>汇编知识学习</title>
+    <link href="http://18428381824.github.io/2017/08/06/%E6%B1%87%E7%BC%96%E7%9F%A5%E8%AF%86%E5%AD%A6%E4%B9%A0/"/>
+    <id>http://18428381824.github.io/2017/08/06/汇编知识学习/</id>
     <published>2017-08-05T16:00:00.000Z</published>
-    <updated>2017-08-06T08:59:08.244Z</updated>
+    <updated>2017-08-06T09:19:27.891Z</updated>
     
-    <content type="html"><![CDATA[<p>1 字符串添加</p><p>qq=’1265616844’<br>driver.get(‘<a href="http://user.qzone.qq.com/{}/311&#39;.format(qq" target="_blank" rel="external">http://user.qzone.qq.com/{}/311&#39;.format(qq</a>))<br>如上，在一堆字符串中添加某个字符串，可以用如上的方式</p><p>2.中文字符串</p><pre><code># _*_ coding: utf-8 _*_</code></pre><p>python 文件首行增加这一行，才可以输出中文，python默认以ASCII码来解析<br>对于windows的python文件保存为带bom 的utf-8也可以实现这个功能<br>文件的声明编码要和实际文件保存的编码一致，不然可能保存为gbk<br>要想命令行输出中文还要添加</p><pre><code>de_str1=str1.decode(&apos;utf-8&apos;)</code></pre><p>才可以在命令行正常输出中文</p>]]></content>
+    <content type="html"><![CDATA[<p>1.MOVSX  带符号扩展指令</p><pre><code>MOV BL,80H   MOVSX  AX,BLAX=0FF80H因为带符号扩展的时候，高位视为符号位，扩展的高位全置1</code></pre><p>2.neg eax  sbb eax ,eax</p><pre><code>例如 neg rsbb r-rneg eax 就是0-eax 其实际上就是设置标志位 cf=1 sbb eax,eax 就是eax-eax-cf如果r=0; cf=0 ;最后结果就是把r 设为0，如果r不等于0，则cf=1相当于r-r-cf=-1=oxffffffff注意： MOVzX  无符号扩展指令</code></pre><p>3.test 指令</p><pre><code>test eax,eax 基本上和 And eax,eax 是一样的，不同的是test 不改变eax的结果，只是改变FLAG寄存器的状态，也就是改变进位标志，零标志，溢出标志等 等。举一个例子，如果eax=01h,test eax,eax 就是两个01h 作与操作，所以结果还是01h,不是0的话，就不会跳转 je  xxxx。所以要跳转je xxxx,只有一种可能就是eax=0h.所以现在eax=0x01 则不会跳转 je  xxxx</code></pre><p>4.__alloca_probe</p><pre><code>逆向vc编译的程序，经常会看到这样的代码出现在函数头部：mov     eax, xxxxhcall    __alloca_probexxxxh是个立即数，一般大于1000h,即十进制数4096。这段代码经常出现在函数头prolog之后，如果有异常结构，会出现在SEH或EH之后。示例1：                 push    ebp                 mov     ebp, esp                 mov     eax, 8080h                 call    __alloca_probe示例2：                 push    ebp                 mov     ebp, esp                 and     esp, 0FFFFFFF8h                 push    0FFFFFFFFh                 push    offset SEH_4A7AA0                 mov     eax, large fs:0                 push    eax                 mov     large fs:0, esp                 push    ecx                 mov     eax, 8080h                 call    __alloca_probe事实上__alloca_probe是一个在stack上分配大块内存空间函数，功能同SUB ESP, xxxxh一致。函数本身由编译器提供，编译的时候vc会根据实际情况（stack上申请大块空间，一般大于一个内存页大小）插入到函数体，为函数在stack上提供私有变量空间，分配的空间大小由fastcall调用方式的EAX寄存器传入。</code></pre><p>5.chkstk函数</p><pre><code>分配较大局部变量空间时chkstk函数来检测是否超过堆栈上已经分配的空间我的理解就是ecx保存未调用此函数前esp的值，随后每次减去一页的空间也就是1000h,eax保存的就是所有要分配的空间，每次分配一页之后也减去1000h,然后比较eax和1000h的值，看是否还需要一页，如果大于1000h,继续循环。否则用ecx减去eax得到最终分配的空间栈顶位置，然后把ecx的值赋给esp,跳回函数的返回地址，结束分配。</code></pre><p>6.JGE.JLE,JNE,JE跳转条件</p><pre><code>JGE 大于等于跳转，JLE小于等于跳转，JNE不等于跳转，JE 前等于后跳转</code></pre><p>7.字符串入栈的操作：</p><pre><code>void main(){01361000  push        ebp  01361001  mov         ebp,esp  01361003  sub         esp,0Ch    //栈顶抬高12个字节01361006  mov         eax,dword ptr [___security_cookie (1363000h)]  0136100B  xor         eax,ebp  0136100D  mov         dword ptr [ebp-4],eax    //用了4个字节  int intA;  char ch[5]=&quot;abcd&quot;;01361010  mov         eax,dword ptr [string &quot;abcd&quot; (136210Ch)] 01361015  mov         cl,byte ptr ds:[1362110h]    //两句传送字符串”abcd\0”到寄存器  intA=15;  fun(intA,ch);0136101B  lea         edx,[ebp-0Ch] //0136101E  push        edx    //数组地址,ch[]0136101F  push        0Fh    //立即数参数,1501361021  push        offset string &quot;Integer:%d String:%s&quot; (13620F4h)  01361026  mov         dword ptr [ebp-0Ch],eax  01361029  mov         byte ptr [ebp-8],cl    //两句语句表示”abcd\0”写入栈中0136102C  call        dword ptr [__imp__printf (13620A0h)]  //调用printf}cl 这个赋值一直不太懂，后来知道了字符串要以00结尾才行，所以要再赋值cl为00，然后放在abcd的后面。</code></pre><p>8.atoi 函数 </p><pre><code>字符串转变为数字</code></pre>]]></content>
     
     <summary type="html">
     
       
       
-        &lt;p&gt;1 字符串添加&lt;/p&gt;
-&lt;p&gt;qq=’1265616844’&lt;br&gt;driver.get(‘&lt;a href=&quot;http://user.qzone.qq.com/{}/311&amp;#39;.format(qq&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;htt
+        &lt;p&gt;1.MOVSX  带符号扩展指令&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;MOV BL,80H   
+MOVSX  AX,BL
+AX=0FF80H
+因为带符号扩展的时候，高位视为符号位，扩展的高位全置1
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;2.neg eax  sbb eax ,eax&lt;
       
     
     </summary>
@@ -395,32 +424,28 @@ ubuntu系统
   </entry>
   
   <entry>
-    <title>汇编知识学习</title>
-    <link href="http://18428381824.github.io/2017/08/06/%E6%B1%87%E7%BC%96%E7%9F%A5%E8%AF%86%E5%AD%A6%E4%B9%A0/"/>
-    <id>http://18428381824.github.io/2017/08/06/汇编知识学习/</id>
+    <title>数据隐藏-ADS</title>
+    <link href="http://18428381824.github.io/2017/08/06/%E6%95%B0%E6%8D%AE%E9%9A%90%E8%97%8F-ADS/"/>
+    <id>http://18428381824.github.io/2017/08/06/数据隐藏-ADS/</id>
     <published>2017-08-05T16:00:00.000Z</published>
-    <updated>2017-08-06T09:19:27.891Z</updated>
+    <updated>2017-08-06T09:08:12.659Z</updated>
     
-    <content type="html"><![CDATA[<p>1.MOVSX  带符号扩展指令</p><pre><code>MOV BL,80H   MOVSX  AX,BLAX=0FF80H因为带符号扩展的时候，高位视为符号位，扩展的高位全置1</code></pre><p>2.neg eax  sbb eax ,eax</p><pre><code>例如 neg rsbb r-rneg eax 就是0-eax 其实际上就是设置标志位 cf=1 sbb eax,eax 就是eax-eax-cf如果r=0; cf=0 ;最后结果就是把r 设为0，如果r不等于0，则cf=1相当于r-r-cf=-1=oxffffffff注意： MOVzX  无符号扩展指令</code></pre><p>3.test 指令</p><pre><code>test eax,eax 基本上和 And eax,eax 是一样的，不同的是test 不改变eax的结果，只是改变FLAG寄存器的状态，也就是改变进位标志，零标志，溢出标志等 等。举一个例子，如果eax=01h,test eax,eax 就是两个01h 作与操作，所以结果还是01h,不是0的话，就不会跳转 je  xxxx。所以要跳转je xxxx,只有一种可能就是eax=0h.所以现在eax=0x01 则不会跳转 je  xxxx</code></pre><p>4.__alloca_probe</p><pre><code>逆向vc编译的程序，经常会看到这样的代码出现在函数头部：mov     eax, xxxxhcall    __alloca_probexxxxh是个立即数，一般大于1000h,即十进制数4096。这段代码经常出现在函数头prolog之后，如果有异常结构，会出现在SEH或EH之后。示例1：                 push    ebp                 mov     ebp, esp                 mov     eax, 8080h                 call    __alloca_probe示例2：                 push    ebp                 mov     ebp, esp                 and     esp, 0FFFFFFF8h                 push    0FFFFFFFFh                 push    offset SEH_4A7AA0                 mov     eax, large fs:0                 push    eax                 mov     large fs:0, esp                 push    ecx                 mov     eax, 8080h                 call    __alloca_probe事实上__alloca_probe是一个在stack上分配大块内存空间函数，功能同SUB ESP, xxxxh一致。函数本身由编译器提供，编译的时候vc会根据实际情况（stack上申请大块空间，一般大于一个内存页大小）插入到函数体，为函数在stack上提供私有变量空间，分配的空间大小由fastcall调用方式的EAX寄存器传入。</code></pre><p>5.chkstk函数</p><pre><code>分配较大局部变量空间时chkstk函数来检测是否超过堆栈上已经分配的空间我的理解就是ecx保存未调用此函数前esp的值，随后每次减去一页的空间也就是1000h,eax保存的就是所有要分配的空间，每次分配一页之后也减去1000h,然后比较eax和1000h的值，看是否还需要一页，如果大于1000h,继续循环。否则用ecx减去eax得到最终分配的空间栈顶位置，然后把ecx的值赋给esp,跳回函数的返回地址，结束分配。</code></pre><p>6.JGE.JLE,JNE,JE跳转条件</p><pre><code>JGE 大于等于跳转，JLE小于等于跳转，JNE不等于跳转，JE 前等于后跳转</code></pre><p>7.字符串入栈的操作：</p><pre><code>void main(){01361000  push        ebp  01361001  mov         ebp,esp  01361003  sub         esp,0Ch    //栈顶抬高12个字节01361006  mov         eax,dword ptr [___security_cookie (1363000h)]  0136100B  xor         eax,ebp  0136100D  mov         dword ptr [ebp-4],eax    //用了4个字节  int intA;  char ch[5]=&quot;abcd&quot;;01361010  mov         eax,dword ptr [string &quot;abcd&quot; (136210Ch)] 01361015  mov         cl,byte ptr ds:[1362110h]    //两句传送字符串”abcd\0”到寄存器  intA=15;  fun(intA,ch);0136101B  lea         edx,[ebp-0Ch] //0136101E  push        edx    //数组地址,ch[]0136101F  push        0Fh    //立即数参数,1501361021  push        offset string &quot;Integer:%d String:%s&quot; (13620F4h)  01361026  mov         dword ptr [ebp-0Ch],eax  01361029  mov         byte ptr [ebp-8],cl    //两句语句表示”abcd\0”写入栈中0136102C  call        dword ptr [__imp__printf (13620A0h)]  //调用printf}cl 这个赋值一直不太懂，后来知道了字符串要以00结尾才行，所以要再赋值cl为00，然后放在abcd的后面。</code></pre><p>8.atoi 函数 </p><pre><code>字符串转变为数字</code></pre>]]></content>
+    <content type="html"><![CDATA[<p>数据隐藏的一种方式–ADS</p><p>NTFS交换数据流（Alternate Data Streams，简称ADS）是NTFS磁盘格式的一个特性。在NTFS文件系统下，每个文件都可以存在多个数据流，意思是除了主文件流之外还可以有许多非主文件流寄宿在主文件流中，这些利用NTFS数据流寄宿并隐藏在系统中的非主文件流我们称之为ADS流文件。虽然我们无法看到ADS流文件，但它们却是真实存在。某些病毒利用NTFS数据流来隐藏，此类病毒我们称之为ADS流病毒或ZeroAcess。</p><p>详见<a href="https://baike.baidu.com/item/ADS%E6%B5%81%E6%96%87%E4%BB%B6/3995128?fr=aladdin" target="_blank" rel="external">ADS</a></p>]]></content>
     
     <summary type="html">
     
       
       
-        &lt;p&gt;1.MOVSX  带符号扩展指令&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;MOV BL,80H   
-MOVSX  AX,BL
-AX=0FF80H
-因为带符号扩展的时候，高位视为符号位，扩展的高位全置1
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;2.neg eax  sbb eax ,eax&lt;
+        &lt;p&gt;数据隐藏的一种方式–ADS&lt;/p&gt;
+&lt;p&gt;NTFS交换数据流（Alternate Data Streams，简称ADS）是NTFS磁盘格式的一个特性。在NTFS文件系统下，每个文件都可以存在多个数据流，意思是除了主文件流之外还可以有许多非主文件流寄宿在主文件流中，这些利用N
       
     
     </summary>
     
-      <category term="编程" scheme="http://18428381824.github.io/categories/%E7%BC%96%E7%A8%8B/"/>
+      <category term="恶意代码分析" scheme="http://18428381824.github.io/categories/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"/>
     
     
-      <category term="编程" scheme="http://18428381824.github.io/tags/%E7%BC%96%E7%A8%8B/"/>
+      <category term="恶意代码分析" scheme="http://18428381824.github.io/tags/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"/>
     
   </entry>
   
@@ -452,28 +477,28 @@ AX=0FF80H
   </entry>
   
   <entry>
-    <title>数据隐藏-ADS</title>
-    <link href="http://18428381824.github.io/2017/08/06/%E6%95%B0%E6%8D%AE%E9%9A%90%E8%97%8F-ADS/"/>
-    <id>http://18428381824.github.io/2017/08/06/数据隐藏-ADS/</id>
+    <title>字符串</title>
+    <link href="http://18428381824.github.io/2017/08/06/strings/"/>
+    <id>http://18428381824.github.io/2017/08/06/strings/</id>
     <published>2017-08-05T16:00:00.000Z</published>
-    <updated>2017-08-06T09:08:12.659Z</updated>
+    <updated>2017-08-06T08:59:08.244Z</updated>
     
-    <content type="html"><![CDATA[<p>数据隐藏的一种方式–ADS</p><p>NTFS交换数据流（Alternate Data Streams，简称ADS）是NTFS磁盘格式的一个特性。在NTFS文件系统下，每个文件都可以存在多个数据流，意思是除了主文件流之外还可以有许多非主文件流寄宿在主文件流中，这些利用NTFS数据流寄宿并隐藏在系统中的非主文件流我们称之为ADS流文件。虽然我们无法看到ADS流文件，但它们却是真实存在。某些病毒利用NTFS数据流来隐藏，此类病毒我们称之为ADS流病毒或ZeroAcess。</p><p>详见<a href="https://baike.baidu.com/item/ADS%E6%B5%81%E6%96%87%E4%BB%B6/3995128?fr=aladdin" target="_blank" rel="external">ADS</a></p>]]></content>
+    <content type="html"><![CDATA[<p>1 字符串添加</p><p>qq=’1265616844’<br>driver.get(‘<a href="http://user.qzone.qq.com/{}/311&#39;.format(qq" target="_blank" rel="external">http://user.qzone.qq.com/{}/311&#39;.format(qq</a>))<br>如上，在一堆字符串中添加某个字符串，可以用如上的方式</p><p>2.中文字符串</p><pre><code># _*_ coding: utf-8 _*_</code></pre><p>python 文件首行增加这一行，才可以输出中文，python默认以ASCII码来解析<br>对于windows的python文件保存为带bom 的utf-8也可以实现这个功能<br>文件的声明编码要和实际文件保存的编码一致，不然可能保存为gbk<br>要想命令行输出中文还要添加</p><pre><code>de_str1=str1.decode(&apos;utf-8&apos;)</code></pre><p>才可以在命令行正常输出中文</p>]]></content>
     
     <summary type="html">
     
       
       
-        &lt;p&gt;数据隐藏的一种方式–ADS&lt;/p&gt;
-&lt;p&gt;NTFS交换数据流（Alternate Data Streams，简称ADS）是NTFS磁盘格式的一个特性。在NTFS文件系统下，每个文件都可以存在多个数据流，意思是除了主文件流之外还可以有许多非主文件流寄宿在主文件流中，这些利用N
+        &lt;p&gt;1 字符串添加&lt;/p&gt;
+&lt;p&gt;qq=’1265616844’&lt;br&gt;driver.get(‘&lt;a href=&quot;http://user.qzone.qq.com/{}/311&amp;#39;.format(qq&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;htt
       
     
     </summary>
     
-      <category term="恶意代码分析" scheme="http://18428381824.github.io/categories/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"/>
+      <category term="编程" scheme="http://18428381824.github.io/categories/%E7%BC%96%E7%A8%8B/"/>
     
     
-      <category term="恶意代码分析" scheme="http://18428381824.github.io/tags/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"/>
+      <category term="编程" scheme="http://18428381824.github.io/tags/%E7%BC%96%E7%A8%8B/"/>
     
   </entry>
   
@@ -503,32 +528,6 @@ AX=0FF80H
     
     
       <category term="网络" scheme="http://18428381824.github.io/tags/%E7%BD%91%E7%BB%9C/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>迷路</title>
-    <link href="http://18428381824.github.io/2017/08/01/%E8%BF%B7%E8%B7%AF/"/>
-    <id>http://18428381824.github.io/2017/08/01/迷路/</id>
-    <published>2017-07-31T16:00:00.000Z</published>
-    <updated>2017-08-01T02:06:52.003Z</updated>
-    
-    <content type="html"><![CDATA[<p>###步骤如下</p><p>1.这个题目是迄今遇到的最坑题目。话不多说，上题目。链接：<a href="http://pan.baidu.com/s/1hr5CtpU" target="_blank" rel="external">http://pan.baidu.com/s/1hr5CtpU</a> 密码：r9wi</p><p>2.首先运行题目，如下图所示，跟平常的题目没什么两样。随便输入字符串，发现弹出报错信息。咋一看，有关键字符串，好咧，这题不难，肯定可以找到关键挑战，然后问题就简单了。（太天真。。。）</p><p><img src="http://i.imgur.com/60iDg8y.png" alt=""></p><p>3  打开OD载入程序，搜索字符串，发现关键字符串，很高兴。</p><p><img src="http://i.imgur.com/J9OcWmh.png" alt=""></p><p>在字符串上方发现两个跳转都跳到失败处，猜想应该是二次验证，一个一个分析，分析第一个call crackme.00402e40 ，发现是对输入的字符串进行一系列处理，然后得到一个数值，在下面语句中发现是和0x92381221 进行比较。不等则跳转向失败，打开IDA，分析关键call ,发现0x92381221代表的十进制数2453148193刚好符合条件，心中顿感，我实在是太聪明了。</p><p><img src="http://i.imgur.com/gT8tpJM.png" alt=""></p><p>继续往下看下一个跳转，call crackme.00401DF0,发现是两个字符串比较，猜想是我们前面的字符串进行再次的运算得到一堆字符串然后比较，然后分析可得处理函数为call crackme.00401990,分析关键call 发现是把输入进行MD5运算得到的一堆字符串。沃日。。。这控制不了啊。。。然后感觉不太对，于是我尝试暴力把跳转改一下，看会出现什么情况。发现既弹出了成功，又弹出来失败，感觉不对。</p><p>4.想着对消息框下个断点，F9运行，点击工具栏的W发现，竟然出现了两个输入Input,觉得肯定玄机在此，觉得其中一个按钮一定是被隐藏了，在command 位置下断点，输入 bp ShowWindow,寻找ShowWindow函数，重新运行程序，发现运行到了用户层，alt+f9运行出来，发现前面就是ShowWindow 窗口在此下断点，删除刚刚下的user32里的断点，发现参数信息为0时，为隐藏，为1时为显现，于是更改参数值如下图所示：</p><p><img src="http://i.imgur.com/k7dqhuI.png" alt=""></p><p>复制到可执行文件，保存文件。再次运行发现果然出现了两个输入按钮。</p><p>5.修改后的程序重新加载进OD，此时发现感觉没什么思路，对获取输入字符串的函数进行下断点，在IDA中发现有GetWindowText函数，双加该函数，ctrl+x 获取其引用的位置，记下地址，在OD中ctrl+g 查找，找到该函数位置下断点，重新运行程序，输入字符串，点击左边的Input,程序运行到断点处，F8单步运行，发现下面有一个call ,F7进去看看，发现是获取字符串的长度，感觉好多Crackme都会对字符串的长度进行检查，于是对存字符串的位置下一个内存访问断点，看看是否有什么意外的惊喜，F9运行程序，发现程序到了这，IDA查看此位置的反编译结果，发现果然是对字符串的长度进行了检查，0x27u说明字符串长度为39,79，79,67,84,70,123,125刚好是题目所说的格式00CTF{},继续运行寻找返回的地方。最后回到401f96的位置，此处果然为一个调用，检查长度和格式。如果不符合返回值为0，跳到失败的位置。符合的话返回值为1，继续往下进行。</p><p><img src="http://i.imgur.com/EoKNATC.png" alt=""></p><p><img src="http://i.imgur.com/HQGVXkP.png" alt=""></p><p>6 继续往下分析，分析各个call 的作用，发现call 1.00401860 位置的call 有很大的嫌疑，里面有各种循环，猜测为算法处理过程，IDA定位此处位置分析基本确定此位置，继续向下运行，查找字符串比较的过程，发现地址为401fca的调用，是弹出错错误的位置，此处下断点，重新运行程序到这个位置，F7进去分析，同时打开IDA，定位此函数，辅助分析，果然发现了两个MessageBOXA函数。分析不同的弹框结果发现前面是一个字符串比较函数，IDA按table键定位此函数的位置。</p><p><img src="http://i.imgur.com/O2ZMscC.png" alt="">    </p><p>进去发现是一个一个进行字符的比较，比较字符串b5h760h64R867618bBwB48BrW92H4w5r  错误的话最后函数返回值为1，弹出错误对话框。</p><p>7.现在的问题就只剩下解决算法出路的问题了。IDA反编译出的代码如下</p><p><img src="http://i.imgur.com/bvyHkdm.png" alt=""></p><p>分析可知其对数字不做变换，大写字母减去65然后再进行关键操作，<br>V9=(V6+V5<em>V7)%26+((V6+V5</em>V7)%26&lt;0?0X1a:0)<br>v6在调试的时候会出现32-2-2=28，v5情况有点复杂，可能是3或者5，待会再说为什么，小写字母减去97然后进行关键操作，这样就进行了字符串的变换。<br>关于v6的问题：该数值最早是函数0041458e 的返回值，返回值为-1的时候就赋值为3，否则为原数。我用3进行测试的时候发现是错误的，那这个函数0041458e 就很有问题。<br>在此处下断点，F7进去发现是再次调用了函数41459c,继续跟进去同时观察IDA的结果，</p><p><img src="http://i.imgur.com/B0LOlTZ.png" alt=""></p><p>发现其实就是判断_mbschr((const unsigned __int8 <em>)(a3 + </em>(_DWORD *)this),a2))的结果，点击该函数进去，OD定位该位置，单步运行会发现，其实是检查输入字符串的第六位是否为0，如果为0则返回 值为0的地址，后面是字符串的地址减去该地址为5，即为v6,否则的话返回值为-1，在后面的判断中赋值为3.此为v6的具体赋值过程。</p><p><img src="http://i.imgur.com/IbfwZCz.png" alt=""></p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;###步骤如下&lt;/p&gt;
-&lt;p&gt;1.这个题目是迄今遇到的最坑题目。话不多说，上题目。链接：&lt;a href=&quot;http://pan.baidu.com/s/1hr5CtpU&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;http://pan.baidu.com
-      
-    
-    </summary>
-    
-      <category term="逆向" scheme="http://18428381824.github.io/categories/%E9%80%86%E5%90%91/"/>
-    
-    
-      <category term="逆向" scheme="http://18428381824.github.io/tags/%E9%80%86%E5%90%91/"/>
     
   </entry>
   
