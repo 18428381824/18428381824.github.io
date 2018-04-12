@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://scuzhangzhang.github.io/"/>
-  <updated>2018-04-12T09:00:56.431Z</updated>
+  <updated>2018-04-12T02:41:16.635Z</updated>
   <id>http://scuzhangzhang.github.io/</id>
   
   <author>
@@ -15,160 +15,6 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
-  
-  <entry>
-    <title>PE Checksum</title>
-    <link href="http://scuzhangzhang.github.io/2018/04/12/PE%20checksum/"/>
-    <id>http://scuzhangzhang.github.io/2018/04/12/PE checksum/</id>
-    <published>2018-04-11T16:00:00.000Z</published>
-    <updated>2018-04-12T09:00:56.431Z</updated>
-    
-    <content type="html"><![CDATA[<h3 id="1-check-介绍"><a href="#1-check-介绍" class="headerlink" title="1.check 介绍"></a>1.check 介绍</h3><p>PE文件可选头结构如下，其中有个成员是checksum ，其在编译以后生成一个校验和，<br>所有驱动、系统启动时加载的DLL、系统关键进程加载的DLL都要进行校验和的校验，查看是否有改动，这个检验和可以通过API进行计算，CheckSumMappedFile 或者直接 MapFileAndCheckSum，计算算法比较简单如下：</p><ul><li>因为要计算整个文件数据嘛，所以开始这个字段的数据要先置0；</li><li>从文件头开始，每次读一个字（WORD），进行带进位的累加（ADC），超出WORD部分自动溢出；</li><li>将前面的累加和再加上PE文件的长度，结果就是这个校验和了</li></ul><h3 id="2-测试代码如下："><a href="#2-测试代码如下：" class="headerlink" title="2 测试代码如下："></a>2 测试代码如下：</h3><pre><code>#include&quot;stdafx.h&quot;#include &lt;windows.h&gt;#include&lt;ImageHlp.h&gt;#pragma comment(lib,&quot;ImageHlp.lib&quot;)void main(){    DWORD HeaderCheckSum = 0;   //PE头里的校验值    DWORD CheckSum = 0;     //计算下来的校验值    MapFileAndCheckSum(L&quot;D:\\newupdate.exe&quot;, &amp;HeaderCheckSum, &amp;CheckSum);    if (CheckSum == HeaderCheckSum)    {        MessageBox(NULL, L&quot;相等&quot;, NULL, 0);    }}</code></pre><h3 id="附PE可选头结构"><a href="#附PE可选头结构" class="headerlink" title="附PE可选头结构"></a>附PE可选头结构</h3><p>typedef struct _IMAGE_OPTIONAL_HEADER<br>{<br>    //<br>    // Standard fields.<br>    //<br>+18h    WORD    Magic;         // 标志字, ROM 映像（0107h）,普通可执行文件（010Bh）<br>+1Ah    BYTE      MajorLinkerVersion;     // 链接程序的主版本号<br>+1Bh    BYTE      MinorLinkerVersion;     // 链接程序的次版本号<br>+1Ch    DWORD   SizeOfCode;     // 所有含代码的节的总大小<br>+20h    DWORD   SizeOfInitializedData;    // 所有含已初始化数据的节的总大小<br>+24h    DWORD   SizeOfUninitializedData; // 所有含未初始化数据的节的大小<br>+28h    DWORD   AddressOfEntryPoint;    // 程序执行入口RVA<br>+2Ch    DWORD   BaseOfCode;      // 代码的区块的起始RVA<br>+30h    DWORD   BaseOfData;      // 数据的区块的起始RVA<br>    //<br>    // NT additional fields.    以下是属于NT结构增加的领域。<br>    //<br>+34h    DWORD   ImageBase;      // 程序的首选装载地址<br>+38h    DWORD   SectionAlignment;      // 内存中的区块的对齐大小<br>+3Ch    DWORD   FileAlignment;      // 文件中的区块的对齐大小<br>+40h    WORD    MajorOperatingSystemVersion;  // 要求操作系统最低版本号的主版本号<br>+42h    WORD    MinorOperatingSystemVersion;  // 要求操作系统最低版本号的副版本号<br>+44h    WORD    MajorImageVersion;       // 可运行于操作系统的主版本号<br>+46h    WORD    MinorImageVersion;       // 可运行于操作系统的次版本号<br>+48h    WORD    MajorSubsystemVersion;  // 要求最低子系统版本的主版本号<br>+4Ah    WORD    MinorSubsystemVersion;  // 要求最低子系统版本的次版本号<br>+4Ch    DWORD   Win32VersionValue;       // 莫须有字段，不被病毒利用的话一般为0<br>+50h    DWORD   SizeOfImage;       // 映像装入内存后的总尺寸<br>+54h    DWORD   SizeOfHeaders;       // 所有头 + 区块表的尺寸大小<br>+58h    DWORD   CheckSum;       // 映像的校检和<br>+5Ch    WORD    Subsystem;       // 可执行文件期望的子系统<br>+5Eh    WORD    DllCharacteristics;       // DllMain()函数何时被调用，默认为 0<br>+60h    DWORD   SizeOfStackReserve;       // 初始化时的栈大小<br>+64h    DWORD   SizeOfStackCommit;       // 初始化时实际提交的栈大小<br>+68h    DWORD   SizeOfHeapReserve;        // 初始化时保留的堆大小<br>+6Ch    DWORD   SizeOfHeapCommit;        // 初始化时实际提交的堆大小<br>+70h    DWORD   LoaderFlags;        // 与调试有关，默认为 0<br>+74h    DWORD   NumberOfRvaAndSizes;  // 下边数据目录的项数，这个字段自Windows NT 发布以来        // 一直是16<br>+78h    IMAGE_DATA_DIRECTORY DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES];<br>       // 数据目录表<br>} IMAGE_OPTIONAL_HEADER32, *PIMAGE_OPTIONAL_HEADER32;</p><p><img src="./images/1523523098546.jpg" alt="enter description here" title="1523523098546.jpg"></p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h3 id=&quot;1-check-介绍&quot;&gt;&lt;a href=&quot;#1-check-介绍&quot; class=&quot;headerlink&quot; title=&quot;1.check 介绍&quot;&gt;&lt;/a&gt;1.check 介绍&lt;/h3&gt;&lt;p&gt;PE文件可选头结构如下，其中有个成员是checksum ，其在编译以后生成一
-      
-    
-    </summary>
-    
-      <category term="杂学" scheme="http://scuzhangzhang.github.io/categories/%E6%9D%82%E5%AD%A6/"/>
-    
-    
-      <category term="杂学" scheme="http://scuzhangzhang.github.io/tags/%E6%9D%82%E5%AD%A6/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>ubuntu 无法安装软件</title>
-    <link href="http://scuzhangzhang.github.io/2018/04/12/ubuntu%20apt%E6%97%A0%E6%B3%95%E5%AE%89%E8%A3%85%E8%BD%AF%E4%BB%B6/"/>
-    <id>http://scuzhangzhang.github.io/2018/04/12/ubuntu apt无法安装软件/</id>
-    <published>2018-04-11T16:00:00.000Z</published>
-    <updated>2018-04-12T09:12:23.393Z</updated>
-    
-    <content type="html"><![CDATA[<h3 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h3><p>apt-get install package 时出现以下问题</p><p>E: Could not get lock /var/lib/dpkg/lock - open (11: Resource temporarily unavailable)<br>E: Unable to lock the administration directory (/var/lib/dpkg/), is another process using it?</p><h3 id="解决办法："><a href="#解决办法：" class="headerlink" title="解决办法："></a>解决办法：</h3><p> sudo rm /var/lib/dpkg/lock<br> sudo dpkg –configure -a</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h3 id=&quot;问题描述&quot;&gt;&lt;a href=&quot;#问题描述&quot; class=&quot;headerlink&quot; title=&quot;问题描述&quot;&gt;&lt;/a&gt;问题描述&lt;/h3&gt;&lt;p&gt;apt-get install package 时出现以下问题&lt;/p&gt;
-&lt;p&gt;E: Could not get lock /
-      
-    
-    </summary>
-    
-      <category term="杂学" scheme="http://scuzhangzhang.github.io/categories/%E6%9D%82%E5%AD%A6/"/>
-    
-    
-      <category term="杂学" scheme="http://scuzhangzhang.github.io/tags/%E6%9D%82%E5%AD%A6/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>键盘记录</title>
-    <link href="http://scuzhangzhang.github.io/2018/04/12/%E9%94%AE%E7%9B%98%E8%AE%B0%E5%BD%95/"/>
-    <id>http://scuzhangzhang.github.io/2018/04/12/键盘记录/</id>
-    <published>2018-04-11T16:00:00.000Z</published>
-    <updated>2018-04-12T09:08:37.962Z</updated>
-    
-    <content type="html"><![CDATA[<h3 id="问题描述："><a href="#问题描述：" class="headerlink" title="问题描述："></a>问题描述：</h3><p>win10更新以后出现 无法定位程序输入点_uncaught_exceptions 于动态链接库 C:\windows\system32\msvcp_win.dll上。</p><h3 id="解决办法："><a href="#解决办法：" class="headerlink" title="解决办法："></a>解决办法：</h3><p>命令行下：输入sfc /scannow</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h3 id=&quot;问题描述：&quot;&gt;&lt;a href=&quot;#问题描述：&quot; class=&quot;headerlink&quot; title=&quot;问题描述：&quot;&gt;&lt;/a&gt;问题描述：&lt;/h3&gt;&lt;p&gt;win10更新以后出现 无法定位程序输入点_uncaught_exceptions 于动态链接库 C:\window
-      
-    
-    </summary>
-    
-      <category term="杂学" scheme="http://scuzhangzhang.github.io/categories/%E6%9D%82%E5%AD%A6/"/>
-    
-    
-      <category term="杂学" scheme="http://scuzhangzhang.github.io/tags/%E6%9D%82%E5%AD%A6/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>获取打开的文件的全路径（2）</title>
-    <link href="http://scuzhangzhang.github.io/2018/04/12/%E8%8E%B7%E5%8F%96%E6%89%93%E5%BC%80%E7%9A%84%E6%96%87%E4%BB%B6%E7%9A%84%E5%85%A8%E8%B7%AF%E5%BE%84%EF%BC%882)/"/>
-    <id>http://scuzhangzhang.github.io/2018/04/12/获取打开的文件的全路径（2)/</id>
-    <published>2018-04-11T16:00:00.000Z</published>
-    <updated>2018-04-12T08:48:33.398Z</updated>
-    
-    <content type="html"><![CDATA[<h2 id="方法二："><a href="#方法二：" class="headerlink" title="方法二："></a>方法二：</h2><p>搜索进程空间中的所有句柄，获取句柄的文件名即可。</p><h3 id="1-首先遍历进程寻找打开文件的进程，比如-word-exe-和PowerPoint-exe"><a href="#1-首先遍历进程寻找打开文件的进程，比如-word-exe-和PowerPoint-exe" class="headerlink" title="1 首先遍历进程寻找打开文件的进程，比如 word.exe 和PowerPoint.exe"></a>1 首先遍历进程寻找打开文件的进程，比如 word.exe 和PowerPoint.exe</h3><pre><code>HANDLE hSnapProcess = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);if (hSnapProcess == INVALID_HANDLE_VALUE){    return 1;}PROCESSENTRY32W ProcessEntry;ProcessEntry.dwSize = sizeof(ProcessEntry);BOOL bret = Process32FirstW(hSnapProcess, &amp;ProcessEntry);WCHAR wszProcessInfo[MAX_PATH] = { 0 };do{    WCHAR Name[MAX_PATH] = { 0 };    if (!lstrcmp(ProcessEntry.szExeFile, L&quot;POWERPNT.EXE&quot;) | !lstrcmp(ProcessEntry.szExeFile, L&quot;WINWORD.EXE&quot;))    {        …….    }</code></pre><h3 id="2-寻找到目标进程以后，获取进程中的句柄"><a href="#2-寻找到目标进程以后，获取进程中的句柄" class="headerlink" title="2  寻找到目标进程以后，获取进程中的句柄"></a>2  寻找到目标进程以后，获取进程中的句柄</h3><p> 这里利用了未文档化的一个函数</p><p>ZwQuerySystemInformation，这是ntdll.dll中的函数</p><pre><code>HMODULE hNtDLL = LoadLibrary(L&quot;NTDLL.DLL&quot;);if (!hNtDLL){    return 1;}ZwQuerySystemInformation = (ZWQUERYSYSTEMINFORMATION)GetProcAddress(hNtDLL, &quot;ZwQuerySystemInformation&quot;);typedef NTSTATUS(WINAPI *ZWQUERYSYSTEMINFORMATION)(unsigned long, PVOID, ULONG, PULONG);ZWQUERYSYSTEMINFORMATION ZwQuerySystemInformation;</code></pre><p>函数原型如下：</p><pre><code>NTSTATUS WINAPI ZwQuerySystemInformation(  _In_      SYSTEM_INFORMATION_CLASS SystemInformationClass,  _Inout_   PVOID                    SystemInformation,  _In_      ULONG                    SystemInformationLength,  _Out_opt_ PULONG                   ReturnLength);</code></pre><p> SYSTEM_INFORMATION_CLASS结构体如下：</p><pre><code>typedef enum _SYSTEMINFOCLASS{    SystemBasicInformation,             // 0x002C    SystemProcessorInformation,         // 0x000C    SystemPerformanceInformation,       // 0x0138    SystemTimeInformation,              // 0x0020    SystemPathInformation,              // not implemented    SystemProcessInformation,           // 0x00C8+ per process    SystemCallInformation,              // 0x0018 + (n * 0x0004)    SystemConfigurationInformation,     // 0x0018    SystemProcessorCounters,            // 0x0030 per cpu    SystemGlobalFlag,                   // 0x0004 (fails if size != 4)    SystemCallTimeInformation,          // not implemented    SystemModuleInformation,            // 0x0004 + (n * 0x011C)    SystemLockInformation,              // 0x0004 + (n * 0x0024)    SystemStackTraceInformation,        // not implemented    SystemPagedPoolInformation,         // checked build only    SystemNonPagedPoolInformation,      // checked build only    SystemHandleInformation,            // 0x0004  + (n * 0x0010)    SystemObjectTypeInformation,        // 0x0038+ + (n * 0x0030+)    SystemPageFileInformation,          // 0x0018+ per page file    SystemVdmInstemulInformation,       // 0x0088    SystemVdmBopInformation,            // invalid info class    SystemCacheInformation,             // 0x0024    SystemPoolTagInformation,           // 0x0004 + (n * 0x001C)    SystemInterruptInformation,         // 0x0000, or 0x0018 per cpu    SystemDpcInformation,               // 0x0014    SystemFullMemoryInformation,        // checked build only    SystemLoadDriver,                   // 0x0018, set mode only    SystemUnloadDriver,                 // 0x0004, set mode only    SystemTimeAdjustmentInformation,    // 0x000C, 0x0008 writeable    SystemSummaryMemoryInformation,     // checked build only    SystemNextEventIdInformation,       // checked build only    SystemEventIdsInformation,          // checked build only    SystemCrashDumpInformation,         // 0x0004    SystemExceptionInformation,         // 0x0010    SystemCrashDumpStateInformation,    // 0x0004    SystemDebuggerInformation,          // 0x0002    SystemContextSwitchInformation,     // 0x0030    SystemRegistryQuotaInformation,     // 0x000C    SystemAddDriver,                    // 0x0008, set mode only    SystemPrioritySeparationInformation,// 0x0004, set mode only    SystemPlugPlayBusInformation,       // not implemented    SystemDockInformation,              // not implemented    SystemPowerInfo,             // 0x0060 (XP only!)    SystemProcessorSpeedInformation,    // 0x000C (XP only!)    SystemTimeZoneInformation,          // 0x00AC    SystemLookasideInformation,         // n * 0x0020    SystemSetTimeSlipEvent,    SystemCreateSession,    // set mode only    SystemDeleteSession,    // set mode only    SystemInvalidInfoClass1,   // invalid info class    SystemRangeStartInformation,   // 0x0004 (fails if size != 4)    SystemVerifierInformation,    SystemAddVerifier,    SystemSessionProcessesInformation, // checked build only    MaxSystemInfoClass} SYSTEMINFOCLASS, *PSYSTEMINFOCLASS;</code></pre><p>这个结构再MSDN上只列举了一部分，这是网上搜索的结构，可以访问<a href="http://www.geoffchappell.com/studies/windows/km/ntoskrnl/api/ex/sysinfo/query.htm查看详细的信息，其包含了我们所需要的一个参数SystemHandleInformation" target="_blank" rel="external">http://www.geoffchappell.com/studies/windows/km/ntoskrnl/api/ex/sysinfo/query.htm查看详细的信息，其包含了我们所需要的一个参数SystemHandleInformation</a>  用来获取系统中进程的句柄信息，第二个参数是缓冲区指针，第三个参数是大小，最后一个参数是实际的返回的数据大小。<br>传入SystemHandleInformation   将会返回一个SYSTEM_HANDLE_INFORMATION结构，结构如下：</p><pre><code>typedef struct _SYSTEM_HANDLE_INFORMATION{    ULONG   uCount;    SYSTEM_HANDLE aSH[];} SYSTEM_HANDLE_INFORMATION, *PSYSTEM_HANDLE_INFORMATION;typedef struct _SYSTEM_HANDLE{    ULONG  uIdProcess;    UCHAR  ObjectType;    // OB_TYPE_* (OB_TYPE_TYPE, etc.)    UCHAR  Flags;         // HANDLE_FLAG_* (HANDLE_FLAG_INHERIT, etc.)    USHORT  Handle;    PVOID  pObject;    ACCESS_MASK GrantedAccess;} SYSTEM_HANDLE, *PSYSTEM_HANDLE;</code></pre><h3 id="3-查找句柄对应的进程，获取句柄对应的文件名"><a href="#3-查找句柄对应的进程，获取句柄对应的文件名" class="headerlink" title="3 查找句柄对应的进程，获取句柄对应的文件名"></a>3 查找句柄对应的进程，获取句柄对应的文件名</h3><p>通过查询返回句柄的进程pid与传入的PID比较。若符合，OpenProcess 打开该进程，DuplicateHanle复制句柄，然后获取句柄的文件名，然后相对路径转换为绝对路径。<br>获取句柄的详细信息用到了ZwQueryInformationFile 函数，这个函数同样是一个未文档化的函数，</p><pre><code>HMODULE hNtDLL = LoadLibrary(L&quot;NTDLL.DLL&quot;);if (!hNtDLL){    return 1;}ZwQueryInformationFile = (ZWQUERYINFORMATIONFILE)GetProcAddress(hNtDLL, &quot;ZwQueryInformationFile&quot;);typedef NTSTATUS(WINAPI *ZWQUERYINFORMATIONFILE)(HANDLE, PIO_STATUS_BLOCK, PVOID,ULONG, FILE_INFORMATION_CLASS);ZWQUERYINFORMATIONFILE ZwQueryInformationFile;NTSTATUS   ZwQueryInformationFile(    IN HANDLE  FileHandle,    OUT PIO_STATUS_BLOCK  IoStatusBlock,    OUT PVOID  FileInformation,    IN ULONG  Length,    IN FILE_INFORMATION_CLASS  FileInformationClass    );</code></pre><p>第一个参数是文件句柄，第二个参数是接收最终完成状态的IO_STATUS_BLOCK结构的指针。第三个参数是存储返回的文件对象的信息，第四个参数是缓冲区大小，第五个参数是文件信息的类型，我们传入FileNameInformation。在这里我们定义了一个结构体 PNM_INFO ，用来存储信息</p><pre><code>typedef struct _NM_INFO{    HANDLE  hFile;    FILE_NAME_INFORMATION Info;    WCHAR Name[MAX_PATH];} NM_INFO, *PNM_INFO;</code></pre><p>第三个成员即为文件名包括路径，不过是相对路径，调用 PathResolve<br> 获取绝对路径。到此文件的全路径就获取到了。<br>代码地址如下：<br><a href="https://github.com/scuzhangzhang/GetFileFullPath/tree/master/GetFileFullPath" target="_blank" rel="external">https://github.com/scuzhangzhang/GetFileFullPath/tree/master/GetFileFullPath</a></p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h2 id=&quot;方法二：&quot;&gt;&lt;a href=&quot;#方法二：&quot; class=&quot;headerlink&quot; title=&quot;方法二：&quot;&gt;&lt;/a&gt;方法二：&lt;/h2&gt;&lt;p&gt;搜索进程空间中的所有句柄，获取句柄的文件名即可。&lt;/p&gt;
-&lt;h3 id=&quot;1-首先遍历进程寻找打开文件的进程，比如-word
-      
-    
-    </summary>
-    
-      <category term="杂学" scheme="http://scuzhangzhang.github.io/categories/%E6%9D%82%E5%AD%A6/"/>
-    
-    
-      <category term="杂学" scheme="http://scuzhangzhang.github.io/tags/%E6%9D%82%E5%AD%A6/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>获取打开文件的全路径（1）</title>
-    <link href="http://scuzhangzhang.github.io/2018/04/12/%E8%8E%B7%E5%8F%96%E6%89%93%E5%BC%80%E7%9A%84%E6%96%87%E4%BB%B6%E7%9A%84%E5%85%A8%E8%B7%AF%E5%BE%84%EF%BC%881%EF%BC%89/"/>
-    <id>http://scuzhangzhang.github.io/2018/04/12/获取打开的文件的全路径（1）/</id>
-    <published>2018-04-11T16:00:00.000Z</published>
-    <updated>2018-04-12T08:49:47.301Z</updated>
-    
-    <content type="html"><![CDATA[<p>方法一：（后续参见方法二）</p><p>获取进程PEB中的命令行参数信息（问题：如果先打开文件比如word.exe再打开文件，会出现获取不到的情况）<br>步骤：<br>1 遍历进程获取打开文件的可执行文件的进程</p><pre><code>HANDLE hSnapProcess = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);if (hSnapProcess == INVALID_HANDLE_VALUE){    return;}PROCESSENTRY32W ProcessEntry;ProcessEntry.dwSize = sizeof(ProcessEntry);BOOL bret = Process32FirstW(hSnapProcess, &amp;ProcessEntry);WCHAR wszProcessInfo[MAX_PATH] = { 0 };do{    WCHAR Name[MAX_PATH] = { 0 };    if (!lstrcmp(ProcessEntry.szExeFile, L&quot;POWERPNT.EXE&quot;)| !lstrcmp(ProcessEntry.szExeFile, L&quot;WINWORD.EXE&quot;))    {        HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, false, ProcessEntry.th32ProcessID);        do something        CloseHandle(hProcess);    }} while (Process32NextW(hSnapProcess, &amp;ProcessEntry));</code></pre><p> 2  利用ntdll.dll中一个未公开的函数NtQueryInformationProcess，获取进程信息然后去读对方进程ReadProcessMemory,函数原型如下：</p><pre><code>NTSTATUS WINAPI NtQueryInformationProcess(  _In_      HANDLE           ProcessHandle,  _In_      PROCESSINFOCLASS ProcessInformationClass,  _Out_     PVOID            ProcessInformation,  _In_      ULONG            ProcessInformationLength,  _Out_opt_ PULONG           ReturnLength);</code></pre><p>第一个参数是进程句柄，第二个参数是获取的进程的信息类型，这里我们选择ProcessBasicInformation,<br>msdn 的声明如下，会返回一个PEB结构体。</p><p><img src="./images/1523522947070.jpg" alt="enter description here" title="1523522947070.jpg"></p><p>第三个参数是输出参数，当参数2是ProcessBasicInformation时，会返回一个<br>PROCESS_BASIC_INFORMATION 结构，结构如下，</p><p><img src="./images/1523522975322.jpg" alt="enter description here" title="1523522975322.jpg"></p><pre><code>status = NtQueryInformationProcess(hProcess,                ProcessBasicInformation,                &amp;pbi,                sizeof(PROCESS_BASIC_INFORMATION),                &amp;ReturnLength);</code></pre><p>3  获取到PROCESS_BASIC_INFORMATION结构体以后，由上可以看出的它的第二个成员就是指向进程PEB结构体的指针，此时调用ReadProcessMemory，获取进程PEB，</p><pre><code> ReadProcessMemory(hProcess, pbi.PebBaseAddress, &amp;peb, sizeof(PEB), 0)  ReadProcessMemory的函数原型如下：BOOL WINAPI ReadProcessMemory(  _In_  HANDLE  hProcess,  _In_  LPCVOID lpBaseAddress,  _Out_ LPVOID  lpBuffer,  _In_  SIZE_T  nSize,  _Out_ SIZE_T  *lpNumberOfBytesRead);</code></pre><p>4.通过ReadProcessMemory 获取进程的PEB以后，PEB的结构如下：</p><pre><code>typedef struct _PEB {    BOOLEAN                 InheritedAddressSpace;    BOOLEAN                 ReadImageFileExecOptions;    BOOLEAN                 BeingDebugged;    BOOLEAN                 Spare;    HANDLE                  Mutant;    PVOID                   ImageBaseAddress;    PPEB_LDR_DATA           LoaderData;    PRTL_USER_PROCESS_PARAMETERS ProcessParameters;    PVOID                   SubSystemData;    PVOID                   ProcessHeap;    PVOID                   FastPebLock;    PPEBLOCKROUTINE         FastPebLockRoutine;    PPEBLOCKROUTINE         FastPebUnlockRoutine;    ULONG                   EnvironmentUpdateCount;    PVOID*                  KernelCallbackTable;    PVOID                   EventLogSection;    PVOID                   EventLog;    PPEB_FREE_BLOCK         FreeList;    ULONG                   TlsExpansionCounter;    PVOID                   TlsBitmap;    ULONG                   TlsBitmapBits[0x2];    PVOID                   ReadOnlySharedMemoryBase;    PVOID                   ReadOnlySharedMemoryHeap;    PVOID*                  ReadOnlyStaticServerData;    PVOID                   AnsiCodePageData;    PVOID                   OemCodePageData;    PVOID                   UnicodeCaseTableData;    ULONG                   NumberOfProcessors;    ULONG                   NtGlobalFlag;    BYTE                    Spare2[0x4];    LARGE_INTEGER           CriticalSectionTimeout;    ULONG                   HeapSegmentReserve;    ULONG                   HeapSegmentCommit;    ULONG                   HeapDeCommitTotalFreeThreshold;    ULONG                   HeapDeCommitFreeBlockThreshold;    ULONG                   NumberOfHeaps;    ULONG                   MaximumNumberOfHeaps;    PVOID*                  *ProcessHeaps;    PVOID                   GdiSharedHandleTable;    PVOID                   ProcessStarterHelper;    PVOID                   GdiDCAttributeList;    PVOID                   LoaderLock;    ULONG                   OSMajorVersion;    ULONG                   OSMinorVersion;    ULONG                   OSBuildNumber;    ULONG                   OSPlatformId;    ULONG                   ImageSubSystem;    ULONG                   ImageSubSystemMajorVersion;    ULONG                   ImageSubSystemMinorVersion;    ULONG                   GdiHandleBuffer[0x22];    ULONG                   PostProcessInitRoutine;    ULONG                   TlsExpansionBitmap;    BYTE                    TlsExpansionBitmapBits[0x80];    ULONG                   SessionId;} PEB, *PPEB;</code></pre><p>如图标红位置为进程的参数信息，再次调用ReadProcessMemory  获取参数信息，<br>ReadProcessMemory(hProcess, peb.ProcessParameters, &amp;upps, sizeof(RTL_USER_PROCESS_PARAMETERS), 0))<br> 其中upps是一个RTL_USER_PROCESS_PARAMETERS 的结构体，定义如下：<br>    typedef struct _RTL_USER_PROCESS_PARAMETERS<br>    {<br>        ULONG MaximumLength;<br>        ULONG Length;</p><pre><code>    ULONG Flags;    ULONG DebugFlags;    HANDLE ConsoleHandle;    ULONG ConsoleFlags;    HANDLE StandardInput;    HANDLE StandardOutput;    HANDLE StandardError;    CURDIR CurrentDirectory;    UNICODE_STRING DllPath;    UNICODE_STRING ImagePathName;    UNICODE_STRING CommandLine;    PVOID Environment;    ULONG StartingX;    ULONG StartingY;    ULONG CountX;    ULONG CountY;    ULONG CountCharsX;    ULONG CountCharsY;    ULONG FillAttribute;    ULONG WindowFlags;    ULONG ShowWindowFlags;    UNICODE_STRING WindowTitle;    UNICODE_STRING DesktopInfo;    UNICODE_STRING ShellInfo;    UNICODE_STRING RuntimeData;    RTL_DRIVE_LETTER_CURDIR CurrentDirectories[RTL_MAX_DRIVE_LETTERS];    ULONG EnvironmentSize;    ULONG EnvironmentVersion;    PVOID PackageDependencyData; //8+    ULONG ProcessGroupId;   // ULONG LoaderThreads;} RTL_USER_PROCESS_PARAMETERS, *PRTL_USER_PROCESS_PARAMETERS;</code></pre><p>如上标红位置为命令行信息，UNICODE_STRING同样是一个结构体，定义如下：</p><pre><code>typedef struct _UNICODE_STRING {    USHORT Length;    USHORT MaximumLength;    PWSTR  Buffer;} UNICODE_STRING;typedef UNICODE_STRING *PUNICODE_STRING;</code></pre><p>再次调用ReadProcessMemory获取命令行字符串信息，存入buffer中</p><pre><code>ReadProcessMemory(hProcess, upps.CommandLine.Buffer, buffer, upps.CommandLine.Length, 0); </code></pre><p>到这完整的进程命令行信息就获取到了。通过字符串处理就可以得到相应的打开的文件的全路径了 。</p><p>代码工程链接：<a href="https://github.com/scuzhangzhang/GetFileFullPath" target="_blank" rel="external">https://github.com/scuzhangzhang/GetFileFullPath</a></p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;方法一：（后续参见方法二）&lt;/p&gt;
-&lt;p&gt;获取进程PEB中的命令行参数信息（问题：如果先打开文件比如word.exe再打开文件，会出现获取不到的情况）&lt;br&gt;步骤：&lt;br&gt;1 遍历进程获取打开文件的可执行文件的进程&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;HANDLE hSnapPr
-      
-    
-    </summary>
-    
-      <category term="杂学" scheme="http://scuzhangzhang.github.io/categories/%E6%9D%82%E5%AD%A6/"/>
-    
-    
-      <category term="杂学" scheme="http://scuzhangzhang.github.io/tags/%E6%9D%82%E5%AD%A6/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>windows 更新以后无法定位msvcp_win.dll</title>
-    <link href="http://scuzhangzhang.github.io/2018/04/12/windows%E6%9B%B4%E6%96%B0%E5%87%BA%E7%8E%B0%E6%97%A0%E6%B3%95%E5%AE%9A%E4%BD%8Ddll%E9%97%AE%E9%A2%98/"/>
-    <id>http://scuzhangzhang.github.io/2018/04/12/windows更新出现无法定位dll问题/</id>
-    <published>2018-04-11T16:00:00.000Z</published>
-    <updated>2018-04-12T09:07:08.397Z</updated>
-    
-    <content type="html"><![CDATA[<h3 id="问题描述："><a href="#问题描述：" class="headerlink" title="问题描述："></a>问题描述：</h3><p>win10更新以后出现 无法定位程序输入点_uncaught_exceptions 于动态链接库 C:\windows\system32\msvcp_win.dll上。</p><h3 id="解决办法："><a href="#解决办法：" class="headerlink" title="解决办法："></a>解决办法：</h3><p>命令行下：输入sfc /scannow</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;h3 id=&quot;问题描述：&quot;&gt;&lt;a href=&quot;#问题描述：&quot; class=&quot;headerlink&quot; title=&quot;问题描述：&quot;&gt;&lt;/a&gt;问题描述：&lt;/h3&gt;&lt;p&gt;win10更新以后出现 无法定位程序输入点_uncaught_exceptions 于动态链接库 C:\window
-      
-    
-    </summary>
-    
-      <category term="杂学" scheme="http://scuzhangzhang.github.io/categories/%E6%9D%82%E5%AD%A6/"/>
-    
-    
-      <category term="杂学" scheme="http://scuzhangzhang.github.io/tags/%E6%9D%82%E5%AD%A6/"/>
-    
-  </entry>
   
   <entry>
     <title>windows 编程获取网卡和ip</title>
@@ -210,6 +56,158 @@
       
         &lt;p&gt;1.在IDA中打开Structures，快捷键是shifr+ F9 ,然后按insert键，进行插入&lt;/p&gt;
 &lt;h1 id=&quot;enter-description-here-1&quot;&gt;&lt;a href=&quot;#enter-description-here-1&quot; class=&quot;heade
+      
+    
+    </summary>
+    
+      <category term="杂学" scheme="http://scuzhangzhang.github.io/categories/%E6%9D%82%E5%AD%A6/"/>
+    
+    
+      <category term="杂学" scheme="http://scuzhangzhang.github.io/tags/%E6%9D%82%E5%AD%A6/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>PE Checksum</title>
+    <link href="http://scuzhangzhang.github.io/2018/04/12/PE%20checksum/"/>
+    <id>http://scuzhangzhang.github.io/2018/04/12/PE checksum/</id>
+    <published>2018-04-11T16:00:00.000Z</published>
+    <updated>2018-04-12T09:00:56.431Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="1-check-介绍"><a href="#1-check-介绍" class="headerlink" title="1.check 介绍"></a>1.check 介绍</h3><p>PE文件可选头结构如下，其中有个成员是checksum ，其在编译以后生成一个校验和，<br>所有驱动、系统启动时加载的DLL、系统关键进程加载的DLL都要进行校验和的校验，查看是否有改动，这个检验和可以通过API进行计算，CheckSumMappedFile 或者直接 MapFileAndCheckSum，计算算法比较简单如下：</p><ul><li>因为要计算整个文件数据嘛，所以开始这个字段的数据要先置0；</li><li>从文件头开始，每次读一个字（WORD），进行带进位的累加（ADC），超出WORD部分自动溢出；</li><li>将前面的累加和再加上PE文件的长度，结果就是这个校验和了</li></ul><h3 id="2-测试代码如下："><a href="#2-测试代码如下：" class="headerlink" title="2 测试代码如下："></a>2 测试代码如下：</h3><pre><code>#include&quot;stdafx.h&quot;#include &lt;windows.h&gt;#include&lt;ImageHlp.h&gt;#pragma comment(lib,&quot;ImageHlp.lib&quot;)void main(){    DWORD HeaderCheckSum = 0;   //PE头里的校验值    DWORD CheckSum = 0;     //计算下来的校验值    MapFileAndCheckSum(L&quot;D:\\newupdate.exe&quot;, &amp;HeaderCheckSum, &amp;CheckSum);    if (CheckSum == HeaderCheckSum)    {        MessageBox(NULL, L&quot;相等&quot;, NULL, 0);    }}</code></pre><h3 id="附PE可选头结构"><a href="#附PE可选头结构" class="headerlink" title="附PE可选头结构"></a>附PE可选头结构</h3><p>typedef struct _IMAGE_OPTIONAL_HEADER<br>{<br>    //<br>    // Standard fields.<br>    //<br>+18h    WORD    Magic;         // 标志字, ROM 映像（0107h）,普通可执行文件（010Bh）<br>+1Ah    BYTE      MajorLinkerVersion;     // 链接程序的主版本号<br>+1Bh    BYTE      MinorLinkerVersion;     // 链接程序的次版本号<br>+1Ch    DWORD   SizeOfCode;     // 所有含代码的节的总大小<br>+20h    DWORD   SizeOfInitializedData;    // 所有含已初始化数据的节的总大小<br>+24h    DWORD   SizeOfUninitializedData; // 所有含未初始化数据的节的大小<br>+28h    DWORD   AddressOfEntryPoint;    // 程序执行入口RVA<br>+2Ch    DWORD   BaseOfCode;      // 代码的区块的起始RVA<br>+30h    DWORD   BaseOfData;      // 数据的区块的起始RVA<br>    //<br>    // NT additional fields.    以下是属于NT结构增加的领域。<br>    //<br>+34h    DWORD   ImageBase;      // 程序的首选装载地址<br>+38h    DWORD   SectionAlignment;      // 内存中的区块的对齐大小<br>+3Ch    DWORD   FileAlignment;      // 文件中的区块的对齐大小<br>+40h    WORD    MajorOperatingSystemVersion;  // 要求操作系统最低版本号的主版本号<br>+42h    WORD    MinorOperatingSystemVersion;  // 要求操作系统最低版本号的副版本号<br>+44h    WORD    MajorImageVersion;       // 可运行于操作系统的主版本号<br>+46h    WORD    MinorImageVersion;       // 可运行于操作系统的次版本号<br>+48h    WORD    MajorSubsystemVersion;  // 要求最低子系统版本的主版本号<br>+4Ah    WORD    MinorSubsystemVersion;  // 要求最低子系统版本的次版本号<br>+4Ch    DWORD   Win32VersionValue;       // 莫须有字段，不被病毒利用的话一般为0<br>+50h    DWORD   SizeOfImage;       // 映像装入内存后的总尺寸<br>+54h    DWORD   SizeOfHeaders;       // 所有头 + 区块表的尺寸大小<br>+58h    DWORD   CheckSum;       // 映像的校检和<br>+5Ch    WORD    Subsystem;       // 可执行文件期望的子系统<br>+5Eh    WORD    DllCharacteristics;       // DllMain()函数何时被调用，默认为 0<br>+60h    DWORD   SizeOfStackReserve;       // 初始化时的栈大小<br>+64h    DWORD   SizeOfStackCommit;       // 初始化时实际提交的栈大小<br>+68h    DWORD   SizeOfHeapReserve;        // 初始化时保留的堆大小<br>+6Ch    DWORD   SizeOfHeapCommit;        // 初始化时实际提交的堆大小<br>+70h    DWORD   LoaderFlags;        // 与调试有关，默认为 0<br>+74h    DWORD   NumberOfRvaAndSizes;  // 下边数据目录的项数，这个字段自Windows NT 发布以来        // 一直是16<br>+78h    IMAGE_DATA_DIRECTORY DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES];<br>       // 数据目录表<br>} IMAGE_OPTIONAL_HEADER32, *PIMAGE_OPTIONAL_HEADER32;</p><p><img src="./images/1523523098546.jpg" alt="enter description here" title="1523523098546.jpg"></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h3 id=&quot;1-check-介绍&quot;&gt;&lt;a href=&quot;#1-check-介绍&quot; class=&quot;headerlink&quot; title=&quot;1.check 介绍&quot;&gt;&lt;/a&gt;1.check 介绍&lt;/h3&gt;&lt;p&gt;PE文件可选头结构如下，其中有个成员是checksum ，其在编译以后生成一
+      
+    
+    </summary>
+    
+      <category term="杂学" scheme="http://scuzhangzhang.github.io/categories/%E6%9D%82%E5%AD%A6/"/>
+    
+    
+      <category term="杂学" scheme="http://scuzhangzhang.github.io/tags/%E6%9D%82%E5%AD%A6/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>键盘记录</title>
+    <link href="http://scuzhangzhang.github.io/2018/04/12/%E9%94%AE%E7%9B%98%E8%AE%B0%E5%BD%95/"/>
+    <id>http://scuzhangzhang.github.io/2018/04/12/键盘记录/</id>
+    <published>2018-04-11T16:00:00.000Z</published>
+    <updated>2018-04-12T09:08:37.962Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="问题描述："><a href="#问题描述：" class="headerlink" title="问题描述："></a>问题描述：</h3><p>win10更新以后出现 无法定位程序输入点_uncaught_exceptions 于动态链接库 C:\windows\system32\msvcp_win.dll上。</p><h3 id="解决办法："><a href="#解决办法：" class="headerlink" title="解决办法："></a>解决办法：</h3><p>命令行下：输入sfc /scannow</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h3 id=&quot;问题描述：&quot;&gt;&lt;a href=&quot;#问题描述：&quot; class=&quot;headerlink&quot; title=&quot;问题描述：&quot;&gt;&lt;/a&gt;问题描述：&lt;/h3&gt;&lt;p&gt;win10更新以后出现 无法定位程序输入点_uncaught_exceptions 于动态链接库 C:\window
+      
+    
+    </summary>
+    
+      <category term="杂学" scheme="http://scuzhangzhang.github.io/categories/%E6%9D%82%E5%AD%A6/"/>
+    
+    
+      <category term="杂学" scheme="http://scuzhangzhang.github.io/tags/%E6%9D%82%E5%AD%A6/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>获取打开文件的全路径（1）</title>
+    <link href="http://scuzhangzhang.github.io/2018/04/12/%E8%8E%B7%E5%8F%96%E6%89%93%E5%BC%80%E7%9A%84%E6%96%87%E4%BB%B6%E7%9A%84%E5%85%A8%E8%B7%AF%E5%BE%84%EF%BC%881%EF%BC%89/"/>
+    <id>http://scuzhangzhang.github.io/2018/04/12/获取打开的文件的全路径（1）/</id>
+    <published>2018-04-11T16:00:00.000Z</published>
+    <updated>2018-04-12T09:25:58.810Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="方法一：（后续参见方法二）"><a href="#方法一：（后续参见方法二）" class="headerlink" title="方法一：（后续参见方法二）"></a>方法一：（后续参见方法二）</h2><p>获取进程PEB中的命令行参数信息（问题：如果先打开文件比如word.exe再打开文件，会出现获取不到的情况）<br>步骤：</p><h3 id="1-遍历进程获取打开文件的可执行文件的进程"><a href="#1-遍历进程获取打开文件的可执行文件的进程" class="headerlink" title="1 遍历进程获取打开文件的可执行文件的进程"></a>1 遍历进程获取打开文件的可执行文件的进程</h3><pre><code>HANDLE hSnapProcess = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);if (hSnapProcess == INVALID_HANDLE_VALUE){    return;}PROCESSENTRY32W ProcessEntry;ProcessEntry.dwSize = sizeof(ProcessEntry);BOOL bret = Process32FirstW(hSnapProcess, &amp;ProcessEntry);WCHAR wszProcessInfo[MAX_PATH] = { 0 };do{    WCHAR Name[MAX_PATH] = { 0 };    if (!lstrcmp(ProcessEntry.szExeFile, L&quot;POWERPNT.EXE&quot;)| !lstrcmp(ProcessEntry.szExeFile, L&quot;WINWORD.EXE&quot;))    {        HANDLE hProcess = OpenProcess(PROCESS_ALL_ACCESS, false, ProcessEntry.th32ProcessID);        do something        CloseHandle(hProcess);    }} while (Process32NextW(hSnapProcess, &amp;ProcessEntry));</code></pre><h3 id="2-利用ntdll-dll中一个未公开的函数NtQueryInformationProcess，获取进程信息然后去读对方进程ReadProcessMemory-函数原型如下："><a href="#2-利用ntdll-dll中一个未公开的函数NtQueryInformationProcess，获取进程信息然后去读对方进程ReadProcessMemory-函数原型如下：" class="headerlink" title="2  利用ntdll.dll中一个未公开的函数NtQueryInformationProcess，获取进程信息然后去读对方进程ReadProcessMemory,函数原型如下："></a>2  利用ntdll.dll中一个未公开的函数NtQueryInformationProcess，获取进程信息然后去读对方进程ReadProcessMemory,函数原型如下：</h3><pre><code>NTSTATUS WINAPI NtQueryInformationProcess(  _In_      HANDLE           ProcessHandle,  _In_      PROCESSINFOCLASS ProcessInformationClass,  _Out_     PVOID            ProcessInformation,  _In_      ULONG            ProcessInformationLength,  _Out_opt_ PULONG           ReturnLength);</code></pre><p>第一个参数是进程句柄，第二个参数是获取的进程的信息类型，这里我们选择ProcessBasicInformation,<br>msdn 的声明如下，会返回一个PEB结构体。</p><p>![enter description here][1]</p><p>第三个参数是输出参数，当参数2是ProcessBasicInformation时，会返回一个<br>PROCESS_BASIC_INFORMATION 结构，结构如下，</p><p>![enter description here][2]</p><pre><code>status = NtQueryInformationProcess(hProcess,                ProcessBasicInformation,                &amp;pbi,                sizeof(PROCESS_BASIC_INFORMATION),                &amp;ReturnLength);</code></pre><h3 id="3-获取到PROCESS-BASIC-INFORMATION结构体以后，由上可以看出的它的第二个成员就是指向进程PEB结构体的指针，此时调用ReadProcessMemory，获取进程PEB，"><a href="#3-获取到PROCESS-BASIC-INFORMATION结构体以后，由上可以看出的它的第二个成员就是指向进程PEB结构体的指针，此时调用ReadProcessMemory，获取进程PEB，" class="headerlink" title="3  获取到PROCESS_BASIC_INFORMATION结构体以后，由上可以看出的它的第二个成员就是指向进程PEB结构体的指针，此时调用ReadProcessMemory，获取进程PEB，"></a>3  获取到PROCESS_BASIC_INFORMATION结构体以后，由上可以看出的它的第二个成员就是指向进程PEB结构体的指针，此时调用ReadProcessMemory，获取进程PEB，</h3><pre><code> ReadProcessMemory(hProcess, pbi.PebBaseAddress, &amp;peb, sizeof(PEB), 0)  ReadProcessMemory的函数原型如下：BOOL WINAPI ReadProcessMemory(  _In_  HANDLE  hProcess,  _In_  LPCVOID lpBaseAddress,  _Out_ LPVOID  lpBuffer,  _In_  SIZE_T  nSize,  _Out_ SIZE_T  *lpNumberOfBytesRead);</code></pre><h3 id="4-通过ReadProcessMemory-获取进程的PEB以后，PEB的结构如下："><a href="#4-通过ReadProcessMemory-获取进程的PEB以后，PEB的结构如下：" class="headerlink" title="4.通过ReadProcessMemory 获取进程的PEB以后，PEB的结构如下："></a>4.通过ReadProcessMemory 获取进程的PEB以后，PEB的结构如下：</h3><pre><code>typedef struct _PEB {    BOOLEAN                 InheritedAddressSpace;    BOOLEAN                 ReadImageFileExecOptions;    BOOLEAN                 BeingDebugged;    BOOLEAN                 Spare;    HANDLE                  Mutant;    PVOID                   ImageBaseAddress;    PPEB_LDR_DATA           LoaderData;    PRTL_USER_PROCESS_PARAMETERS ProcessParameters;    PVOID                   SubSystemData;    PVOID                   ProcessHeap;    PVOID                   FastPebLock;    PPEBLOCKROUTINE         FastPebLockRoutine;    PPEBLOCKROUTINE         FastPebUnlockRoutine;    ULONG                   EnvironmentUpdateCount;    PVOID*                  KernelCallbackTable;    PVOID                   EventLogSection;    PVOID                   EventLog;    PPEB_FREE_BLOCK         FreeList;    ULONG                   TlsExpansionCounter;    PVOID                   TlsBitmap;    ULONG                   TlsBitmapBits[0x2];    PVOID                   ReadOnlySharedMemoryBase;    PVOID                   ReadOnlySharedMemoryHeap;    PVOID*                  ReadOnlyStaticServerData;    PVOID                   AnsiCodePageData;    PVOID                   OemCodePageData;    PVOID                   UnicodeCaseTableData;    ULONG                   NumberOfProcessors;    ULONG                   NtGlobalFlag;    BYTE                    Spare2[0x4];    LARGE_INTEGER           CriticalSectionTimeout;    ULONG                   HeapSegmentReserve;    ULONG                   HeapSegmentCommit;    ULONG                   HeapDeCommitTotalFreeThreshold;    ULONG                   HeapDeCommitFreeBlockThreshold;    ULONG                   NumberOfHeaps;    ULONG                   MaximumNumberOfHeaps;    PVOID*                  *ProcessHeaps;    PVOID                   GdiSharedHandleTable;    PVOID                   ProcessStarterHelper;    PVOID                   GdiDCAttributeList;    PVOID                   LoaderLock;    ULONG                   OSMajorVersion;    ULONG                   OSMinorVersion;    ULONG                   OSBuildNumber;    ULONG                   OSPlatformId;    ULONG                   ImageSubSystem;    ULONG                   ImageSubSystemMajorVersion;    ULONG                   ImageSubSystemMinorVersion;    ULONG                   GdiHandleBuffer[0x22];    ULONG                   PostProcessInitRoutine;    ULONG                   TlsExpansionBitmap;    BYTE                    TlsExpansionBitmapBits[0x80];    ULONG                   SessionId;} PEB, *PPEB;</code></pre><p>如图标红位置为进程的参数信息，再次调用ReadProcessMemory  获取参数信息，<br>ReadProcessMemory(hProcess, peb.ProcessParameters, &amp;upps, sizeof(RTL_USER_PROCESS_PARAMETERS), 0))<br> 其中upps是一个RTL_USER_PROCESS_PARAMETERS 的结构体，定义如下：<br>    typedef struct _RTL_USER_PROCESS_PARAMETERS<br>    {<br>        ULONG MaximumLength;<br>        ULONG Length;</p><pre><code>    ULONG Flags;    ULONG DebugFlags;    HANDLE ConsoleHandle;    ULONG ConsoleFlags;    HANDLE StandardInput;    HANDLE StandardOutput;    HANDLE StandardError;    CURDIR CurrentDirectory;    UNICODE_STRING DllPath;    UNICODE_STRING ImagePathName;    UNICODE_STRING CommandLine;    PVOID Environment;    ULONG StartingX;    ULONG StartingY;    ULONG CountX;    ULONG CountY;    ULONG CountCharsX;    ULONG CountCharsY;    ULONG FillAttribute;    ULONG WindowFlags;    ULONG ShowWindowFlags;    UNICODE_STRING WindowTitle;    UNICODE_STRING DesktopInfo;    UNICODE_STRING ShellInfo;    UNICODE_STRING RuntimeData;    RTL_DRIVE_LETTER_CURDIR CurrentDirectories[RTL_MAX_DRIVE_LETTERS];    ULONG EnvironmentSize;    ULONG EnvironmentVersion;    PVOID PackageDependencyData; //8+    ULONG ProcessGroupId;   // ULONG LoaderThreads;} RTL_USER_PROCESS_PARAMETERS, *PRTL_USER_PROCESS_PARAMETERS;</code></pre><p>如上标红位置为命令行信息，UNICODE_STRING同样是一个结构体，定义如下：</p><pre><code>typedef struct _UNICODE_STRING {    USHORT Length;    USHORT MaximumLength;    PWSTR  Buffer;} UNICODE_STRING;typedef UNICODE_STRING *PUNICODE_STRING;</code></pre><p>再次调用ReadProcessMemory获取命令行字符串信息，存入buffer中</p><pre><code>ReadProcessMemory(hProcess, upps.CommandLine.Buffer, buffer, upps.CommandLine.Length, 0); </code></pre><p>到这完整的进程命令行信息就获取到了。通过字符串处理就可以得到相应的打开的文件的全路径了 。</p><p>代码工程链接：<a href="https://github.com/scuzhangzhang/GetFileFullPath" target="_blank" rel="external">https://github.com/scuzhangzhang/GetFileFullPath</a></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h2 id=&quot;方法一：（后续参见方法二）&quot;&gt;&lt;a href=&quot;#方法一：（后续参见方法二）&quot; class=&quot;headerlink&quot; title=&quot;方法一：（后续参见方法二）&quot;&gt;&lt;/a&gt;方法一：（后续参见方法二）&lt;/h2&gt;&lt;p&gt;获取进程PEB中的命令行参数信息（问题：如果先打开文
+      
+    
+    </summary>
+    
+      <category term="杂学" scheme="http://scuzhangzhang.github.io/categories/%E6%9D%82%E5%AD%A6/"/>
+    
+    
+      <category term="杂学" scheme="http://scuzhangzhang.github.io/tags/%E6%9D%82%E5%AD%A6/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>获取打开的文件的全路径（2）</title>
+    <link href="http://scuzhangzhang.github.io/2018/04/12/%E8%8E%B7%E5%8F%96%E6%89%93%E5%BC%80%E7%9A%84%E6%96%87%E4%BB%B6%E7%9A%84%E5%85%A8%E8%B7%AF%E5%BE%84%EF%BC%882)/"/>
+    <id>http://scuzhangzhang.github.io/2018/04/12/获取打开的文件的全路径（2)/</id>
+    <published>2018-04-11T16:00:00.000Z</published>
+    <updated>2018-04-12T08:48:33.398Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="方法二："><a href="#方法二：" class="headerlink" title="方法二："></a>方法二：</h2><p>搜索进程空间中的所有句柄，获取句柄的文件名即可。</p><h3 id="1-首先遍历进程寻找打开文件的进程，比如-word-exe-和PowerPoint-exe"><a href="#1-首先遍历进程寻找打开文件的进程，比如-word-exe-和PowerPoint-exe" class="headerlink" title="1 首先遍历进程寻找打开文件的进程，比如 word.exe 和PowerPoint.exe"></a>1 首先遍历进程寻找打开文件的进程，比如 word.exe 和PowerPoint.exe</h3><pre><code>HANDLE hSnapProcess = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);if (hSnapProcess == INVALID_HANDLE_VALUE){    return 1;}PROCESSENTRY32W ProcessEntry;ProcessEntry.dwSize = sizeof(ProcessEntry);BOOL bret = Process32FirstW(hSnapProcess, &amp;ProcessEntry);WCHAR wszProcessInfo[MAX_PATH] = { 0 };do{    WCHAR Name[MAX_PATH] = { 0 };    if (!lstrcmp(ProcessEntry.szExeFile, L&quot;POWERPNT.EXE&quot;) | !lstrcmp(ProcessEntry.szExeFile, L&quot;WINWORD.EXE&quot;))    {        …….    }</code></pre><h3 id="2-寻找到目标进程以后，获取进程中的句柄"><a href="#2-寻找到目标进程以后，获取进程中的句柄" class="headerlink" title="2  寻找到目标进程以后，获取进程中的句柄"></a>2  寻找到目标进程以后，获取进程中的句柄</h3><p> 这里利用了未文档化的一个函数</p><p>ZwQuerySystemInformation，这是ntdll.dll中的函数</p><pre><code>HMODULE hNtDLL = LoadLibrary(L&quot;NTDLL.DLL&quot;);if (!hNtDLL){    return 1;}ZwQuerySystemInformation = (ZWQUERYSYSTEMINFORMATION)GetProcAddress(hNtDLL, &quot;ZwQuerySystemInformation&quot;);typedef NTSTATUS(WINAPI *ZWQUERYSYSTEMINFORMATION)(unsigned long, PVOID, ULONG, PULONG);ZWQUERYSYSTEMINFORMATION ZwQuerySystemInformation;</code></pre><p>函数原型如下：</p><pre><code>NTSTATUS WINAPI ZwQuerySystemInformation(  _In_      SYSTEM_INFORMATION_CLASS SystemInformationClass,  _Inout_   PVOID                    SystemInformation,  _In_      ULONG                    SystemInformationLength,  _Out_opt_ PULONG                   ReturnLength);</code></pre><p> SYSTEM_INFORMATION_CLASS结构体如下：</p><pre><code>typedef enum _SYSTEMINFOCLASS{    SystemBasicInformation,             // 0x002C    SystemProcessorInformation,         // 0x000C    SystemPerformanceInformation,       // 0x0138    SystemTimeInformation,              // 0x0020    SystemPathInformation,              // not implemented    SystemProcessInformation,           // 0x00C8+ per process    SystemCallInformation,              // 0x0018 + (n * 0x0004)    SystemConfigurationInformation,     // 0x0018    SystemProcessorCounters,            // 0x0030 per cpu    SystemGlobalFlag,                   // 0x0004 (fails if size != 4)    SystemCallTimeInformation,          // not implemented    SystemModuleInformation,            // 0x0004 + (n * 0x011C)    SystemLockInformation,              // 0x0004 + (n * 0x0024)    SystemStackTraceInformation,        // not implemented    SystemPagedPoolInformation,         // checked build only    SystemNonPagedPoolInformation,      // checked build only    SystemHandleInformation,            // 0x0004  + (n * 0x0010)    SystemObjectTypeInformation,        // 0x0038+ + (n * 0x0030+)    SystemPageFileInformation,          // 0x0018+ per page file    SystemVdmInstemulInformation,       // 0x0088    SystemVdmBopInformation,            // invalid info class    SystemCacheInformation,             // 0x0024    SystemPoolTagInformation,           // 0x0004 + (n * 0x001C)    SystemInterruptInformation,         // 0x0000, or 0x0018 per cpu    SystemDpcInformation,               // 0x0014    SystemFullMemoryInformation,        // checked build only    SystemLoadDriver,                   // 0x0018, set mode only    SystemUnloadDriver,                 // 0x0004, set mode only    SystemTimeAdjustmentInformation,    // 0x000C, 0x0008 writeable    SystemSummaryMemoryInformation,     // checked build only    SystemNextEventIdInformation,       // checked build only    SystemEventIdsInformation,          // checked build only    SystemCrashDumpInformation,         // 0x0004    SystemExceptionInformation,         // 0x0010    SystemCrashDumpStateInformation,    // 0x0004    SystemDebuggerInformation,          // 0x0002    SystemContextSwitchInformation,     // 0x0030    SystemRegistryQuotaInformation,     // 0x000C    SystemAddDriver,                    // 0x0008, set mode only    SystemPrioritySeparationInformation,// 0x0004, set mode only    SystemPlugPlayBusInformation,       // not implemented    SystemDockInformation,              // not implemented    SystemPowerInfo,             // 0x0060 (XP only!)    SystemProcessorSpeedInformation,    // 0x000C (XP only!)    SystemTimeZoneInformation,          // 0x00AC    SystemLookasideInformation,         // n * 0x0020    SystemSetTimeSlipEvent,    SystemCreateSession,    // set mode only    SystemDeleteSession,    // set mode only    SystemInvalidInfoClass1,   // invalid info class    SystemRangeStartInformation,   // 0x0004 (fails if size != 4)    SystemVerifierInformation,    SystemAddVerifier,    SystemSessionProcessesInformation, // checked build only    MaxSystemInfoClass} SYSTEMINFOCLASS, *PSYSTEMINFOCLASS;</code></pre><p>这个结构再MSDN上只列举了一部分，这是网上搜索的结构，可以访问<a href="http://www.geoffchappell.com/studies/windows/km/ntoskrnl/api/ex/sysinfo/query.htm查看详细的信息，其包含了我们所需要的一个参数SystemHandleInformation" target="_blank" rel="external">http://www.geoffchappell.com/studies/windows/km/ntoskrnl/api/ex/sysinfo/query.htm查看详细的信息，其包含了我们所需要的一个参数SystemHandleInformation</a>  用来获取系统中进程的句柄信息，第二个参数是缓冲区指针，第三个参数是大小，最后一个参数是实际的返回的数据大小。<br>传入SystemHandleInformation   将会返回一个SYSTEM_HANDLE_INFORMATION结构，结构如下：</p><pre><code>typedef struct _SYSTEM_HANDLE_INFORMATION{    ULONG   uCount;    SYSTEM_HANDLE aSH[];} SYSTEM_HANDLE_INFORMATION, *PSYSTEM_HANDLE_INFORMATION;typedef struct _SYSTEM_HANDLE{    ULONG  uIdProcess;    UCHAR  ObjectType;    // OB_TYPE_* (OB_TYPE_TYPE, etc.)    UCHAR  Flags;         // HANDLE_FLAG_* (HANDLE_FLAG_INHERIT, etc.)    USHORT  Handle;    PVOID  pObject;    ACCESS_MASK GrantedAccess;} SYSTEM_HANDLE, *PSYSTEM_HANDLE;</code></pre><h3 id="3-查找句柄对应的进程，获取句柄对应的文件名"><a href="#3-查找句柄对应的进程，获取句柄对应的文件名" class="headerlink" title="3 查找句柄对应的进程，获取句柄对应的文件名"></a>3 查找句柄对应的进程，获取句柄对应的文件名</h3><p>通过查询返回句柄的进程pid与传入的PID比较。若符合，OpenProcess 打开该进程，DuplicateHanle复制句柄，然后获取句柄的文件名，然后相对路径转换为绝对路径。<br>获取句柄的详细信息用到了ZwQueryInformationFile 函数，这个函数同样是一个未文档化的函数，</p><pre><code>HMODULE hNtDLL = LoadLibrary(L&quot;NTDLL.DLL&quot;);if (!hNtDLL){    return 1;}ZwQueryInformationFile = (ZWQUERYINFORMATIONFILE)GetProcAddress(hNtDLL, &quot;ZwQueryInformationFile&quot;);typedef NTSTATUS(WINAPI *ZWQUERYINFORMATIONFILE)(HANDLE, PIO_STATUS_BLOCK, PVOID,ULONG, FILE_INFORMATION_CLASS);ZWQUERYINFORMATIONFILE ZwQueryInformationFile;NTSTATUS   ZwQueryInformationFile(    IN HANDLE  FileHandle,    OUT PIO_STATUS_BLOCK  IoStatusBlock,    OUT PVOID  FileInformation,    IN ULONG  Length,    IN FILE_INFORMATION_CLASS  FileInformationClass    );</code></pre><p>第一个参数是文件句柄，第二个参数是接收最终完成状态的IO_STATUS_BLOCK结构的指针。第三个参数是存储返回的文件对象的信息，第四个参数是缓冲区大小，第五个参数是文件信息的类型，我们传入FileNameInformation。在这里我们定义了一个结构体 PNM_INFO ，用来存储信息</p><pre><code>typedef struct _NM_INFO{    HANDLE  hFile;    FILE_NAME_INFORMATION Info;    WCHAR Name[MAX_PATH];} NM_INFO, *PNM_INFO;</code></pre><p>第三个成员即为文件名包括路径，不过是相对路径，调用 PathResolve<br> 获取绝对路径。到此文件的全路径就获取到了。<br>代码地址如下：<br><a href="https://github.com/scuzhangzhang/GetFileFullPath/tree/master/GetFileFullPath" target="_blank" rel="external">https://github.com/scuzhangzhang/GetFileFullPath/tree/master/GetFileFullPath</a></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h2 id=&quot;方法二：&quot;&gt;&lt;a href=&quot;#方法二：&quot; class=&quot;headerlink&quot; title=&quot;方法二：&quot;&gt;&lt;/a&gt;方法二：&lt;/h2&gt;&lt;p&gt;搜索进程空间中的所有句柄，获取句柄的文件名即可。&lt;/p&gt;
+&lt;h3 id=&quot;1-首先遍历进程寻找打开文件的进程，比如-word
+      
+    
+    </summary>
+    
+      <category term="杂学" scheme="http://scuzhangzhang.github.io/categories/%E6%9D%82%E5%AD%A6/"/>
+    
+    
+      <category term="杂学" scheme="http://scuzhangzhang.github.io/tags/%E6%9D%82%E5%AD%A6/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>windows 更新以后无法定位msvcp_win.dll</title>
+    <link href="http://scuzhangzhang.github.io/2018/04/12/windows%E6%9B%B4%E6%96%B0%E5%87%BA%E7%8E%B0%E6%97%A0%E6%B3%95%E5%AE%9A%E4%BD%8Ddll%E9%97%AE%E9%A2%98/"/>
+    <id>http://scuzhangzhang.github.io/2018/04/12/windows更新出现无法定位dll问题/</id>
+    <published>2018-04-11T16:00:00.000Z</published>
+    <updated>2018-04-12T09:07:08.397Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="问题描述："><a href="#问题描述：" class="headerlink" title="问题描述："></a>问题描述：</h3><p>win10更新以后出现 无法定位程序输入点_uncaught_exceptions 于动态链接库 C:\windows\system32\msvcp_win.dll上。</p><h3 id="解决办法："><a href="#解决办法：" class="headerlink" title="解决办法："></a>解决办法：</h3><p>命令行下：输入sfc /scannow</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h3 id=&quot;问题描述：&quot;&gt;&lt;a href=&quot;#问题描述：&quot; class=&quot;headerlink&quot; title=&quot;问题描述：&quot;&gt;&lt;/a&gt;问题描述：&lt;/h3&gt;&lt;p&gt;win10更新以后出现 无法定位程序输入点_uncaught_exceptions 于动态链接库 C:\window
+      
+    
+    </summary>
+    
+      <category term="杂学" scheme="http://scuzhangzhang.github.io/categories/%E6%9D%82%E5%AD%A6/"/>
+    
+    
+      <category term="杂学" scheme="http://scuzhangzhang.github.io/tags/%E6%9D%82%E5%AD%A6/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>ubuntu 无法安装软件</title>
+    <link href="http://scuzhangzhang.github.io/2018/04/12/ubuntu%20apt%E6%97%A0%E6%B3%95%E5%AE%89%E8%A3%85%E8%BD%AF%E4%BB%B6/"/>
+    <id>http://scuzhangzhang.github.io/2018/04/12/ubuntu apt无法安装软件/</id>
+    <published>2018-04-11T16:00:00.000Z</published>
+    <updated>2018-04-12T09:12:23.393Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h3><p>apt-get install package 时出现以下问题</p><p>E: Could not get lock /var/lib/dpkg/lock - open (11: Resource temporarily unavailable)<br>E: Unable to lock the administration directory (/var/lib/dpkg/), is another process using it?</p><h3 id="解决办法："><a href="#解决办法：" class="headerlink" title="解决办法："></a>解决办法：</h3><p> sudo rm /var/lib/dpkg/lock<br> sudo dpkg –configure -a</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h3 id=&quot;问题描述&quot;&gt;&lt;a href=&quot;#问题描述&quot; class=&quot;headerlink&quot; title=&quot;问题描述&quot;&gt;&lt;/a&gt;问题描述&lt;/h3&gt;&lt;p&gt;apt-get install package 时出现以下问题&lt;/p&gt;
+&lt;p&gt;E: Could not get lock /
       
     
     </summary>
@@ -500,24 +498,23 @@ inform 192.168.1.1
   </entry>
   
   <entry>
-    <title>双系统安装（win10+ubuntu）</title>
-    <link href="http://scuzhangzhang.github.io/2017/10/16/%E5%8F%8C%E7%B3%BB%E7%BB%9F%E5%AE%89%E8%A3%85/"/>
-    <id>http://scuzhangzhang.github.io/2017/10/16/双系统安装/</id>
+    <title>树莓派透明代理</title>
+    <link href="http://scuzhangzhang.github.io/2017/10/16/%E6%A0%91%E8%8E%93%E6%B4%BE%E9%80%8F%E6%98%8E%E4%BB%A3%E7%90%86/"/>
+    <id>http://scuzhangzhang.github.io/2017/10/16/树莓派透明代理/</id>
     <published>2017-10-15T16:00:00.000Z</published>
-    <updated>2017-11-05T04:46:32.813Z</updated>
+    <updated>2017-10-25T11:46:28.532Z</updated>
     
-    <content type="html"><![CDATA[<p>1.我选择的 是win10加ubuntu双系统。</p><p>2.准备工作</p><pre><code>U盘一个16gwin10系统ubuntu系统</code></pre><p>3.备份好硬盘数据以后，空出一个分区，然后制作一个PE盘，然后进PE删除这个分区，使其处于未分配的空间状态，用于安装ubuntu ,然后安装win10，这个就不用多说了，大家都会。</p><p>4.安装结束以后，用大白菜iso装机方式，把ubuntu系统直接写入U盘，然后U盘其启动即可进入装机状态。</p><p>其他的跟一般装ubuntu一样，在分区那个位置，选择其他方式，选择手动分区，然后选择刚刚那个未分配空间，一般可以分4个分区。/boot 200M,swap分区视内存定,一般可以和内存一样大，然后剩下分/，15g-20g左右，剩下的可以全部给/home。引导驱动器选择/boot,然后继续安装正常方式来装就好了。</p><p>4.此时两个系统都安好了，但是此时还是默认win10启动，此时最重要的来了，下载一个叫EasyBCD的软件，选择添加新条目，然后选择Linux，然后名称，驱动器选择/boot对应的就好了。此时重启你就会发现有两个候选操作系统了。</p><p><img src="https://i.imgur.com/prFcTXH.png" alt=""></p>]]></content>
+    <content type="html"><![CDATA[<p>1.安装vim</p><p>连网之后，首先安装vim,便于后面的配置文件的编写。</p><pre><code>sudo apt-get install vim</code></pre><p>2.静态ip  </p><p>图形界面貌似会失败，建议在配置文件里改：</p><pre><code>sudo vim /etc/dhcpcd.conf</code></pre><p>填写以下内容</p><pre><code>interface eth0static ip_address=ipstatic routers=网关static domain_name_servers=223.5.5.5</code></pre><p>3.配置路由转发：</p><pre><code>sudo vim  /etc/sysctl.conf</code></pre><p>设置：</p><pre><code>net.ipv4.ip_forward=1</code></pre><p>4.ssh开机自启动</p><p>&emsp;&emsp;ssh 连接树莓派还是很放方面的，不用每次都去接键盘之类的<br>但是树莓派的ssh 默认是不自启动的，在/etc/rc.local中添加</p><pre><code>sudo /etc/init.d/ssh start (exit 之前)</code></pre><p>5.shadowssocks 安装</p><p>建议pip 安装</p><blockquote><p>sudo pip install  shadowsocks<br>就可以了然后就是配置文件的编写</p><p>sudo mkdir /etc/shadowsocks<br>sudo touch /etc/shadowsocks/shadowsocks.json</p></blockquote><p>添加以下内容</p><pre><code>{     &quot;server&quot;:&quot;127.0.0.1&quot;,    &quot;server_port&quot;:ss服务器端口,    &quot;local_address&quot;:&quot;0.0.0.0&quot;,    &quot;local_port&quot;:1080,    &quot;password&quot;:&quot;ss密码&quot;,    &quot;timeout&quot;:600,    &quot;method&quot;:&quot;aes-256-cfb&quot;}</code></pre><p>6.redsocks安装</p><pre><code>git clone git@github.com:darkk/redsocks.git（克隆失败可以在其他地方下载后传过来） sudo apt-get install libevent-dev cd redsocksmake</code></pre><p>在redsocks 文件夹中有redsocks.conf.example<br>把它复制出来，重命名为 redsocks.conf<br>我习惯放在/etc目录下即/etc/redsocks.conf<br>然后编辑配置文件</p><pre><code>local_ip =0.0.0.0 ;local_port = 12345; 自己定义后面iptables要用ip = 127.0.0.1;port = 1080;</code></pre><p>7.kcptun 加速器的安装</p><p>Kcptun的作用主要是配合SS用来做加速。</p><p>下载地址</p><blockquote><p><a href="https://github.com/xtaci/kcptun/releases/latest" target="_blank" rel="external">https://github.com/xtaci/kcptun/releases/latest</a></p></blockquote><p>选择kcptun-linux-arm 那一个下载解压</p><blockquote><p>tar -zxf kcptun-linux-arm*.tar.gz<br>选择适合你的树莓派的二进制文件我选择的是client_linux_arm7 。</p></blockquote><p>创建配置文件如下：</p><pre><code>{  &quot;localaddr&quot;: &quot;:8888&quot;,  &quot;remoteaddr&quot;: &quot;服务器ip:端口&quot;,  &quot;key&quot;: &quot;very fast&quot;,  &quot;crypt&quot;: &quot;aes-128&quot;,  &quot;mode&quot;: &quot;fast2&quot;,  &quot;mtu&quot;: 1400,  &quot;sndwnd&quot;: 256,  &quot;rcvwnd&quot;: 2048,  &quot;datashard&quot;: 10,  &quot;parityshard&quot;: 3,  &quot;dscp&quot;: 46,  &quot;nocomp&quot;: false}</code></pre><p>然后把client_linux_arm7放到/usr/local/bin 里面<br>运行</p><blockquote><p>sudo client_linux_arm7 -c 配置文件<br>就可以了。</p></blockquote><p>8.iptabels </p><pre><code>sudo sslocal -c /etc/shadowsocks/shadowsocks.json &amp; &gt; /dev/null 2&gt;&amp;1 sudo redsocks -c /etc/redsocks/redsocks.conf &amp; &gt; /dev/null 2&gt;&amp;1 sudo iptables -t nat -N REDSOCKS sudo iptables -t nat -A REDSOCKS -d 0.0.0.0 -j RETURN sudo iptables -t nat -A REDSOCKS -d 127.0.0.0/8 -j RETURN sudo iptables -t nat -A REDSOCKS -d 192.168.0.0/16 -j RETURN sudo iptables -t nat -A REDSOCKS -d 10.0.0.0/16 -j RETURN sudo iptables -t nat -A REDSOCKS -d 服务器IP -j RETURN sudo iptables -t nat -A REDSOCKS -p tcp -j REDIRECT --to-ports 12345 sudo iptables -t nat -A OUTPUT -p tcp -j REDSOCKS sudo iptables -t nat -A PREROUTING -i eth0 -p tcp -j REDSOCKS</code></pre><p>9.此时你把局域网其他电脑设置成它还是不能上网，因为存在dns 问题通过安装dnsmasq来解决</p><pre><code>sudo apt-get install dnsmasq</code></pre><p>配置文件在 /etc/dnsmasq.conf<br>编辑配置文件<br>取消no-resolv前面的注释<br>加入 </p><pre><code>server=202.38.93.153 server=202.141.162.123</code></pre><p>保存重启dnsmasq  </p><pre><code>sudo service dnsmasq restart</code></pre><p>此时不出意外的话应该是可以把局域网内的其他主机网关s设置成 树莓派的ip ,然后实现透明上网。<br>建议dns 设置成</p><pre><code>server=202.38.93.153 server=202.141.162.123</code></pre><p>10 .善后工作<br>把上述的配置加入启动项</p><pre><code>sudo /etc/init.d/ssh startsudo client_linux_arm7 -c /home/pi/Desktop/configus.txt  &amp; &gt; /dev/null 2&gt;&amp;1sudo sslocal -c /etc/shadowsocks-libev/ss.conf &amp; &gt; /dev/null 2&gt;&amp;1sudo redsocks -c /etc/redsocks.conf &amp; &gt; /dev/null 2&gt;&amp;1sudo service dnsmasq restart</code></pre><p>附加：<br>热点配置<br>安装hostapd </p><pre><code>sudo apt-get install hostapd</code></pre><p>配置文件/etc/hostapd/hostapd.conf </p><pre><code>interface=wlan0 hw_mode=g channel=10 auth_algs=1 wpa=2 wpa_key_mgmt=WPA-PSK wpa_pairwise=CCMP rsn_pairwise=CCMP wpa_passphrase=wifi密码 ssid=wifi名字</code></pre><p>dnsmasq 配置文件/etc/dnsmasq.conf 中修改</p><pre><code>interface=wlan0dhcp-range=10.0.0.2,10.0.0.255,255.255.255.0,12h</code></pre><p>在启动项中/etc/rc.local 增加：</p><pre><code>sudo ifconfig wlan0 down sudo ifconfig wlan0 10.0.0.1 netmask 255.255.255.0 up sudo rm -rf /dev/random sudo ln -s /dev/urandom /dev/random sudo service dnsmasq restart sudo hostapd -B /etc/hostapd/hostapd.conf &amp; &gt; /dev/null 2&gt;&amp;1sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE sudo iptables -A FORWARD -i eth0 -o wlan0 -m state --state RELATED,ESTABLISHED -j ACCEPT sudo iptables -A FORWARD -i wlan0 -o eth0 -j ACCEPT</code></pre><p>以及在/etc/iptables 中增加</p><pre><code>sudo iptables -t nat -A PREROUTING -i wlan0 -p tcp -j REDSOCKS</code></pre><p>参考网址：<br><a href="http://fishedee.com/%E5%90%8E%E7%AB%AF/2016/11/30/%E6%A0%91%E8%8E%93%E6%B4%BE%E5%81%9A%E9%80%8F%E6%98%8E%E4%BB%A3%E7%90%86.html" target="_blank" rel="external">http://fishedee.com/%E5%90%8E%E7%AB%AF/2016/11/30/%E6%A0%91%E8%8E%93%E6%B4%BE%E5%81%9A%E9%80%8F%E6%98%8E%E4%BB%A3%E7%90%86.html</a></p><p><a href="http://www.jianshu.com/p/05d32b4e8fc0" target="_blank" rel="external">http://www.jianshu.com/p/05d32b4e8fc0</a></p><p><a href="http://blog.uiideas.com/2016/09/16/Kcptun%E4%BD%BF%E7%94%A8/" target="_blank" rel="external">http://blog.uiideas.com/2016/09/16/Kcptun%E4%BD%BF%E7%94%A8/</a></p><p><a href="https://story.tonylee.name/2016/03/31/yong-shu-mei-pai-da-zao-wu-xian-zhong-ji-ke-xue-shang-wang-lu-you-qi/" target="_blank" rel="external">https://story.tonylee.name/2016/03/31/yong-shu-mei-pai-da-zao-wu-xian-zhong-ji-ke-xue-shang-wang-lu-you-qi/</a></p>]]></content>
     
     <summary type="html">
     
       
       
-        &lt;p&gt;1.我选择的 是win10加ubuntu双系统。&lt;/p&gt;
-&lt;p&gt;2.准备工作&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;U盘一个16g
-win10系统
-ubuntu系统
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;3.备份好硬盘数据以后，空出一个分区，然后制作一个PE盘，然后进PE删除这个分区，使
+        &lt;p&gt;1.安装vim&lt;/p&gt;
+&lt;p&gt;连网之后，首先安装vim,便于后面的配置文件的编写。&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo apt-get install vim
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;2.静态ip  &lt;/p&gt;
+&lt;p&gt;图形界面貌似会失败，建议在配置文件里改：&lt;/p
       
     
     </summary>
@@ -530,22 +527,19 @@ ubuntu系统
   </entry>
   
   <entry>
-    <title>对抗反汇编</title>
-    <link href="http://scuzhangzhang.github.io/2017/10/16/%E5%AF%B9%E6%8A%97%E5%8F%8D%E6%B1%87%E7%BC%96/"/>
-    <id>http://scuzhangzhang.github.io/2017/10/16/对抗反汇编/</id>
+    <title>恶意代码重定向</title>
+    <link href="http://scuzhangzhang.github.io/2017/10/16/%E6%81%B6%E6%84%8F%E4%BB%A3%E7%A0%81%E9%87%8D%E5%AE%9A%E5%90%91/"/>
+    <id>http://scuzhangzhang.github.io/2017/10/16/恶意代码重定向/</id>
     <published>2017-10-15T16:00:00.000Z</published>
-    <updated>2017-10-25T07:18:53.412Z</updated>
+    <updated>2017-10-25T07:11:55.201Z</updated>
     
-    <content type="html"><![CDATA[<p>1.插入流氓字节，阻止真正的指令被反汇编</p><blockquote><p>线性反汇编和面向代码流的反汇编：</p><p>线性反汇编是遍历一个代码段，一次一条指令的线性反汇编，不考虑代码流的控制指令。而面向代码流的反汇编是会检查每一条指令。然后建立反汇编的地址列表，然后这样的反汇编算法会更加先进，而不易出错。比如：</p></blockquote><pre><code>.text:00401035                 jz      short near ptr loc_401037+1.text:00401037.text:00401037 loc_401037:                             ; CODE XREF: .text:00401035j.text:00401037                 call    near ptr 8B4C55C7h</code></pre><blockquote><p>观察以上的汇编代码，你会发现jz跳转到了call 指令中间，这显然是不可能的，所以call指令一定是一个数据而不是代码，在此处按d键，然后再观察</p><pre><code>                 xor     eax, eax.text:00401035                 jz      short loc_401038.text:00401035 ; ---------------------------------------------------------------------------.text:00401037                 db 0E8h.text:00401038 ; ---------------------------------------------------------------------------.text:00401038.text:00401038 loc_401038:                             ; CODE XREF: .text:00401035j.text:00401038                 mov     eax, [ebp+0Ch]</code></pre><p>这样显然很正确了，对于call 指令而言，如果后面四个字节跟的是地址，它对应的机器码是0xe8，此处显然是把数据0xe8当成了call指令，才会出现这样的问题。</p></blockquote><p>2.固定条件的跳转指令</p><pre><code>   xor     eax, eax.text:00401035                 jz      short loc_401038</code></pre><p>3.函数指针问题 </p><pre><code> mov [ebp+var_4],offset sub_4011c0; call [ebp+var_4]可用IDA脚本语言IDC进行修正函数为AddCodeXref();</code></pre><p>3.函数未识别的问题 </p><blockquote><p>可以按p键来强制把一段代码变成函数<br>但是要把流氓字节nop,不然函数可能会出问题。用IDA自带的patch program来做。<br>也可用脚本idapython  代码如下：</p></blockquote><pre><code>import idaapiidaapi.CompileLine(&apos;static n_key(){ RunPythonStatement(&quot;nopIt()&quot;);}&apos;)AddHotkey(&quot;Alt-N&quot;,&quot;n_key&quot;)def nopIt():    start=ScreenEA()    end=NextHead(start)    for ea in range(start,end):        PatchByte(ea,0x90)    Jump(end)</code></pre><p>4，异常触发</p><pre><code>push offset sub_4014c0push large dword ptr fs:0mov large fs:0,espxor ecx,ecxdiv ecx</code></pre><blockquote><p>属于滥用结构化异常（SEH）来对抗反汇编，通过人为构造一些比如访问一个无效的内存区域，除0等来触发异常，</p><p>SHE链是一个函数列表，处理线程的异常，列表中的函数要么处理异常，要么向下传递，如果传递到最后一个异常处理函数，就会被认为是一个不能处理的异常，弹出“an unhandled exception has occurred ”。</p><p>查找SEH链，操作系统会检查FS寄存器，这个寄存器中包含一个段选择子，从概念上来讲，链表以栈的方式工作，第一个调用的是最后一个加入链表的记录。前面的例子就是把自己的异常处理加入到链表的头部，然后用除0来触发异常，进而执行自己的代码。</p></blockquote>]]></content>
+    <content type="html"><![CDATA[<p>&emsp;1.首先用strings查看字符串，发现<a href="http://www.practicalmalwareanalysis.com/start.htm，User-Agent字样，以及C:\autobat.exe，疑似编码用的字符串：" target="_blank" rel="external">http://www.practicalmalwareanalysis.com/start.htm，User-Agent字样，以及C:\autobat.exe，疑似编码用的字符串：</a></p><pre><code>/abcdefghijklmnopqrstuvwxyz0123456789:.以及CreateFile，CreateProcessA，InternetReadFileInternetCloseHandleInternetOpenUrlAInternetOpenAWININET.dllURLDownloadToCacheFileA </code></pre><p>&emsp;&emsp;显式调用高层API COM接口，以及Wininet 接口函数。<br><img src="https://i.imgur.com/ODPMB8W.png" alt=""><br><img src="https://i.imgur.com/qDJ4DI5.png" alt=""><br>这些函数，这些都是重要信息需要关注的。</p><p>&emsp;&emsp;2.IDA加载程序分析，首先是401457函数，调用了CreateFileA和ReadFile函数，具体分析发现是打开’C:\autobat.exe’,失败了调用函数，分析可知是把’<a href="http://www.practicalmalwareanalysis.com/start.htm&#39;,0写入文件C:\autobat.exe，重命名该函数为write_url,然后再次调用401457函数，分析可得是把该网址读到缓冲区ipbuffer,命名该函数为read_url,返回值为1，然后接下来调用4011f3函数，首先是在szagent地址存放硬编码的头部信息，但是错误的多写了User-Agent：这样会导致实际得到的头部会出现User-Agent:User-Agent:的情况。然后下面是InternetOpenA和InternetOpenUrlA函数打开http://www.practicalmalwareanalysis.com/start.htm，打开成功后InternetReadFile读取页面信息，" target="_blank" rel="external">http://www.practicalmalwareanalysis.com/start.htm&#39;,0写入文件C:\autobat.exe，重命名该函数为write_url,然后再次调用401457函数，分析可得是把该网址读到缓冲区ipbuffer,命名该函数为read_url,返回值为1，然后接下来调用4011f3函数，首先是在szagent地址存放硬编码的头部信息，但是错误的多写了User-Agent：这样会导致实际得到的头部会出现User-Agent:User-Agent:的情况。然后下面是InternetOpenA和InternetOpenUrlA函数打开http://www.practicalmalwareanalysis.com/start.htm，打开成功后InternetReadFile读取页面信息，</a> 首先搜索&lt;no’字符串，然后调用401000函数，</p><p><img src="https://i.imgur.com/ht0pUfZ.png" alt=""></p><p>&emsp;&emsp;进去分析发现是对&lt;noscript标签的不规则比较，然后对判断是否后面会有<a href="http://www.practicalmalwareanalysis.com，然后找到“96”的位置结束，然后把v7地址存放的内容赋到a3地址。" target="_blank" rel="external">http://www.practicalmalwareanalysis.com，然后找到“96”的位置结束，然后把v7地址存放的内容赋到a3地址。</a></p><p><img src="https://i.imgur.com/akX3WUw.png" alt=""></p><p>&emsp;&emsp;函数401000成功返回1，然后4011f3也返回1，最后执行401684函数，函数有两个参数，一个是刚刚的a3，另一个是v6的地址。v6=1,打开401684函数进行分析，是现实strtok函数，把字符串分为两部分，分别赋给两变量，然后是个case语句，当发现首字母为d时，执行401565函数，分析401565函数，首先是401147函数初步分析发现是个解码函数，然后后面是URLDownloadToCacheFileA，CreateProcessA函数，是把下载的程序运行起来。首字母为n时，v6置1，首字母为s时，sleep特定的时间，首字母为r时，运行401651函数，进去函数进行分析，发现又是刚刚那个解码函数401147，然后再次调用write_url函数，由此可以知道应该是个url重定向。到此整个样本就已经分析结束了。</p>]]></content>
     
     <summary type="html">
     
       
       
-        &lt;p&gt;1.插入流氓字节，阻止真正的指令被反汇编&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;线性反汇编和面向代码流的反汇编：&lt;/p&gt;
-&lt;p&gt;线性反汇编是遍历一个代码段，一次一条指令的线性反汇编，不考虑代码流的控制指令。而面向代码流的反汇编是会检查每一条指令。然后建立反汇编的地址列表，
+        &lt;p&gt;&amp;emsp;1.首先用strings查看字符串，发现&lt;a href=&quot;http://www.practicalmalwareanalysis.com/start.htm，User-Agent字样，以及C:\autobat.exe，疑似编码用的字符串：&quot; target=&quot;_b
       
     
     </summary>
